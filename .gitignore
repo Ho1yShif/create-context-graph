@@ -35,5 +35,10 @@ Thumbs.db
 npm-wrapper/node_modules/
 npm-wrapper/*.tgz
 
+# Docusaurus
+docs/node_modules/
+docs/build/
+docs/.docusaurus/
+
 # Generated test output
 /foobar/

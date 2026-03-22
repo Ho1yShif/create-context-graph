@@ -1,6 +1,9 @@
 # Create Context Graph
 
-> **Neo4j Labs Project** — This is an experimental project under active development. APIs and features may change.
+[![Neo4j Labs](https://img.shields.io/badge/Neo4j_Labs-blue?logo=neo4j)](https://neo4j.com/labs/)
+[![Docs](https://img.shields.io/badge/docs-docusaurus-green)](https://neo4j-labs.github.io/create-context-graph/)
+
+> **Neo4j Labs Project** — This project is part of [Neo4j Labs](https://neo4j.com/labs/). It is maintained by Neo4j staff and the community, but not officially supported. For help, use [GitHub Issues](https://github.com/neo4j-labs/create-context-graph/issues) or the [Neo4j Community Forum](https://community.neo4j.com/).
 
 Interactive CLI scaffolding tool that generates fully-functional, domain-specific context graph applications. Pick your industry domain, pick your agent framework, and get a complete full-stack app in under 5 minutes.
 
@@ -251,10 +254,10 @@ git clone https://github.com/neo4j-labs/create-context-graph.git
 cd create-context-graph
 uv venv && uv pip install -e ".[dev]"
 
-# Run tests (358 tests, no Neo4j or API keys required)
+# Run tests (394 tests, no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 182 tests
-pytest tests/ -v --slow        # Full: 358 tests (includes 176-combo domain x framework matrix)
+pytest tests/ -v               # Fast: 196 tests
+pytest tests/ -v --slow        # Full: 394 tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
 create-context-graph /tmp/test-app --domain software-engineering --framework pydanticai --demo-data

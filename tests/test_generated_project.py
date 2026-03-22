@@ -1,3 +1,17 @@
+# Copyright 2026 Neo4j Labs
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Deep validation tests for generated project files.
 
 Verifies that scaffolded projects have correct structure,
@@ -194,10 +208,61 @@ class TestGeneratedCypher:
         assert "CREATE INDEX" in schema
         assert "IF NOT EXISTS" in schema
 
+    def test_schema_statements_valid(self, generated_project):
+        """Each non-comment, non-empty line should be a valid Cypher statement."""
+        out, _ = generated_project
+        schema = (out / "cypher" / "schema.cypher").read_text()
+        valid_keywords = {"CREATE", "DROP", "MATCH", "CALL", "RETURN", "WITH"}
+        for line in schema.strip().split("\n"):
+            line = line.strip()
+            if not line or line.startswith("//"):
+                continue
+            first_word = line.split()[0].upper()
+            assert first_word in valid_keywords, (
+                f"Unexpected Cypher statement start: '{first_word}' in: {line[:80]}"
+            )
+            assert line.endswith(";"), f"Cypher statement missing semicolon: {line[:80]}"
+
     def test_gds_projections_exist(self, generated_project):
         out, _ = generated_project
         gds = (out / "cypher" / "gds_projections.cypher").read_text()
         assert "gds.graph.project" in gds
+
+
+class TestGeneratedFrontendSyntax:
+    """Frontend files must have valid structure."""
+
+    TSX_FILES = [
+        "frontend/components/ChatInterface.tsx",
+        "frontend/components/ContextGraphView.tsx",
+        "frontend/components/DecisionTracePanel.tsx",
+        "frontend/components/Provider.tsx",
+        "frontend/app/layout.tsx",
+        "frontend/app/page.tsx",
+    ]
+
+    @pytest.mark.parametrize("tsx_file", TSX_FILES)
+    def test_tsx_has_valid_imports(self, generated_project, tsx_file):
+        """TSX files must have import statements."""
+        out, _ = generated_project
+        path = out / tsx_file
+        assert path.exists(), f"Missing: {tsx_file}"
+        content = path.read_text()
+        assert "import" in content, f"{tsx_file} missing imports"
+
+    @pytest.mark.parametrize("tsx_file", TSX_FILES)
+    def test_tsx_has_export(self, generated_project, tsx_file):
+        """TSX files must export a component or function."""
+        out, _ = generated_project
+        path = out / tsx_file
+        content = path.read_text()
+        assert "export" in content, f"{tsx_file} missing export"
+
+    def test_config_ts_has_required_exports(self, generated_project):
+        out, _ = generated_project
+        config = (out / "frontend" / "lib" / "config.ts").read_text()
+        for name in ["DOMAIN", "NODE_COLORS", "NODE_SIZES", "DEMO_SCENARIOS", "API_BASE"]:
+            assert name in config, f"config.ts missing {name}"
 
 
 class TestGeneratedBackendPyproject:

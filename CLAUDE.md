@@ -6,7 +6,7 @@ Interactive CLI scaffolding tool that generates domain-specific context graph ap
 
 Given a domain (e.g., "healthcare", "wildlife-management") and an agent framework (e.g., PydanticAI, Claude Agent SDK), it generates a complete full-stack application: FastAPI backend, Next.js + Chakra UI v3 + NVL frontend, Neo4j schema, synthetic data, and a configured AI agent with domain-specific tools.
 
-**Status:** Phase 4 complete. 22 domains, 8 agent frameworks, NVL graph visualization, data generation pipeline, 7 SaaS connectors, custom domain generation, 182 passing tests.
+**Status:** Phase 5 complete (v0.2.0). 22 domains, 8 agent frameworks, NVL graph visualization, data generation pipeline, 7 SaaS connectors, custom domain generation, Docusaurus documentation site, 196 passing tests.
 
 ## Quick Reference
 
@@ -133,14 +133,16 @@ my-app/
 ## Testing
 
 ```bash
-pytest tests/ -v                 # All 182 tests (358 with slow matrix)
-pytest tests/test_config.py      # Config model tests (10)
-pytest tests/test_ontology.py    # Ontology loading + all 22 domains validate (20)
-pytest tests/test_renderer.py    # Template rendering + all 8 frameworks compile check (34)
-pytest tests/test_generator.py   # Data generation pipeline (14)
-pytest tests/test_cli.py         # CLI integration + 8 domain/framework combos (15)
-pytest tests/test_custom_domain.py # Custom domain generation with mocked LLM (17)
-pytest tests/test_connectors.py  # SaaS connectors with mocked APIs (23)
+pytest tests/ -v                    # All 196 tests (394 with slow matrix)
+pytest tests/test_config.py         # Config model tests (10)
+pytest tests/test_ontology.py       # Ontology loading + all 22 domains validate (20)
+pytest tests/test_renderer.py       # Template rendering + all 8 frameworks compile check (34)
+pytest tests/test_generator.py      # Data generation pipeline (14)
+pytest tests/test_cli.py            # CLI integration + 8 domain/framework combos (15)
+pytest tests/test_custom_domain.py  # Custom domain generation with mocked LLM (17)
+pytest tests/test_connectors.py     # SaaS connectors with mocked APIs (23)
+pytest tests/test_generated_project.py # Deep validation: Python/TS/Cypher syntax (27+)
+pytest tests/test_performance.py    # Timed generation tests (slow, 22 domains)
 ```
 
 Tests do NOT require Neo4j or any API keys. All tests use `tmp_path` fixtures for output.
@@ -205,6 +207,5 @@ Tests do NOT require Neo4j or any API keys. All tests use `tmp_path` fixtures fo
 
 ## What's Not Yet Implemented
 
-- Comprehensive documentation (Diataxis framework)
-- Neo4j Labs compliance (badges, disclaimers, CONTRIBUTING.md)
-- End-to-end smoke tests (generated app starts and responds)
+- End-to-end smoke tests with Neo4j in CI (generated app starts and responds to health check)
+- TypeScript compilation validation in CI (requires Node.js in test environment)
