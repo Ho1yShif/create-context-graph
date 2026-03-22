@@ -11,12 +11,11 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://neo4j-labs.github.io',
-  baseUrl: '/create-context-graph/',
+  url: 'https://create-context-graph.vercel.app',
+  baseUrl: '/',
 
   organizationName: 'neo4j-labs',
   projectName: 'create-context-graph',
-  trailingSlash: false,
 
   onBrokenLinks: 'throw',
 

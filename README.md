@@ -1,7 +1,7 @@
 # Create Context Graph
 
 [![Neo4j Labs](https://img.shields.io/badge/Neo4j_Labs-blue?logo=neo4j)](https://neo4j.com/labs/)
-[![Docs](https://img.shields.io/badge/docs-docusaurus-green)](https://neo4j-labs.github.io/create-context-graph/)
+[![Docs](https://img.shields.io/badge/docs-docusaurus-green)](https://create-context-graph.vercel.app/)
 
 > **Neo4j Labs Project** — This project is part of [Neo4j Labs](https://neo4j.com/labs/). It is maintained by Neo4j staff and the community, but not officially supported. For help, use [GitHub Issues](https://github.com/neo4j-labs/create-context-graph/issues) or the [Neo4j Community Forum](https://community.neo4j.com/).
 
