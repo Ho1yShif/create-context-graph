@@ -1,0 +1,205 @@
+{% raw %}"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Box,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+  Badge,
+  Flex,
+} from "@chakra-ui/react";
+import { FileText, ArrowLeft } from "lucide-react";
+import { API_BASE } from "@/lib/config";
+
+interface DocumentSummary {
+  title: string;
+  template_id: string;
+  template_name: string;
+  preview: string;
+  mentioned_entities: { name: string; labels: string[] }[];
+}
+
+interface DocumentDetail {
+  document: {
+    title: string;
+    content: string;
+    template_id: string;
+    template_name: string;
+  };
+  mentioned_entities: { name: string; labels: string[] }[];
+}
+
+export function DocumentBrowser() {
+  const [documents, setDocuments] = useState<DocumentSummary[]>([]);
+  const [selectedDoc, setSelectedDoc] = useState<DocumentDetail | null>(null);
+  const [filterTemplate, setFilterTemplate] = useState<string>("");
+
+  useEffect(() => {
+    loadDocuments();
+  }, [filterTemplate]);
+
+  async function loadDocuments() {
+    try {
+      const params = new URLSearchParams();
+      if (filterTemplate) params.set("template_id", filterTemplate);
+      const res = await fetch(`${API_BASE}/documents?${params}`);
+      const data = await res.json();
+      setDocuments(data.documents || []);
+    } catch {
+      // Backend may not be running yet
+    }
+  }
+
+  async function selectDocument(title: string) {
+    try {
+      const res = await fetch(
+        `${API_BASE}/documents/${encodeURIComponent(title)}`
+      );
+      const data = await res.json();
+      setSelectedDoc(data);
+    } catch {
+      // ignore
+    }
+  }
+
+  // Get unique template names for filter
+  const templateTypes = [
+    ...new Map(
+      documents.map((d) => [d.template_id, d.template_name])
+    ).entries(),
+  ];
+
+  return (
+    <Flex direction="column" h="100%">
+      <Box px={4} py={3} borderBottom="1px solid" borderColor="gray.200">
+        <Heading size="sm">
+          <HStack>
+            <FileText size={16} />
+            <span>Documents</span>
+          </HStack>
+        </Heading>
+        <Text fontSize="xs" color="gray.500">
+          {documents.length} domain documents
+        </Text>
+      </Box>
+
+      {/* Template filter badges */}
+      {!selectedDoc && (
+        <Flex
+          px={4}
+          py={2}
+          gap={1}
+          flexWrap="wrap"
+          borderBottom="1px solid"
+          borderColor="gray.100"
+        >
+          <Badge
+            cursor="pointer"
+            variant={!filterTemplate ? "solid" : "outline"}
+            onClick={() => setFilterTemplate("")}
+            size="sm"
+          >
+            All
+          </Badge>
+          {templateTypes.map(([id, name]) => (
+            <Badge
+              key={id}
+              cursor="pointer"
+              size="sm"
+              variant={filterTemplate === id ? "solid" : "outline"}
+              onClick={() => setFilterTemplate(id)}
+            >
+              {name}
+            </Badge>
+          ))}
+        </Flex>
+      )}
+
+      {selectedDoc ? (
+        /* Full document view */
+        <Box flex={1} overflow="auto" px={4} py={3}>
+          <HStack
+            cursor="pointer"
+            onClick={() => setSelectedDoc(null)}
+            mb={3}
+            color="blue.500"
+            fontSize="xs"
+          >
+            <ArrowLeft size={12} />
+            <Text>Back to list</Text>
+          </HStack>
+          <Heading size="sm" mb={2}>
+            {selectedDoc.document.title}
+          </Heading>
+          <Badge mb={3} size="sm">
+            {selectedDoc.document.template_name}
+          </Badge>
+          {selectedDoc.mentioned_entities.length > 0 && (
+            <HStack mb={3} flexWrap="wrap" gap={1}>
+              {selectedDoc.mentioned_entities.map((e) => (
+                <Badge key={e.name} size="sm" variant="outline">
+                  {e.name}
+                </Badge>
+              ))}
+            </HStack>
+          )}
+          <Box
+            fontSize="sm"
+            whiteSpace="pre-wrap"
+            lineHeight="tall"
+            color="gray.700"
+          >
+            {selectedDoc.document.content}
+          </Box>
+        </Box>
+      ) : (
+        /* Document list */
+        <VStack
+          flex={1}
+          overflow="auto"
+          px={4}
+          py={2}
+          gap={2}
+          align="stretch"
+        >
+          {documents.length === 0 ? (
+            <Box py={8}>
+              <Text fontSize="sm" color="gray.500" textAlign="center">
+                No documents loaded.
+              </Text>
+              <Text fontSize="xs" color="gray.400" textAlign="center" mt={1}>
+                Run <code>make seed</code> to load domain documents.
+              </Text>
+            </Box>
+          ) : (
+            documents.map((doc) => (
+              <Box
+                key={doc.title}
+                p={3}
+                borderRadius="md"
+                border="1px solid"
+                borderColor="gray.200"
+                cursor="pointer"
+                onClick={() => selectDocument(doc.title)}
+                _hover={{ borderColor: "blue.200" }}
+              >
+                <Text fontSize="sm" fontWeight="medium" lineClamp={1}>
+                  {doc.title}
+                </Text>
+                <Badge size="sm" mt={1}>
+                  {doc.template_name}
+                </Badge>
+                <Text fontSize="xs" color="gray.500" mt={1} lineClamp={2}>
+                  {doc.preview}
+                </Text>
+              </Box>
+            ))
+          )}
+        </VStack>
+      )}
+    </Flex>
+  );
+}
+{% endraw %}

@@ -1,9 +1,10 @@
 {% raw %}"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Heading, Text, Flex, Badge } from "@chakra-ui/react";
+import { useCallback, useEffect, useState } from "react";
+import { Box, Heading, Text, Flex, Badge, VStack, HStack, IconButton } from "@chakra-ui/react";
 import { InteractiveNvlWrapper } from "@neo4j-nvl/react";
 import type { Node, Relationship } from "@neo4j-nvl/base";
+import { X, ArrowRight, ArrowLeft } from "lucide-react";
 import { NODE_COLORS, NODE_SIZES, DEFAULT_CYPHER, API_BASE } from "@/lib/config";
 
 interface NvlNode extends Node {
@@ -20,11 +21,20 @@ interface NvlRelationship extends Relationship {
   captions: { text: string }[];
 }
 
+interface EntityConnection {
+  name: string;
+  labels: string[];
+  relationship: string;
+  direction: string;
+}
+
 export function ContextGraphView() {
   const [nodes, setNodes] = useState<NvlNode[]>([]);
   const [rels, setRels] = useState<NvlRelationship[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<NvlNode | null>(null);
+  const [entityDetail, setEntityDetail] = useState<Record<string, unknown> | null>(null);
+  const [connections, setConnections] = useState<EntityConnection[]>([]);
 
   useEffect(() => {
     loadGraph();
@@ -95,9 +105,30 @@ export function ContextGraphView() {
     setRels(relList);
   }
 
+  async function loadEntityDetail(name: string) {
+    try {
+      const res = await fetch(`${API_BASE}/entities/${encodeURIComponent(name)}`);
+      const data = await res.json();
+      setEntityDetail(data.entity || null);
+      setConnections(data.connections || []);
+    } catch {
+      setEntityDetail(null);
+      setConnections([]);
+    }
+  }
+
   const handleNodeClick = useCallback((_: unknown, node: Node) => {
-    setSelectedNode(node as NvlNode);
+    const nvlNode = node as NvlNode;
+    setSelectedNode(nvlNode);
+    const name = nvlNode.captions?.[0]?.text;
+    if (name) loadEntityDetail(name);
   }, []);
+
+  function closeDetail() {
+    setEntityDetail(null);
+    setSelectedNode(null);
+    setConnections([]);
+  }
 
   return (
     <Flex direction="column" h="100%">
@@ -130,6 +161,85 @@ export function ContextGraphView() {
             style={{ width: "100%", height: "100%" }}
           />
         )}
+
+        {/* Entity detail panel */}
+        {entityDetail && (
+          <Box
+            position="absolute"
+            right={0}
+            top={0}
+            bottom={0}
+            w="320px"
+            bg="white"
+            borderLeft="1px solid"
+            borderColor="gray.200"
+            overflow="auto"
+            p={4}
+            zIndex={10}
+            boxShadow="lg"
+          >
+            <Flex justify="space-between" align="center" mb={3}>
+              <Heading size="sm">
+                {selectedNode?.captions?.[0]?.text}
+              </Heading>
+              <IconButton
+                aria-label="Close"
+                size="xs"
+                variant="ghost"
+                onClick={closeDetail}
+              >
+                <X size={14} />
+              </IconButton>
+            </Flex>
+
+            {/* Labels */}
+            <HStack mb={3} flexWrap="wrap" gap={1}>
+              {((entityDetail._labels as string[]) || []).map((label) => (
+                <Badge key={label} colorPalette="blue" size="sm">
+                  {label}
+                </Badge>
+              ))}
+            </HStack>
+
+            {/* Properties */}
+            <VStack align="stretch" gap={2} mb={4}>
+              {Object.entries(entityDetail)
+                .filter(([k]) => k !== "_labels" && k !== "name")
+                .map(([key, value]) => (
+                  <Box key={key}>
+                    <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                      {key.replace(/_/g, " ")}
+                    </Text>
+                    <Text fontSize="sm">{String(value ?? "—")}</Text>
+                  </Box>
+                ))}
+            </VStack>
+
+            {/* Connections */}
+            {connections.length > 0 && (
+              <>
+                <Heading size="xs" mb={2}>
+                  Connections ({connections.length})
+                </Heading>
+                <VStack align="stretch" gap={1}>
+                  {connections.map((conn, i) => (
+                    <HStack key={i} fontSize="xs" gap={1}>
+                      {conn.direction === "outgoing" ? (
+                        <ArrowRight size={10} />
+                      ) : (
+                        <ArrowLeft size={10} />
+                      )}
+                      <Badge size="sm" variant="outline" flexShrink={0}>
+                        {conn.relationship}
+                      </Badge>
+                      <Text truncate>{conn.name}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </>
+            )}
+          </Box>
+        )}
       </Box>
 
       {/* Color legend */}
@@ -142,11 +252,6 @@ export function ContextGraphView() {
             </Flex>
           ))}
         </Flex>
-        {selectedNode && (
-          <Box mt={2}>
-            <Badge size="sm">{selectedNode.captions?.[0]?.text}</Badge>
-          </Box>
-        )}
       </Box>
     </Flex>
   );

@@ -1,6 +1,6 @@
 {% raw %}"use client";
 
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, Tabs } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
 import { ChatInterface } from "@/components/ChatInterface";
 const ContextGraphView = dynamic(
@@ -8,6 +8,7 @@ const ContextGraphView = dynamic(
   { ssr: false }
 );
 import { DecisionTracePanel } from "@/components/DecisionTracePanel";
+import { DocumentBrowser } from "@/components/DocumentBrowser";
 import { DOMAIN } from "@/lib/config";
 
 export default function Home() {
@@ -35,9 +36,20 @@ export default function Home() {
           <ContextGraphView />
         </Box>
 
-        {/* Right panel: Decision traces */}
-        <Box w="350px" borderLeft="1px solid" borderColor="gray.200" overflow="auto">
-          <DecisionTracePanel />
+        {/* Right panel: Decision traces + Documents */}
+        <Box w="350px" borderLeft="1px solid" borderColor="gray.200" overflow="hidden">
+          <Tabs.Root defaultValue="traces" size="sm">
+            <Tabs.List borderBottom="1px solid" borderColor="gray.200">
+              <Tabs.Trigger value="traces">Traces</Tabs.Trigger>
+              <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="traces" p={0} h="calc(100vh - 110px)" overflow="auto">
+              <DecisionTracePanel />
+            </Tabs.Content>
+            <Tabs.Content value="documents" p={0} h="calc(100vh - 110px)" overflow="auto">
+              <DocumentBrowser />
+            </Tabs.Content>
+          </Tabs.Root>
         </Box>
       </Flex>
     </Flex>

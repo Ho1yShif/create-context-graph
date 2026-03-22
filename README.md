@@ -23,9 +23,9 @@ uvx create-context-graph my-app --domain healthcare --framework pydanticai --dem
 Create Context Graph walks you through an interactive wizard and generates a complete project:
 
 - **FastAPI backend** with an AI agent configured for your domain
-- **Next.js + Chakra UI v3 frontend** with chat, graph visualization, and decision trace panels
+- **Next.js + Chakra UI v3 frontend** with chat, graph visualization, entity detail panel, document browser, and decision trace viewer
 - **Neo4j schema** with domain-specific constraints, indexes, and GDS projections
-- **Synthetic demo data** — entities, relationships, documents, and decision traces
+- **Rich demo data** — LLM-generated entities, relationships, professional documents (discharge summaries, trade confirmations, lab reports), and multi-step decision traces
 - **SaaS data import** — connect GitHub, Slack, Gmail, Jira, Notion, Google Calendar, or Salesforce
 - **Custom domains** — describe your domain in plain English and the LLM generates a complete ontology
 - **Domain-specific agent tools** with Cypher queries tailored to your industry
@@ -193,8 +193,9 @@ my-app/
 │   ├── app/                       # Next.js pages
 │   ├── components/
 │   │   ├── ChatInterface.tsx      # AI chat with demo scenarios
-│   │   ├── ContextGraphView.tsx   # Graph visualization (NVL)
-│   │   ├── DecisionTracePanel.tsx  # Reasoning provenance viewer
+│   │   ├── ContextGraphView.tsx   # Graph visualization (NVL) with entity detail panel
+│   │   ├── DecisionTracePanel.tsx  # Reasoning trace viewer with step details
+│   │   ├── DocumentBrowser.tsx    # Document browser with template filtering
 │   │   └── Provider.tsx           # Chakra UI v3 provider
 │   ├── lib/config.ts              # Domain configuration
 │   ├── theme/index.ts             # Chakra theme with domain colors
@@ -254,10 +255,10 @@ git clone https://github.com/neo4j-labs/create-context-graph.git
 cd create-context-graph
 uv venv && uv pip install -e ".[dev]"
 
-# Run tests (394 tests, no Neo4j or API keys required)
+# Run tests (460 tests, no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 196 tests
-pytest tests/ -v --slow        # Full: 394 tests (includes 176-combo domain x framework matrix + 22 perf tests)
+pytest tests/ -v               # Fast: 262 tests
+pytest tests/ -v --slow        # Full: 460 tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
 create-context-graph /tmp/test-app --domain software-engineering --framework pydanticai --demo-data

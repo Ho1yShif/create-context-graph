@@ -6,7 +6,7 @@ Interactive CLI scaffolding tool that generates domain-specific context graph ap
 
 Given a domain (e.g., "healthcare", "wildlife-management") and an agent framework (e.g., PydanticAI, Claude Agent SDK), it generates a complete full-stack application: FastAPI backend, Next.js + Chakra UI v3 + NVL frontend, Neo4j schema, synthetic data, and a configured AI agent with domain-specific tools.
 
-**Status:** Phase 5 complete (v0.2.0). 22 domains, 8 agent frameworks, NVL graph visualization, data generation pipeline, 7 SaaS connectors, custom domain generation, Docusaurus documentation site, 196 passing tests.
+**Status:** Phase 5 complete (v0.2.0). 22 domains, 8 agent frameworks, NVL graph visualization, LLM-generated demo data (80-90 entities, 25+ documents, 3-5 decision traces per domain), document browser, entity detail panel, 7 SaaS connectors, custom domain generation, Docusaurus documentation site, 262 passing tests.
 
 ## Quick Reference
 
@@ -35,6 +35,7 @@ src/create_context_graph/
 ├── custom_domain.py    # LLM-powered custom domain YAML generation
 ├── renderer.py         # Jinja2 template engine (renders project scaffold)
 ├── generator.py        # LLM-powered synthetic data pipeline (4 stages)
+├── name_pools.py       # Realistic name pools and value generators for static fallback
 ├── ingest.py           # Neo4j ingestion via neo4j-agent-memory or direct driver
 ├── neo4j_validator.py  # Neo4j connection testing
 ├── connectors/         # SaaS data connectors (7 services)
@@ -73,9 +74,11 @@ Templates that contain JSX curly braces or Python dict literals must use `{% raw
 ### Two-layer ontology inheritance
 `_base.yaml` defines shared POLE+O entity types (Person, Organization, Location, Event, Object). Domain YAMLs declare `inherits: _base` and add domain-specific entity types. The `ontology.py` loader merges base entities/relationships into each domain.
 
-### Dual data generation modes
-- **Static fallback** (no LLM key): Generates placeholder entities with `{Label} {N}` naming. Ships pre-generated fixtures in `fixtures/` directory.
-- **LLM-powered** (with `--anthropic-api-key`): Generates realistic entities, documents, and decision traces via Anthropic or OpenAI APIs.
+### Rich fixture data pipeline
+- **Pre-generated fixtures** (shipped): All 22 domains ship with high-quality LLM-generated fixture data (80-90 entities, 160-280 relationships, 25+ documents at 200-1600 words, 3-5 decision traces with multi-step reasoning). Generated via `scripts/regenerate_fixtures.py` using Claude API.
+- **Static fallback** (no LLM key at runtime): Uses realistic name pools (`name_pools.py`) organized by POLE+O type, contextual property generators (emails from names, realistic IDs, domain-appropriate ranges), and structured document templates.
+- **LLM-powered** (with `--anthropic-api-key` at runtime): Generates realistic entities, documents, and decision traces via Anthropic or OpenAI APIs.
+- **Data seeding** (`make seed`): Loads all four data types into Neo4j — entities, relationships, documents (as `:Document` nodes with `:MENTIONS` links to entities), and decision traces (as `:DecisionTrace` → `:HAS_STEP` → `:TraceStep` chains).
 
 ### Dual ingestion backends
 `ingest.py` tries `neo4j-agent-memory` MemoryClient first (demonstrating all three memory types), falls back to direct `neo4j` driver if the package isn't installed.
@@ -122,7 +125,7 @@ my-app/
 ├── backend/pyproject.toml
 ├── frontend/             # Next.js + Chakra UI v3 + NVL
 │   ├── app/ (layout.tsx, page.tsx, globals.css)
-│   ├── components/ (ChatInterface, ContextGraphView, DecisionTracePanel, Provider)
+│   ├── components/ (ChatInterface, ContextGraphView, DecisionTracePanel, DocumentBrowser, Provider)
 │   ├── lib/config.ts, theme/index.ts
 │   └── package.json, next.config.ts, tsconfig.json
 ├── cypher/ (schema.cypher, gds_projections.cypher)
@@ -133,7 +136,7 @@ my-app/
 ## Testing
 
 ```bash
-pytest tests/ -v                    # All 196 tests (394 with slow matrix)
+pytest tests/ -v                    # All 262 tests (460 with slow matrix)
 pytest tests/test_config.py         # Config model tests (10)
 pytest tests/test_ontology.py       # Ontology loading + all 22 domains validate (20)
 pytest tests/test_renderer.py       # Template rendering + all 8 frameworks compile check (34)

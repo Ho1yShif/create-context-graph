@@ -356,6 +356,13 @@ def generate_cypher_schema(ontology: DomainOntology) -> str:
         )
         lines.append("")
 
+    # Infrastructure indexes for Documents and Decision Traces
+    lines.append("// Infrastructure: Document and Decision Trace indexes")
+    lines.append("CREATE INDEX document_title IF NOT EXISTS FOR (n:Document) ON (n.title);")
+    lines.append("CREATE INDEX document_template_id IF NOT EXISTS FOR (n:Document) ON (n.template_id);")
+    lines.append("CREATE CONSTRAINT decision_trace_id_unique IF NOT EXISTS FOR (n:DecisionTrace) REQUIRE n.id IS UNIQUE;")
+    lines.append("")
+
     return "\n".join(lines)
 
 

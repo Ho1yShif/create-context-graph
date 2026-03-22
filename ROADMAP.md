@@ -223,7 +223,35 @@ Prepared for public release with Docusaurus documentation, Neo4j Labs compliance
 | Domain coverage | 22 domains | 22 domains |
 | Framework coverage | 8 agent frameworks | 8 agent frameworks |
 | Generation success rate | >= 95% | 100% (176/176 matrix combos pass) |
-| Test suite | 100+ tests | 196 tests (394 with slow matrix) |
+| Test suite | 100+ tests | 262 tests (460 with slow matrix) |
+
+---
+
+## Post-Launch: Data Quality & UI Enhancements — COMPLETE
+
+**Status:** Done
+
+### Fixture data quality overhaul
+
+- **`name_pools.py`** — Realistic name pools (25 person names, 20 org names, etc.) and contextual value generators (emails from names, realistic IDs, domain-appropriate ranges)
+- **Improved static fallback** in `generator.py` — produces passable data without an LLM (realistic names, structured documents, interpolated trace outcomes)
+- **`scripts/regenerate_fixtures.py`** — One-time script to regenerate all 22 fixtures using Claude API with coherent cross-entity prompts, validation, and retry logic
+- **All 22 fixtures regenerated** with LLM-quality data: 80-90 entities, 160-280 relationships, 25+ documents (200-1600 words each), 3-5 decision traces with specific observations and outcomes
+- **Fixture quality tests** — 66 parametrized tests across all 22 domains verify no placeholder names, documents >= 200 chars, no uninterpolated template variables
+
+### Full fixture data utilization in generated apps
+
+- **`generate_data.py.j2`** updated — `make seed` now loads all 4 data types: entities, relationships, documents (as `:Document` nodes with `:MENTIONS` entity links), and decision traces (as `:DecisionTrace` → `:HAS_STEP` → `:TraceStep` chains)
+- **4 new API endpoints** in `routes.py.j2`:
+  - `GET /documents` — list with template filter, previews, mentioned entities
+  - `GET /documents/{title}` — full document content
+  - `GET /traces` — traces with full reasoning steps
+  - `GET /entities/{name}` — all properties, labels, and connections
+- **Document browser** (`DocumentBrowser.tsx.j2`) — template type filter badges, scrollable list with previews, full document viewer with mentioned entity badges
+- **Entity detail panel** in `ContextGraphView.tsx.j2` — click any graph node to see all properties, labels, and connections with relationship types/directions
+- **Fixed DecisionTracePanel** — uses new `/traces` endpoint, loads steps with observations (was previously broken: wrong node label, empty steps array)
+- **Tabbed right panel** in `page.tsx.j2` — Traces and Documents tabs using Chakra UI v3 compound Tabs components
+- **Schema indexes** for `Document` and `DecisionTrace` nodes added to `generate_cypher_schema()`
 
 ---
 
@@ -231,8 +259,9 @@ Prepared for public release with Docusaurus documentation, Neo4j Labs compliance
 
 | Phase | Description | Status | Tests |
 |-------|-------------|--------|-------|
-| 1 | Core CLI & Template Engine | **Complete** | 196 passing |
+| 1 | Core CLI & Template Engine | **Complete** | 262 passing |
 | 2 | Domain Expansion & Data Generation | **Complete** | (included above) |
 | 3 | Framework Templates & Frontend | **Complete** | (included above) |
 | 4 | SaaS Import & Custom Domains | **Complete** | (included above) |
 | 5 | Polish, Testing & Launch | **Complete** | (included above) |
+| — | Data Quality & UI Enhancements | **Complete** | (included above) |

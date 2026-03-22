@@ -235,6 +235,7 @@ class ProjectRenderer:
             "frontend/components/ChatInterface.tsx.j2": "components/ChatInterface.tsx",
             "frontend/components/ContextGraphView.tsx.j2": "components/ContextGraphView.tsx",
             "frontend/components/DecisionTracePanel.tsx.j2": "components/DecisionTracePanel.tsx",
+            "frontend/components/DocumentBrowser.tsx.j2": "components/DocumentBrowser.tsx",
             "frontend/components/Provider.tsx.j2": "components/Provider.tsx",
             "frontend/lib/config.ts.j2": "lib/config.ts",
             "frontend/theme/index.ts.j2": "theme/index.ts",

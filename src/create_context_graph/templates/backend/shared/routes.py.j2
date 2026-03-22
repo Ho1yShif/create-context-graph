@@ -93,6 +93,91 @@ async def pagerank():
     """Run PageRank centrality."""
     results = await run_pagerank()
     return {"pagerank": results}
+
+
+@router.get("/documents")
+async def list_documents(template_id: str | None = None, skip: int = 0, limit: int = 50):
+    """List documents, optionally filtered by template type."""
+    if template_id:
+        cypher = """
+        MATCH (d:Document {template_id: $template_id})
+        OPTIONAL MATCH (d)-[:MENTIONS]->(e)
+        RETURN d.title AS title, d.template_id AS template_id,
+               d.template_name AS template_name,
+               substring(d.content, 0, 200) AS preview,
+               collect(DISTINCT {name: e.name, labels: labels(e)}) AS mentioned_entities
+        ORDER BY d.title
+        SKIP $skip LIMIT $limit
+        """
+        results = await execute_cypher(cypher, {"template_id": template_id, "skip": skip, "limit": limit})
+    else:
+        cypher = """
+        MATCH (d:Document)
+        OPTIONAL MATCH (d)-[:MENTIONS]->(e)
+        RETURN d.title AS title, d.template_id AS template_id,
+               d.template_name AS template_name,
+               substring(d.content, 0, 200) AS preview,
+               collect(DISTINCT {name: e.name, labels: labels(e)}) AS mentioned_entities
+        ORDER BY d.title
+        SKIP $skip LIMIT $limit
+        """
+        results = await execute_cypher(cypher, {"skip": skip, "limit": limit})
+    return {"documents": results}
+
+
+@router.get("/documents/{title:path}")
+async def get_document(title: str):
+    """Get full document content by title."""
+    cypher = """
+    MATCH (d:Document {title: $title})
+    OPTIONAL MATCH (d)-[:MENTIONS]->(e)
+    RETURN d {.title, .content, .template_id, .template_name} AS document,
+           collect(DISTINCT {name: e.name, labels: labels(e)}) AS mentioned_entities
+    """
+    results = await execute_cypher(cypher, {"title": title})
+    if not results:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return results[0]
+
+
+@router.get("/traces")
+async def list_traces():
+    """List decision traces with their full reasoning steps."""
+    cypher = """
+    MATCH (t:DecisionTrace)
+    OPTIONAL MATCH (t)-[:HAS_STEP]->(s:TraceStep)
+    WITH t, s ORDER BY s.step_number
+    RETURN t.id AS id, t.task AS task, t.outcome AS outcome,
+           collect(CASE WHEN s IS NOT NULL THEN {
+               step_number: s.step_number,
+               thought: s.thought,
+               action: s.action,
+               observation: s.observation
+           } END) AS steps
+    """
+    results = await execute_cypher(cypher)
+    return {"traces": results}
+
+
+@router.get("/entities/{name}")
+async def get_entity_detail(name: str):
+    """Get full entity detail with all properties and connections."""
+    cypher = """
+    MATCH (n) WHERE toLower(n.name) = toLower($name)
+    OPTIONAL MATCH (n)-[r]-(connected)
+    WHERE connected.name IS NOT NULL
+    RETURN n {.*, _labels: labels(n)} AS entity,
+           collect(DISTINCT {
+               name: connected.name,
+               labels: labels(connected),
+               relationship: type(r),
+               direction: CASE WHEN startNode(r) = n THEN 'outgoing' ELSE 'incoming' END
+           }) AS connections
+    """
+    results = await execute_cypher(cypher, {"name": name})
+    if not results:
+        raise HTTPException(status_code=404, detail="Entity not found")
+    return results[0]
 {% endraw %}
 
 @router.get("/scenarios")

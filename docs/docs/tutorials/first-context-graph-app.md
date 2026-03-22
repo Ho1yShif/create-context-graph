@@ -89,19 +89,24 @@ With everything running, you have three interfaces to explore:
 
 ### Frontend -- http://localhost:3000
 
-The Next.js frontend provides:
+The Next.js frontend provides a three-panel layout:
 
-- **Chat interface** -- talk to your AI agent using natural language. The agent uses domain-specific tools to query the knowledge graph and return answers.
-- **Context graph view** -- an interactive NVL graph visualization showing entities and relationships. Nodes are color-coded by type and sized by importance.
-- **Decision trace panel** -- see the agent's step-by-step reasoning, including which tools it called and what data it retrieved.
+- **Chat interface** (left) -- talk to your AI agent using natural language. The agent uses domain-specific tools to query the knowledge graph and return answers. Clickable demo scenario buttons get you started.
+- **Context graph view** (center) -- an interactive NVL graph visualization showing entities and relationships. Nodes are color-coded by type. **Click any node** to open an entity detail panel showing all properties, labels, and connections.
+- **Right panel with tabs:**
+  - **Decision Traces** -- pre-seeded reasoning traces showing the agent's step-by-step thinking (thought, action, observation) with full outcomes.
+  - **Documents** -- browse domain-specific documents (discharge summaries, trade confirmations, lab reports, etc.) with template type filtering. Click any document to read the full content with mentioned entity badges.
 
 ### Backend API -- http://localhost:8000/docs
 
 The FastAPI backend exposes a Swagger UI with all available endpoints. Key routes include:
 
 - `POST /chat` -- send a message to the agent
-- `GET /graph` -- retrieve graph data for visualization
-- `GET /health` -- check service status
+- `GET /documents` -- list documents with optional template filter
+- `GET /documents/{title}` -- full document content with mentioned entities
+- `GET /traces` -- decision traces with full reasoning steps
+- `GET /entities/{name}` -- full entity detail with properties and connections
+- `POST /cypher` -- execute arbitrary Cypher queries
 
 ### Neo4j Browser -- http://localhost:7474
 

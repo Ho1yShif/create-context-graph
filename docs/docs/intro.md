@@ -14,10 +14,10 @@ Given a domain (like healthcare, financial services, or wildlife management) and
 - **22 built-in domains** -- healthcare, financial services, real estate, manufacturing, scientific research, software engineering, and more. Each domain ships with a complete ontology, agent tools, demo scenarios, and fixture data.
 - **8 agent frameworks** -- PydanticAI, Claude Agent SDK, OpenAI Agents SDK, LangGraph, CrewAI, Strands, Google ADK, and MAF. Pick the one you know, or try something new.
 - **Graph-native AI agents** -- every generated agent comes with Cypher-powered tools for querying entities, relationships, and decision traces in Neo4j.
-- **Interactive graph visualization** -- the frontend includes an NVL-powered graph explorer alongside a chat interface and decision trace panel.
+- **Interactive graph visualization** -- the frontend includes an NVL-powered graph explorer with entity detail panel (click any node to see all properties and connections), a document browser with template filtering, and a decision trace viewer.
+- **Rich demo data** -- each domain ships with LLM-generated fixture data: 80-90 entities with realistic names, 25+ professional documents (discharge summaries, trade confirmations, lab reports), and 3-5 multi-step decision traces. All loaded into Neo4j via `make seed` and browsable in the frontend.
 - **SaaS data import** -- connect Gmail, Slack, Jira, GitHub, Notion, and Salesforce to populate your graph with real data.
 - **Custom domains** -- describe your domain and let the tool generate a complete ontology, or write your own YAML definition from scratch.
-- **Synthetic data pipeline** -- generate realistic demo data with LLM-powered generation or use built-in fixture files for instant setup.
 
 ## Quick Install
 

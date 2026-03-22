@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Box, Heading, Text, VStack, HStack, Badge, Flex } from "@chakra-ui/react";
-import { GitBranch, Brain, Wrench } from "lucide-react";
+import { GitBranch, Brain, Wrench, Eye } from "lucide-react";
 import { API_BASE } from "@/lib/config";
 
 interface TraceStep {
+  step_number: number;
   thought: string;
   action: string;
   observation?: string;
@@ -16,7 +17,6 @@ interface DecisionTrace {
   task: string;
   steps: TraceStep[];
   outcome: string;
-  timestamp?: string;
 }
 
 export function DecisionTracePanel() {
@@ -29,22 +29,17 @@ export function DecisionTracePanel() {
 
   async function loadTraces() {
     try {
-      const res = await fetch(`${API_BASE}/cypher`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query:
-            "MATCH (t:ReasoningTrace) RETURN t ORDER BY t.created_at DESC LIMIT 10",
-        }),
-      });
+      const res = await fetch(`${API_BASE}/traces`);
       const data = await res.json();
-      if (data.results) {
+      if (data.traces) {
         setTraces(
-          data.results.map((r: Record<string, unknown>) => ({
-            id: (r.t as Record<string, unknown>)?.id || "",
-            task: (r.t as Record<string, unknown>)?.task || "",
-            steps: [],
-            outcome: (r.t as Record<string, unknown>)?.outcome || "",
+          data.traces.map((t: Record<string, unknown>) => ({
+            id: (t.id as string) || "",
+            task: (t.task as string) || "",
+            steps: ((t.steps as TraceStep[]) || []).filter(
+              (s) => s && s.thought
+            ),
+            outcome: (t.outcome as string) || "",
           }))
         );
       }
@@ -74,8 +69,8 @@ export function DecisionTracePanel() {
               No decision traces yet.
             </Text>
             <Text fontSize="xs" color="gray.400" textAlign="center" mt={1}>
-              Decision traces appear here as the agent makes decisions
-              and records its reasoning process.
+              Decision traces appear here after seeding data with{" "}
+              <code>make seed</code>.
             </Text>
           </Box>
         ) : (
@@ -118,13 +113,13 @@ export function DecisionTracePanel() {
           borderColor="gray.200"
           px={4}
           py={3}
-          maxH="40%"
+          maxH="50%"
           overflow="auto"
         >
           <Text fontSize="sm" fontWeight="bold" mb={2}>
             {selectedTrace.task}
           </Text>
-          <VStack gap={2} align="stretch">
+          <VStack gap={3} align="stretch">
             {selectedTrace.steps.map((step, i) => (
               <Box key={i} pl={3} borderLeft="2px solid" borderColor="blue.200">
                 <HStack>
@@ -139,11 +134,19 @@ export function DecisionTracePanel() {
                     {step.action}
                   </Text>
                 </HStack>
+                {step.observation && (
+                  <HStack mt={1}>
+                    <Eye size={12} />
+                    <Text fontSize="xs" color="green.700">
+                      {step.observation}
+                    </Text>
+                  </HStack>
+                )}
               </Box>
             ))}
           </VStack>
           {selectedTrace.outcome && (
-            <Box mt={2} p={2} bg="green.50" borderRadius="md">
+            <Box mt={3} p={2} bg="green.50" borderRadius="md">
               <Text fontSize="xs" fontWeight="bold">
                 Outcome:
               </Text>
