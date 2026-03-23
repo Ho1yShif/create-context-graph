@@ -44,3 +44,4 @@ docs/.docusaurus/
 /foobar/
 
 tmp-e2e-tests/
+tmp*/

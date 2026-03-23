@@ -103,7 +103,9 @@ async def handle_message(message: str, session_id: str | None = None) -> dict:
 
     # Extract the last AI message
     ai_messages = [m for m in result["messages"] if hasattr(m, "content") and m.type == "ai"]
-    response_text = ai_messages[-1].content if ai_messages else "No response generated."
+    response_text = ai_messages[-1].content if ai_messages else ""
+    if not response_text.strip():
+        response_text = "I searched the knowledge graph but couldn't find relevant results for your query. Could you try rephrasing your question?"
 
     await store_message(session_id, "assistant", response_text)
 
@@ -142,12 +144,23 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
         kind = event.get("event", "")
         if kind == "on_chat_model_stream":
             chunk = event.get("data", {}).get("chunk")
-            if chunk and hasattr(chunk, "content") and isinstance(chunk.content, str):
-                collector.emit_text_delta(chunk.content)
-                response_text += chunk.content
+            if chunk and hasattr(chunk, "content"):
+                text = ""
+                if isinstance(chunk.content, str):
+                    text = chunk.content
+                elif isinstance(chunk.content, list):
+                    text = "".join(
+                        block.get("text", "") if isinstance(block, dict) else getattr(block, "text", "")
+                        for block in chunk.content
+                        if (isinstance(block, dict) and block.get("type") == "text")
+                        or (hasattr(block, "type") and getattr(block, "type", None) == "text")
+                    )
+                if text:
+                    collector.emit_text_delta(text)
+                    response_text += text
 
-    if not response_text:
-        response_text = "No response generated."
+    if not response_text.strip():
+        response_text = "I searched the knowledge graph but couldn't find relevant results for your query. Could you try rephrasing your question?"
 
     await store_message(session_id, "assistant", response_text)
     collector.emit_done(response_text, session_id)

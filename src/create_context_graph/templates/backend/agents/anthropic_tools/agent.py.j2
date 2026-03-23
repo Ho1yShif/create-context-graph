@@ -170,6 +170,9 @@ async def handle_message(message: str, session_id: str | None = None) -> dict:
             response_text = "\n".join(text_parts)
             break
 
+    if not response_text.strip():
+        response_text = "I searched the knowledge graph but couldn't find relevant results for your query. Could you try rephrasing your question?"
+
     await store_message(session_id, "assistant", response_text)
 
     return {
@@ -235,6 +238,9 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
             ]
             response_text = "\n".join(text_parts)
             break
+
+    if not response_text.strip():
+        response_text = "I searched the knowledge graph but couldn't find relevant results for your query. Could you try rephrasing your question?"
 
     await store_message(session_id, "assistant", response_text)
     collector.emit_done(response_text, session_id)
