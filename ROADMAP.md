@@ -393,11 +393,50 @@ Based on comprehensive QA testing of all 176 domain-framework combinations.
 
 ---
 
+## Phase 8 — Streaming Chat & Real-Time Tool Visualization (v0.5.0)
+
+### Streaming Architecture (SSE)
+- **Event-driven CypherResultCollector** — added `asyncio.Queue`-based event system to the global collector. When a streaming session is active, `tool_start`, `tool_end`, `text_delta`, and `done` events are pushed to the queue automatically as tools execute and text streams in
+- **`POST /chat/stream` endpoint** — new SSE endpoint alongside existing `/chat` (backward compatible). Uses `StreamingResponse` with `text/event-stream` content type. Emits `session_id` first, then tool and text events, terminated by `done` or `error`
+- **`execute_cypher()` emits `tool_start`** before query execution when `tool_name` is set — all 8 frameworks get real-time tool events with zero agent template changes
+
+### Text Streaming (5 of 8 frameworks)
+- **Full streaming** (`handle_message_stream()` added): PydanticAI (`agent.run_stream()`), Claude Agent SDK (`client.messages.stream()`), OpenAI Agents SDK (`Runner.run_streamed()`), LangGraph (`graph.astream_events()`), Anthropic Tools (`client.messages.stream()`)
+- **Tool-only streaming** (no agent changes): CrewAI, Strands, Google ADK — tool call events fire in real-time via the collector; text arrives at the end. The `/chat/stream` route auto-detects and falls back gracefully
+
+### Frontend Streaming UI
+- **SSE client** — `fetch` + `ReadableStream` + `TextDecoder` for POST-based SSE (not `EventSource` which only supports GET)
+- **Chakra UI Timeline** — tool calls displayed as a vertical timeline with `Spinner` for running tools, checkmark `Check` icon for complete tools
+- **Collapsible tool details** — expandable view of tool inputs and output preview
+- **Skeleton loading** — `Skeleton` placeholders while waiting for first content
+- **Throttled ReactMarkdown** — text deltas batched at ~50ms to avoid excessive re-renders
+- **Incremental graph updates** — `onGraphUpdate` called on each `tool_end` event, so the NVL visualization updates after each tool completes rather than all at once
+
+### Tests added (23 new → 388 total)
+- `TestStreamingEndpoint` — `/chat/stream` endpoint, `StreamingResponse`, backward compat
+- `TestCollectorEventQueue` — event queue methods on CypherResultCollector
+- `TestStreamingAgentTemplates` — `handle_message_stream` presence in 5 frameworks, absence in 3
+- `TestStreamingFrontend` — Timeline, Skeleton, Collapsible, SSE parsing in ChatInterface
+- End-to-end validation: 8 frameworks × 3 domains + all 22 domains = 46 scaffold validations
+
+### Files modified
+- `templates/backend/shared/context_graph_client.py.j2` — event queue on CypherResultCollector
+- `templates/backend/shared/routes.py.j2` — `/chat/stream` SSE endpoint
+- `templates/frontend/components/ChatInterface.tsx.j2` — SSE client + Timeline/Collapsible/Skeleton UI
+- `templates/backend/agents/anthropic_tools/agent.py.j2` — `handle_message_stream()`
+- `templates/backend/agents/claude_agent_sdk/agent.py.j2` — `handle_message_stream()`
+- `templates/backend/agents/pydanticai/agent.py.j2` — `handle_message_stream()`
+- `templates/backend/agents/openai_agents/agent.py.j2` — `handle_message_stream()`
+- `templates/backend/agents/langgraph/agent.py.j2` — `handle_message_stream()`
+- `tests/test_generated_project.py` — 23 new streaming tests
+
+---
+
 ## Summary
 
 | Phase | Description | Status | Tests |
 |-------|-------------|--------|-------|
-| 1 | Core CLI & Template Engine | **Complete** | 365 passing |
+| 1 | Core CLI & Template Engine | **Complete** | 388 passing |
 | 2 | Domain Expansion & Data Generation | **Complete** | (included above) |
 | 3 | Framework Templates & Frontend | **Complete** | (included above) |
 | 4 | SaaS Import & Custom Domains | **Complete** | (included above) |
@@ -406,3 +445,4 @@ Based on comprehensive QA testing of all 176 domain-framework combinations.
 | — | Graph Visualization & Agent Fixes | **Complete** | (included above) |
 | 6 | Memory Integration, Multi-Turn & DX | **Complete** | (included above) |
 | 7 | Hardening, Security & DX | **Complete** | (included above) |
+| 8 | Streaming Chat & Real-Time Tool Viz | **Complete** | (included above) |

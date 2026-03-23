@@ -23,7 +23,7 @@ uvx create-context-graph my-app --domain healthcare --framework pydanticai --dem
 Create Context Graph walks you through an interactive wizard and generates a complete project:
 
 - **FastAPI backend** with an AI agent configured for your domain, powered by [neo4j-agent-memory](https://github.com/neo4j-labs/neo4j-agent-memory) for multi-turn conversations
-- **Next.js + Chakra UI v3 frontend** with markdown-rendered chat, tool call visualization, interactive graph visualization (schema view, double-click expand, drag/zoom, property panel), entity detail panel, document browser, and decision trace viewer
+- **Next.js + Chakra UI v3 frontend** with streaming chat (Server-Sent Events), real-time tool call visualization (Timeline with live spinners), interactive graph visualization (schema view, double-click expand, drag/zoom, property panel), entity detail panel, document browser, and decision trace viewer
 - **Neo4j schema** with domain-specific constraints, indexes, and GDS projections
 - **Rich demo data** — LLM-generated entities, relationships, professional documents (discharge summaries, trade confirmations, lab reports), and multi-step decision traces
 - **SaaS data import** — connect GitHub, Slack, Gmail, Jira, Notion, Google Calendar, or Salesforce
@@ -169,16 +169,16 @@ Select your preferred agent framework at project creation time:
 
 | Framework | Description |
 |-----------|-------------|
-| **PydanticAI** | Structured tool definitions with Pydantic models and `RunContext` |
-| **Claude Agent SDK** | Anthropic tool-use with agentic loop |
-| **OpenAI Agents SDK** | `@function_tool` decorators with `Runner.run()` |
-| **LangGraph** | Stateful graph-based agent workflow with `create_react_agent()` |
-| **CrewAI** | Multi-agent crew with role-based tools |
-| **Strands (AWS)** | Tool-use agents with AWS Bedrock |
-| **Google ADK** | Gemini agents with `FunctionTool` calling |
-| **Anthropic Tools** | Modular tool registry with Anthropic API agentic loop |
+| **PydanticAI** | Structured tool definitions with Pydantic models and `RunContext` | Full streaming |
+| **Claude Agent SDK** | Anthropic tool-use with agentic loop | Full streaming |
+| **OpenAI Agents SDK** | `@function_tool` decorators with `Runner.run()` | Full streaming |
+| **LangGraph** | Stateful graph-based agent workflow with `create_react_agent()` | Full streaming |
+| **CrewAI** | Multi-agent crew with role-based tools | Tool streaming |
+| **Strands (AWS)** | Tool-use agents with AWS Bedrock | Tool streaming |
+| **Google ADK** | Gemini agents with `FunctionTool` calling | Tool streaming |
+| **Anthropic Tools** | Modular tool registry with Anthropic API agentic loop | Full streaming |
 
-All frameworks share the same FastAPI HTTP layer, Neo4j client, and frontend. Only the agent implementation differs.
+All frameworks share the same FastAPI HTTP layer, Neo4j client, and frontend. Only the agent implementation differs. "Full streaming" means token-by-token text + real-time tool calls. "Tool streaming" means real-time tool calls with text delivered at the end.
 
 ## Generated Project Structure
 
@@ -202,7 +202,7 @@ my-app/
 ├── frontend/
 │   ├── app/                       # Next.js pages
 │   ├── components/
-│   │   ├── ChatInterface.tsx      # AI chat with demo scenarios + graph data flow
+│   │   ├── ChatInterface.tsx      # Streaming AI chat (SSE) with real-time tool calls + graph data flow
 │   │   ├── ContextGraphView.tsx   # Interactive NVL graph (schema view, expand, drag/zoom, properties)
 │   │   ├── DecisionTracePanel.tsx  # Reasoning trace viewer with step details
 │   │   ├── DocumentBrowser.tsx    # Document browser with template filtering
@@ -270,10 +270,10 @@ git clone https://github.com/neo4j-labs/create-context-graph.git
 cd create-context-graph
 uv venv && uv pip install -e ".[dev]"
 
-# Run tests (512 tests, no Neo4j or API keys required)
+# Run tests (no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 314 tests
-pytest tests/ -v --slow        # Full: 512 tests (includes 176-combo domain x framework matrix + 22 perf tests)
+pytest tests/ -v               # Fast: 388 tests
+pytest tests/ -v --slow        # Full: 586 tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
 create-context-graph /tmp/test-app --domain software-engineering --framework pydanticai --demo-data

@@ -6,7 +6,7 @@ Interactive CLI scaffolding tool that generates domain-specific context graph ap
 
 Given a domain (e.g., "healthcare", "wildlife-management") and an agent framework (e.g., PydanticAI, Claude Agent SDK), it generates a complete full-stack application: FastAPI backend, Next.js + Chakra UI v3 + NVL frontend, Neo4j schema, synthetic data, and a configured AI agent with domain-specific tools.
 
-**Status:** Phase 7 complete (v0.4.0). 22 domains, 8 agent frameworks, neo4j-agent-memory integration for multi-turn conversations, interactive NVL graph visualization (schema view, double-click expand, drag/zoom, property panel, agent-driven graph updates), LLM-generated demo data (80-90 entities, 25+ documents, 3-5 decision traces per domain), markdown rendering in chat, tool call visualization, document browser with pagination, entity detail panel, 7 SaaS connectors, custom domain generation, Neo4j Aura .env import + neo4j-local support, Docusaurus documentation site, graceful Neo4j degradation with /health endpoint, Cypher injection prevention, enum identifier sanitization, configurable CORS/model/timeouts, --dry-run and --verbose CLI flags, constants module, WCAG accessibility improvements, 365 passing tests.
+**Status:** Phase 8 in progress (v0.5.0). 22 domains, 8 agent frameworks, **streaming chat via Server-Sent Events** (token-by-token text + real-time tool call visualization with Timeline/Spinner/Collapsible), neo4j-agent-memory integration for multi-turn conversations, interactive NVL graph visualization (schema view, double-click expand, drag/zoom, property panel, agent-driven graph updates — now updated incrementally during streaming), LLM-generated demo data (80-90 entities, 25+ documents, 3-5 decision traces per domain), markdown rendering in chat, document browser with pagination, entity detail panel, 7 SaaS connectors, custom domain generation, Neo4j Aura .env import + neo4j-local support, Docusaurus documentation site, graceful Neo4j degradation with /health endpoint, Cypher injection prevention, enum identifier sanitization, configurable CORS/model/timeouts, --dry-run and --verbose CLI flags, constants module, WCAG accessibility improvements, 388 passing tests.
 
 ## Quick Reference
 
@@ -86,8 +86,11 @@ Templates that contain JSX curly braces or Python dict literals must use `{% raw
 ### Custom domain generation
 `custom_domain.py` generates complete domain ontology YAMLs from natural language descriptions using LLM (Anthropic/OpenAI). Uses `_base.yaml` + 2 reference domain YAMLs as few-shot examples. Validates output against `DomainOntology` Pydantic model with retry loop (up to 3 attempts). Generated domains can be saved to `~/.create-context-graph/custom-domains/` for reuse.
 
+### Streaming chat via Server-Sent Events (SSE)
+The chat uses a streaming architecture where the backend emits SSE events as the agent executes. The `POST /chat/stream` endpoint creates an `asyncio.Queue` on the `CypherResultCollector` and launches the agent in a background task. As tools execute, the collector emits `tool_start` and `tool_end` events (with graph data). For frameworks that support it (PydanticAI, Anthropic Tools, Claude Agent SDK, OpenAI Agents, LangGraph), `text_delta` events stream tokens as they arrive. Other frameworks (CrewAI, Strands, Google ADK) emit tool events in real-time with text arriving at the end. The frontend parses SSE via `fetch` + `ReadableStream` (not `EventSource`, which only supports GET). Tool calls render as a Chakra UI `Timeline` with live `Spinner` indicators. Text deltas are batched (~50ms) before updating ReactMarkdown to avoid excessive re-renders. Graph visualization updates incrementally after each `tool_end` event. The original `/chat` endpoint is preserved for backward compatibility.
+
 ### Interactive graph visualization with agent integration
-The frontend `ContextGraphView` starts in **schema view** (calls `db.schema.visualization()` via `GET /schema/visualization`) showing entity types as nodes and relationship types as edges. When the user interacts with the agent chat, tool call results flow to the graph automatically via a `CypherResultCollector` in `context_graph_client.py` — the `/chat` endpoint drains collected Cypher results and attaches them as `graph_data` in the response, without modifying any agent template. The `ChatInterface` passes `graph_data` to the parent `page.tsx` via an `onGraphUpdate` callback, which flows down to `ContextGraphView` as `externalGraphData`. Double-clicking a schema node loads instances of that label; double-clicking a data node calls `POST /expand` to fetch neighbors (deduplicated merge). NVL uses d3Force layout with drag/zoom/pan, click for property details, and canvas click to deselect.
+The frontend `ContextGraphView` starts in **schema view** (calls `db.schema.visualization()` via `GET /schema/visualization`) showing entity types as nodes and relationship types as edges. When the user interacts with the agent chat, tool call results flow to the graph automatically via the `CypherResultCollector` in `context_graph_client.py`. In streaming mode, graph data arrives incrementally with each `tool_end` SSE event — the `ChatInterface` calls `onGraphUpdate` for each tool completion, so the graph updates as each tool finishes rather than all at once. The `page.tsx` passes data to `ContextGraphView` as `externalGraphData`. Double-clicking a schema node loads instances of that label; double-clicking a data node calls `POST /expand` to fetch neighbors (deduplicated merge). NVL uses d3Force layout with drag/zoom/pan, click for property details, and canvas click to deselect.
 
 ### neo4j-agent-memory integration
 Generated projects use `MemoryClient` from `neo4j-agent-memory` for multi-turn conversation persistence. The `context_graph_client.py.j2` template initializes the MemoryClient alongside the Neo4j driver (with ImportError fallback) and exposes `get_conversation_history()` and `store_message()`. All 8 agent frameworks call these to retrieve history before each LLM call and store messages after. The frontend `ChatInterface` captures `session_id` from the first response and sends it in all subsequent requests.
@@ -148,7 +151,7 @@ my-app/
 ## Testing
 
 ```bash
-pytest tests/ -v                    # All 365 tests (563 with slow matrix)
+pytest tests/ -v                    # All 388 tests (586 with slow matrix)
 pytest tests/test_config.py         # Config model + framework alias tests (19)
 pytest tests/test_ontology.py       # Ontology loading + all 22 domains validate + enum sanitization (60)
 pytest tests/test_renderer.py       # Template rendering + all 8 frameworks + v0.3.0 features (52)
@@ -156,7 +159,7 @@ pytest tests/test_generator.py      # Data generation pipeline (14)
 pytest tests/test_cli.py            # CLI integration + 8 domain/framework combos + neo4j types + validation (20)
 pytest tests/test_custom_domain.py  # Custom domain generation with mocked LLM (17)
 pytest tests/test_connectors.py     # SaaS connectors with mocked APIs (23)
-pytest tests/test_generated_project.py # Deep validation: Python/TS/Cypher syntax, memory, neo4j types, v0.4.0 (90)
+pytest tests/test_generated_project.py # Deep validation: Python/TS/Cypher syntax, memory, neo4j types, streaming (113)
 pytest tests/test_performance.py    # Timed generation tests (slow, 22 domains)
 ```
 
@@ -178,20 +181,21 @@ Tests do NOT require Neo4j or any API keys. All tests use `tmp_path` fixtures fo
 5. Pass `tool_name=` kwarg to `execute_cypher()` calls for tool call visualization
 6. Use `{% raw %}...{% endraw %}` blocks for Python dict literals in the template
 7. Use `{% for tool in agent_tools %}` to generate domain-specific tools from ontology
-6. The template receives full ontology context: `domain`, `agent_tools`, `system_prompt`, `framework_display_name`, etc.
-7. Add tests to `TestAllFrameworksRender` in `test_renderer.py` and `TestMultipleDomainScaffolds` in `test_cli.py`
+8. The template receives full ontology context: `domain`, `agent_tools`, `system_prompt`, `framework_display_name`, etc.
+9. **(Optional) Add `handle_message_stream()` for text streaming**: Import `get_collector` from `context_graph_client`, use the framework's streaming API to iterate text chunks, call `collector.emit_text_delta(chunk)` for each, and `collector.emit_done(response_text, session_id)` at the end. Tool call events fire automatically via `execute_cypher`. If not provided, the `/chat/stream` route falls back to `handle_message()` with tool events still streaming in real-time.
+10. Add tests to `TestAllFrameworksRender` in `test_renderer.py`, `TestMultipleDomainScaffolds` in `test_cli.py`, and `TestStreamingAgentTemplates` in `test_generated_project.py`
 
 ### Current frameworks and their patterns
-| Framework | Directory | Pattern |
-|-----------|-----------|---------|
-| PydanticAI | `pydanticai/` | `@agent.tool` decorator + `RunContext[AgentDeps]` |
-| Claude Agent SDK | `claude_agent_sdk/` | Dict-based TOOLS list + agentic while loop |
-| OpenAI Agents SDK | `openai_agents/` | `@function_tool` decorator + `Runner.run()` |
-| LangGraph | `langgraph/` | `@tool` + `create_react_agent()` |
-| CrewAI | `crewai/` | `Agent` + `Task` + `Crew` with `@tool` |
-| Strands | `strands/` | `Agent` with `@tool`, Bedrock model |
-| Google ADK | `google_adk/` | `Agent` + `FunctionTool`, Gemini model |
-| Anthropic Tools | `anthropic_tools/` | Modular `@register_tool` registry + Anthropic API agentic loop |
+| Framework | Directory | Pattern | Streaming |
+|-----------|-----------|---------|-----------|
+| PydanticAI | `pydanticai/` | `@agent.tool` decorator + `RunContext[AgentDeps]` | Full (`agent.run_stream()`) |
+| Claude Agent SDK | `claude_agent_sdk/` | Dict-based TOOLS list + agentic while loop | Full (`client.messages.stream()`) |
+| OpenAI Agents SDK | `openai_agents/` | `@function_tool` decorator + `Runner.run()` | Full (`Runner.run_streamed()`) |
+| LangGraph | `langgraph/` | `@tool` + `create_react_agent()` | Full (`graph.astream_events()`) |
+| CrewAI | `crewai/` | `Agent` + `Task` + `Crew` with `@tool` | Tools only |
+| Strands | `strands/` | `Agent` with `@tool`, Bedrock model | Tools only |
+| Google ADK | `google_adk/` | `Agent` + `FunctionTool`, Gemini model | Tools only |
+| Anthropic Tools | `anthropic_tools/` | Modular `@register_tool` registry + Anthropic API agentic loop | Full (`client.messages.stream()`) |
 
 ## Adding a New SaaS Connector
 

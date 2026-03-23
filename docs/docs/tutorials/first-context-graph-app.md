@@ -101,7 +101,7 @@ With everything running, you have three interfaces to explore:
 
 The Next.js frontend provides a three-panel layout:
 
-- **Chat interface** (left) -- talk to your AI agent using natural language. Conversations are multi-turn (the agent remembers what was discussed in the current session). Responses are rendered as markdown with formatted code, lists, and tables. Tool call cards show which graph queries the agent executed. Clickable demo scenario buttons get you started.
+- **Chat interface** (left) -- talk to your AI agent using natural language. Responses stream in real-time: tool calls appear as a live timeline with spinner indicators as each executes, and text tokens appear incrementally. Conversations are multi-turn (the agent remembers what was discussed in the current session). Responses are rendered as markdown with formatted code, lists, and tables. Expand any tool call to see inputs and output details. Clickable demo scenario buttons get you started.
 - **Context graph view** (center) -- an interactive NVL graph visualization showing entities and relationships. Nodes are color-coded by type. **Click any node** to open an entity detail panel showing all properties, labels, and connections.
 - **Right panel with tabs:**
   - **Decision Traces** -- pre-seeded reasoning traces showing the agent's step-by-step thinking (thought, action, observation) with full outcomes.
@@ -111,7 +111,8 @@ The Next.js frontend provides a three-panel layout:
 
 The FastAPI backend exposes a Swagger UI with all available endpoints. Key routes include:
 
-- `POST /chat` -- send a message to the agent
+- `POST /chat` -- send a message to the agent (non-streaming)
+- `POST /chat/stream` -- streaming chat via Server-Sent Events
 - `GET /documents` -- list documents with optional template filter
 - `GET /documents/{title}` -- full document content with mentioned entities
 - `GET /traces` -- decision traces with full reasoning steps
