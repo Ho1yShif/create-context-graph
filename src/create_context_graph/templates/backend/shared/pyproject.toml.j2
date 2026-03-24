@@ -2,7 +2,11 @@
 name = "{{ project_slug }}-backend"
 version = "0.1.0"
 description = "{{ domain.name }} Context Graph Backend"
-{% if framework == 'crewai' %}requires-python = ">=3.11"{% else %}requires-python = ">=3.10"{% endif %}
+{% if framework == 'crewai' -%}
+requires-python = ">=3.11"
+{% else -%}
+requires-python = ">=3.10"
+{% endif -%}
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
