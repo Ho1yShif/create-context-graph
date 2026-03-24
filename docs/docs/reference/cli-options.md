@@ -32,6 +32,7 @@ create-context-graph [PROJECT_NAME] [OPTIONS]
 | `--neo4j-local` | `flag` | -- | `false` | Use `@johnymontana/neo4j-local` for a lightweight local Neo4j instance (no Docker required, needs Node.js). Sets `neo4j_type` to `local`. |
 | `--anthropic-api-key` | `string` | `ANTHROPIC_API_KEY` | -- | Anthropic API key. Enables LLM-powered data generation (realistic entity names, documents, decision traces) and custom domain generation. |
 | `--output-dir` | `path` | -- | `./<project-slug>` | Directory where the generated project is written. Defaults to a kebab-case slug of the project name in the current working directory. |
+| `--reset-database` | `flag` | -- | `false` | Clear all existing data from Neo4j before ingesting. Runs `MATCH (n) DETACH DELETE n`. Useful when switching domains on a shared Neo4j instance. |
 | `--dry-run` | `flag` | -- | `false` | Preview what would be generated (project config summary) without creating any files. |
 | `--verbose` | `flag` | -- | `false` | Enable verbose debug logging during generation. Useful for troubleshooting. |
 | `--list-domains` | `flag` | -- | -- | Print all available domain IDs and names, then exit. |
@@ -124,6 +125,20 @@ create-context-graph my-app \
   --ingest \
   --neo4j-uri neo4j://localhost:7687 \
   --neo4j-password my-secret
+```
+
+### Reset Neo4j before ingesting
+
+Clear all existing data from a shared Neo4j instance before loading new domain data:
+
+```bash
+create-context-graph my-app \
+  --domain healthcare \
+  --framework pydanticai \
+  --demo-data \
+  --ingest \
+  --reset-database \
+  --neo4j-uri neo4j://localhost:7687
 ```
 
 ### Custom output directory

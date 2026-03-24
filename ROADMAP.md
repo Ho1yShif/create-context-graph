@@ -494,11 +494,92 @@ Comprehensive QA pass across all 176 domain/framework combinations. 15 bugs fixe
 
 ---
 
+## Phase 10 — Framework Reliability, Data Quality & UX (v0.5.1)
+
+Comprehensive testing of v0.4.6 revealed that 6 of 9 agent frameworks were non-functional (hanging or not executing tools), plus frontend UX bugs and static data quality issues. This phase addresses all feedback.
+
+### Critical: Fix Hanging Frameworks
+
+- **Thread-safe CypherResultCollector**: `_push_event()` now detects worker threads and uses `loop.call_soon_threadsafe()` instead of direct `put_nowait()` on the asyncio.Queue. Captures `self._loop` in `set_event_queue()`.
+- **CrewAI/Strands async bridging**: Replaced `asyncio.run()` in `_run_sync()` with `asyncio.run_coroutine_threadsafe(coro, _main_loop)`. Added `_capture_loop()` called before `asyncio.to_thread()` to capture the main event loop. 30s timeout per tool call.
+- **Google ADK async bridging**: Improved `_run_sync()` with cross-thread `run_coroutine_threadsafe` fallback alongside existing `nest_asyncio` for same-thread reentrant calls.
+- **Bounded agentic loops**: Anthropic Tools and Claude Agent SDK `while True:` loops replaced with `for _iteration in range(15):`. Added `timeout=60.0` to API calls. Fallback message when max iterations exceeded.
+
+### Critical: Fix Tool Execution
+
+- **Tool-use emphasis**: All 8 agent templates now append "IMPORTANT: You MUST use the available tools to query the knowledge graph..." to the domain system prompt.
+- **PydanticAI**: Added `retries=2` to Agent constructor for transient failure recovery.
+- **OpenAI Agents JSON leak**: Streaming now filters `response.output_text.delta` events only, skipping `response.function_call_arguments.delta` that leaked raw JSON into the text stream.
+
+### Frontend Fixes
+
+- **Chat history scoping**: `STORAGE_KEY` and `SESSION_KEY` now include `DOMAIN.id` to prevent cross-app pollution when running multiple domain apps.
+- **SSR hydration fix**: Deferred `sessionStorage` reads to `useEffect` instead of `useState` initializer. Added `hydrated` state.
+- **Send button**: Increased from `size="sm"` to `size="md"` with `colorPalette="blue"`.
+- **Timeout feedback**: Added elapsed time counter (shown after 3s), reduced visible timeout from 120s to 60s.
+- **Retry button**: Error messages now include a "Retry" button that resends the original message.
+
+### Dependencies & CLI
+
+- **neo4j-agent-memory[openai]**: Added `[openai]` extra to fix "OpenAI package not installed" error on `store_message()`.
+- **`--reset-database` flag**: New CLI flag that runs `MATCH (n) DETACH DELETE n` before ingestion. Added `reset_neo4j()` to `ingest.py`.
+
+### Static Demo Data Quality
+
+- **Domain-specific name pools**: Added 200+ names across 50+ entity labels (medical diagnoses, financial instruments, software repos, gaming items, etc.) in `LABEL_NAMES` dict in `name_pools.py`.
+- **Label-aware ID prefixes**: `LABEL_ID_PREFIXES` maps labels to domain-appropriate prefixes (PAT-, DX-, ACT-, REPO-, etc.).
+- **`get_names_for_label()`**: New function that checks `LABEL_NAMES` first, falls back to POLE+O pools.
+- **Generator updated**: `_generate_static_entities()` now uses `get_names_for_label()` instead of `get_names_for_pole_type()`.
+
+### Decision Traces Expansion
+
+- **All 22 domains**: Expanded from 3-5 to 8-12 decision traces each. Added ~130 new traces total with domain-specific multi-step reasoning scenarios.
+
+### Streaming Endpoint
+
+- **Overall timeout**: SSE endpoint now has a 300s overall timeout alongside the 120s per-event idle timeout.
+
+### Tests added (26 new → 435 total)
+
+- `TestAsyncBridgingFixes` — CrewAI/Strands use `run_coroutine_threadsafe`, no bare `asyncio.run()`
+- `TestMaxIterationGuards` — Anthropic Tools/Claude Agent SDK have bounded iterations
+- `TestOpenAIStreamFiltering` — OpenAI agents filter tool argument deltas
+- `TestCollectorThreadSafety` — Collector uses `call_soon_threadsafe` and `threading`
+- `TestToolPromptSuffix` — All 8 frameworks include tool-use emphasis
+- `TestChatHistoryScoping` — Storage keys include `DOMAIN.id`
+- `TestHydrationFix` — No direct `sessionStorage` in `useState`, has `hydrated` state
+- `TestNeo4jAgentMemoryDeps` — pyproject includes `[openai]` extra
+- `TestStreamingEndpointTimeout` — Routes have `overall_timeout`
+- `TestDomainSpecificNamePools` — Label names exist and are used correctly
+
+### Files modified
+
+- `src/create_context_graph/templates/backend/shared/context_graph_client.py.j2` — thread-safe collector
+- `src/create_context_graph/templates/backend/agents/crewai/agent.py.j2` — async bridging + tool prompt
+- `src/create_context_graph/templates/backend/agents/strands/agent.py.j2` — async bridging + tool prompt
+- `src/create_context_graph/templates/backend/agents/google_adk/agent.py.j2` — async bridging + tool prompt
+- `src/create_context_graph/templates/backend/agents/anthropic_tools/agent.py.j2` — max iterations + tool prompt
+- `src/create_context_graph/templates/backend/agents/claude_agent_sdk/agent.py.j2` — max iterations + tool prompt
+- `src/create_context_graph/templates/backend/agents/pydanticai/agent.py.j2` — tool prompt + retries
+- `src/create_context_graph/templates/backend/agents/openai_agents/agent.py.j2` — JSON leak fix + tool prompt
+- `src/create_context_graph/templates/backend/agents/langgraph/agent.py.j2` — tool prompt
+- `src/create_context_graph/templates/frontend/components/ChatInterface.tsx.j2` — history scoping, hydration, retry, timeout, send button
+- `src/create_context_graph/templates/backend/shared/pyproject.toml.j2` — openai extra
+- `src/create_context_graph/templates/backend/shared/routes.py.j2` — overall timeout
+- `src/create_context_graph/name_pools.py` — domain-specific name pools
+- `src/create_context_graph/generator.py` — label-aware naming
+- `src/create_context_graph/cli.py` — `--reset-database` flag
+- `src/create_context_graph/ingest.py` — `reset_neo4j()` function
+- `src/create_context_graph/domains/*.yaml` — ~130 new decision traces across all 22 domains
+- `tests/test_generated_project.py` — 26 new tests
+
+---
+
 ## Summary
 
 | Phase | Description | Status | Tests |
 |-------|-------------|--------|-------|
-| 1 | Core CLI & Template Engine | **Complete** | 409 passing |
+| 1 | Core CLI & Template Engine | **Complete** | 435 passing |
 | 2 | Domain Expansion & Data Generation | **Complete** | (included above) |
 | 3 | Framework Templates & Frontend | **Complete** | (included above) |
 | 4 | SaaS Import & Custom Domains | **Complete** | (included above) |
@@ -509,3 +590,4 @@ Comprehensive QA pass across all 176 domain/framework combinations. 15 bugs fixe
 | 7 | Hardening, Security & DX | **Complete** | (included above) |
 | 8 | Streaming Chat & Real-Time Tool Viz | **Complete** | (included above) |
 | 9 | QA Hardening & DX Polish | **Complete** | (included above) |
+| 10 | Framework Reliability, Data Quality & UX | **Complete** | (included above) |

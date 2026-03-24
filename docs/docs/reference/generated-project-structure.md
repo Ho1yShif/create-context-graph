@@ -132,7 +132,7 @@ The agent is configured with:
 
 ### `app/context_graph_client.py`
 
-Neo4j client for reading and writing to the knowledge graph. Provides methods for entity CRUD, relationship traversal, arbitrary Cypher execution, schema visualization (`db.schema.visualization()`), and node expansion. Uses a custom `_serialize()` function to preserve Neo4j Node/Relationship metadata (labels, elementIds, types) instead of the driver's `.data()` method. Includes a `CypherResultCollector` that captures Cypher results and tool call metadata from agent tool calls for automatic graph data and tool call visualization in the frontend. The collector supports an optional `asyncio.Queue`-based event system for SSE streaming — when a queue is attached, `tool_start`, `tool_end`, `text_delta`, and `done` events are pushed in real-time as agent tools execute.
+Neo4j client for reading and writing to the knowledge graph. Provides methods for entity CRUD, relationship traversal, arbitrary Cypher execution, schema visualization (`db.schema.visualization()`), and node expansion. Uses a custom `_serialize()` function to preserve Neo4j Node/Relationship metadata (labels, elementIds, types) instead of the driver's `.data()` method. Includes a `CypherResultCollector` that captures Cypher results and tool call metadata from agent tool calls for automatic graph data and tool call visualization in the frontend. The collector supports an optional `asyncio.Queue`-based event system for SSE streaming — when a queue is attached, `tool_start`, `tool_end`, `text_delta`, and `done` events are pushed in real-time as agent tools execute. The collector is thread-safe: when called from worker threads (e.g., CrewAI/Strands tools running via `asyncio.to_thread()`), it uses `loop.call_soon_threadsafe()` instead of direct `put_nowait()`.
 
 Also initializes the `neo4j-agent-memory` `MemoryClient` (with graceful fallback if not installed) and exposes `get_conversation_history()` and `store_message()` for multi-turn conversation persistence.
 
@@ -167,7 +167,7 @@ Main application page with a three-panel layout: chat interface on the left, gra
 
 ### `components/ChatInterface.tsx`
 
-Streaming chat UI component with multi-turn conversation support. Uses Server-Sent Events (SSE) via `POST /chat/stream` for real-time responses: tool calls appear as a Chakra UI Timeline with live Spinner indicators as each tool executes, text tokens stream in and are rendered with ReactMarkdown (batched at ~50ms to avoid excessive re-renders), and graph data flows to the visualization incrementally after each tool completes. Falls back gracefully if the streaming endpoint is unavailable. Manages `session_id` state — captures it from the first SSE event and sends it in all subsequent requests. Includes a "New Conversation" button, clickable demo scenario buttons from the ontology, and Collapsible tool detail cards showing inputs/outputs. Uses Skeleton loading placeholders while waiting for first content.
+Streaming chat UI component with multi-turn conversation support. Uses Server-Sent Events (SSE) via `POST /chat/stream` for real-time responses: tool calls appear as a Chakra UI Timeline with live Spinner indicators as each tool executes, text tokens stream in and are rendered with ReactMarkdown (batched at ~50ms to avoid excessive re-renders), and graph data flows to the visualization incrementally after each tool completes. Falls back gracefully if the streaming endpoint is unavailable. Manages `session_id` state — captures it from the first SSE event and sends it in all subsequent requests. Chat history is scoped by domain ID to prevent cross-app pollution when running multiple domain apps. Session storage reads are deferred to `useEffect` to avoid SSR hydration mismatches. Includes a "New Conversation" button, clickable demo scenario buttons from the ontology, Collapsible tool detail cards showing inputs/outputs, a retry button on error messages, and an elapsed time counter during loading. Uses Skeleton loading placeholders while waiting for first content. 60s request timeout with AbortController.
 
 ### `components/ContextGraphView.tsx`
 
@@ -267,6 +267,7 @@ Defines a Neo4j container with APOC and GDS plugins, mapped to ports 7474 (brows
 | `make neo4j-stop` | Stop neo4j-local (local mode only) |
 | `make neo4j-status` | Check neo4j-local status (local mode only) |
 | `make seed` | Apply schema and load all fixture data (entities, relationships, documents, traces) into Neo4j |
+| `make reset` | Clear all data from Neo4j (`MATCH (n) DETACH DELETE n`) |
 | `make test-connection` | Validate Neo4j credentials and connectivity |
 | `make start` | Start both backend and frontend (uses `trap` for clean Ctrl+C shutdown) |
 | `make dev-backend` | Start only the FastAPI backend |

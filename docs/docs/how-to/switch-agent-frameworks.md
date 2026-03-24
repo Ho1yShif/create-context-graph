@@ -12,13 +12,13 @@ Create Context Graph supports 8 agent frameworks. The framework choice only affe
 | Framework | Key | Description | Streaming |
 |-----------|-----|-------------|-----------|
 | **PydanticAI** | `pydanticai` | Type-safe agents with `@agent.tool` decorators and dependency injection via `RunContext` | Full |
-| **Claude Agent SDK** | `claude-agent-sdk` | Anthropic's SDK with dict-based tool definitions and an agentic while loop | Full |
+| **Claude Agent SDK** | `claude-agent-sdk` | Anthropic's SDK with dict-based tool definitions and a bounded agentic loop (max 15 iterations) | Full |
 | **OpenAI Agents SDK** | `openai-agents` | OpenAI's agent framework with `@function_tool` decorators and `Runner.run()` | Full |
 | **LangGraph** | `langgraph` | LangChain's graph-based agent runtime with `@tool` and `create_react_agent()` | Full |
-| **CrewAI** | `crewai` | Multi-agent framework with `Agent`, `Task`, and `Crew` abstractions | Tools only |
-| **Strands** | `strands` | AWS-native agent framework using Bedrock models with `@tool` decorators | Tools only |
+| **CrewAI** | `crewai` | Multi-agent framework with `Agent`, `Task`, and `Crew` abstractions (thread-safe async bridging) | Tools only |
+| **Strands** | `strands` | Agent framework using Anthropic models with `@tool` decorators (thread-safe async bridging) | Tools only |
 | **Google ADK** | `google-adk` | Google's Agent Development Kit with `FunctionTool` and Gemini models | Full |
-| **Anthropic Tools** | `anthropic-tools` | Modular agent framework with `@register_tool` registry and Anthropic API agentic loop | Full |
+| **Anthropic Tools** | `anthropic-tools` | Modular agent framework with `@register_tool` registry and bounded Anthropic API agentic loop (max 15 iterations) | Full |
 
 **Streaming column:** "Full" means token-by-token text streaming + real-time tool call events. "Tools only" means tool call events stream in real-time, but the text response arrives all at once after the agent finishes. All frameworks use the same SSE (Server-Sent Events) protocol.
 

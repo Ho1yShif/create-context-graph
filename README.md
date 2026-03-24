@@ -246,6 +246,7 @@ Options:
   --neo4j-local             Use @johnymontana/neo4j-local for local Neo4j (no Docker)
   --anthropic-api-key TEXT  Anthropic API key for LLM generation [env: ANTHROPIC_API_KEY]
   --output-dir PATH         Output directory (default: ./<project-name>)
+  --reset-database          Clear all Neo4j data before ingesting
   --dry-run                 Preview what would be generated without creating files
   --verbose                 Enable verbose debug output
   --list-domains            List available domains and exit
@@ -273,8 +274,8 @@ uv venv && uv pip install -e ".[dev]"
 
 # Run tests (no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 409 tests
-pytest tests/ -v --slow        # Full: 607 tests (includes 176-combo domain x framework matrix + 22 perf tests)
+pytest tests/ -v               # Fast: 435 tests
+pytest tests/ -v --slow        # Full: 633 tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
 create-context-graph /tmp/test-app --domain software-engineering --framework pydanticai --demo-data
