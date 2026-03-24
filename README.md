@@ -174,7 +174,7 @@ Select your preferred agent framework at project creation time:
 | **OpenAI Agents SDK** | `@function_tool` decorators with `Runner.run()` | Full streaming |
 | **LangGraph** | Stateful graph-based agent workflow with `create_react_agent()` | Full streaming |
 | **CrewAI** | Multi-agent crew with role-based tools | Tool streaming |
-| **Strands (AWS)** | Tool-use agents with AWS Bedrock | Tool streaming |
+| **Strands** | Tool-use agents with Anthropic model | Tool streaming |
 | **Google ADK** | Gemini agents with `FunctionTool` calling | Full streaming |
 | **Anthropic Tools** | Modular tool registry with Anthropic API agentic loop | Full streaming |
 

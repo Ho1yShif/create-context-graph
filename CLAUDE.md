@@ -193,7 +193,7 @@ Tests do NOT require Neo4j or any API keys. All tests use `tmp_path` fixtures fo
 | OpenAI Agents SDK | `openai_agents/` | `@function_tool` decorator + `Runner.run()` | Full (`Runner.run_streamed()`) |
 | LangGraph | `langgraph/` | `@tool` + `create_react_agent()` | Full (`graph.astream_events()`) |
 | CrewAI | `crewai/` | `Agent` + `Task` + `Crew` with `@tool` | Tools only |
-| Strands | `strands/` | `Agent` with `@tool`, Bedrock model | Tools only |
+| Strands | `strands/` | `Agent` with `@tool`, Anthropic model | Tools only |
 | Google ADK | `google_adk/` | `Agent` + `FunctionTool`, Gemini model | Full (`runner.run_async()`) |
 | Anthropic Tools | `anthropic_tools/` | Modular `@register_tool` registry + Anthropic API agentic loop | Full (`client.messages.stream()`) |
 

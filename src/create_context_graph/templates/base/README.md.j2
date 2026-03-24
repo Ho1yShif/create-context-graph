@@ -114,7 +114,7 @@ This project uses [CrewAI](https://www.crewai.com/) with an Agent/Task/Crew arch
 
 **Note:** CrewAI requires Python 3.11+. Streaming is limited to real-time tool call visualization; text arrives after the crew completes.
 {% elif framework == 'strands' %}
-This project uses [Strands Agents](https://github.com/strands-agents/strands-agents) (AWS) with `@tool` decorators and a Bedrock-backed model. Runs synchronously via `asyncio.to_thread()`.
+This project uses [Strands Agents](https://github.com/strands-agents/strands-agents) with `@tool` decorators and an Anthropic-backed model. Requires `ANTHROPIC_API_KEY` in your `.env` file. Runs synchronously via `asyncio.to_thread()`.
 
 Streaming is limited to real-time tool call visualization; text arrives after the agent completes.
 {% elif framework == 'google_adk' %}

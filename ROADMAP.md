@@ -91,7 +91,7 @@ Added all 8 agent framework templates, replaced NVL placeholder with real graph 
   - **OpenAI Agents SDK** (`openai_agents/`) — `@function_tool` decorators + `Runner.run()`
   - **LangGraph** (`langgraph/`) — `@tool` + `create_react_agent()` with `ChatAnthropic`
   - **CrewAI** (`crewai/`) — `Agent` + `Task` + `Crew` with `@tool` decorator
-  - **Strands (AWS)** (`strands/`) — `Agent` with `@tool`, Bedrock model
+  - **Strands** (`strands/`) — `Agent` with `@tool`, Anthropic model
   - **Google ADK** (`google_adk/`) — `Agent` + `FunctionTool`, Gemini model, async runner
   - **MAF** (`maf/`) — Modular tool registry with decorator pattern
 - **NVL graph visualization** — Replaced placeholder in `ContextGraphView.tsx` with real `@neo4j-nvl/react` `InteractiveNvlWrapper` component: force-directed layout, domain-colored nodes via `NODE_COLORS`/`NODE_SIZES`, node click handler, color legend
