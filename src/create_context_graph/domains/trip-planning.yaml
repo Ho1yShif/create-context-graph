@@ -287,6 +287,76 @@ decision_traces:
         action: "Find higher-rated or better-value alternatives for each activity slot"
     outcome_template: "Optimized plan saves ${{savings}} with {{improvement}} in ratings"
 
+  - id: activity_scheduling
+    task: "Schedule activities for {{itinerary.name}} to minimize travel time and maximize enjoyment"
+    steps:
+      - thought: "Map all booked activities by location and duration"
+        action: "Query activities linked to itinerary with durations and destination locations"
+      - thought: "Cluster activities by proximity to reduce transit time"
+        action: "Group activities near the same hotel or neighborhood by day"
+      - thought: "Balance intensity levels across each day"
+        action: "Alternate high-energy and relaxing activities, avoiding back-to-back extremes"
+      - thought: "Verify opening hours and seasonal availability"
+        action: "Cross-reference activity schedules with trip dates and local calendars"
+    outcome_template: "Scheduled {{count}} activities across {{days}} days with {{transit_reduction}} less transit"
+
+  - id: budget_allocation
+    task: "Allocate ${{itinerary.total_budget}} budget across accommodation, activities, and dining for {{destination.name}}"
+    steps:
+      - thought: "Determine baseline costs for accommodation at the destination"
+        action: "Query average hotel prices by category in the destination"
+      - thought: "Estimate activity spending based on planned experiences"
+        action: "Sum prices of selected activities and identify free alternatives"
+      - thought: "Calculate dining budget based on restaurant options and traveler count"
+        action: "Query restaurant price ranges near the hotel and estimate daily meal costs"
+    outcome_template: "Budget split: accommodation ${{accommodation}}, activities ${{activities}}, dining ${{dining}}, reserve ${{reserve}}"
+
+  - id: weather_contingency
+    task: "Create weather contingency plan for {{itinerary.name}} visiting {{destination.name}} in {{destination.best_season}}"
+    steps:
+      - thought: "Identify outdoor activities vulnerable to bad weather"
+        action: "Query activities on the itinerary with types sightseeing, adventure, or nature"
+      - thought: "Find indoor alternatives for each weather-sensitive activity"
+        action: "Search for cultural, shopping, or wellness activities at the same destination"
+      - thought: "Assess hotel amenities as fallback entertainment"
+        action: "Check hotel amenities for spa, pool, or indoor facilities"
+    outcome_template: "Contingency plan covers {{outdoor_count}} outdoor activities with {{indoor_count}} indoor alternatives"
+
+  - id: restaurant_reservation
+    task: "Plan dining reservations for {{itinerary.name}} near {{hotel.name}} in {{destination.name}}"
+    steps:
+      - thought: "Identify top-rated restaurants near the booked hotel"
+        action: "Query restaurants with NEAR relationship to the hotel, ordered by rating"
+      - thought: "Diversify cuisine types across trip days"
+        action: "Group restaurants by cuisine and assign one per evening to avoid repetition"
+      - thought: "Check reservation requirements and price compatibility with budget"
+        action: "Filter restaurants by reservation_required flag and price_range within budget"
+      - thought: "Account for special dietary needs and traveler preferences"
+        action: "Review cuisine options for vegetarian, allergy-friendly, or local specialties"
+    outcome_template: "Reserved {{count}} restaurants across {{cuisines}} cuisine types, avg ${{avg_cost}}/meal"
+
+  - id: transport_planning
+    task: "Plan transportation for {{itinerary.name}} across activities in {{destination.name}}"
+    steps:
+      - thought: "Map distances between hotel, activities, and restaurants"
+        action: "Query locations of all booked activities and restaurants relative to hotel"
+      - thought: "Evaluate local transport options and costs"
+        action: "Assess destination type for public transit, taxi, rental car, or walking feasibility"
+      - thought: "Optimize daily routes to minimize backtracking"
+        action: "Sequence each day's activities by geographic proximity"
+    outcome_template: "Transport plan: {{mode}} recommended, estimated ${{cost}} total, {{time}} daily transit"
+
+  - id: travel_companion_matching
+    task: "Suggest group-compatible activities for {{review.travel_style}} travelers visiting {{destination.name}}"
+    steps:
+      - thought: "Identify activities suitable for the travel style and group size"
+        action: "Query activities at destination filtered by difficulty and type matching travel style"
+      - thought: "Balance group preferences using review sentiment"
+        action: "Aggregate review ratings by travel style for each activity"
+      - thought: "Check group booking availability and discounts"
+        action: "Filter activities that accommodate the itinerary's traveler count"
+    outcome_template: "Matched {{count}} activities for {{travel_style}} group with avg rating {{rating}}"
+
 demo_scenarios:
   - name: Trip Planning
     prompts:

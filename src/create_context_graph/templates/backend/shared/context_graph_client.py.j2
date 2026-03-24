@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json as _json
 import logging
+import threading
 
 from neo4j import AsyncGraphDatabase, AsyncDriver
 from neo4j.graph import Node, Relationship, Path
@@ -34,21 +35,45 @@ class CypherResultCollector:
         self.results: list[dict] = []
         self.tool_calls: list[dict] = []
         self._event_queue: asyncio.Queue | None = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
     # -- event queue management ------------------------------------------------
 
     def set_event_queue(self, queue: asyncio.Queue) -> None:
         """Attach an asyncio.Queue for SSE streaming."""
         self._event_queue = queue
+        try:
+            self._loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self._loop = None
 
     def clear_event_queue(self) -> None:
         """Detach the event queue."""
         self._event_queue = None
+        self._loop = None
 
     def _push_event(self, event: str, data: dict) -> None:
-        """Push an SSE event to the queue if one is attached."""
-        if self._event_queue is not None:
-            self._event_queue.put_nowait({"event": event, "data": data})
+        """Push an SSE event to the queue if one is attached.
+
+        Thread-safe: if called from a worker thread (e.g. CrewAI/Strands tools
+        running via ``asyncio.to_thread``), uses ``call_soon_threadsafe`` to
+        schedule the put on the event loop's thread.
+        """
+        if self._event_queue is None:
+            return
+        payload = {"event": event, "data": data}
+        try:
+            loop = self._loop
+            if loop is not None and loop.is_running():
+                # Detect whether we are on the event-loop thread or a worker.
+                loop_thread = getattr(loop, "_thread_id", None)
+                current_tid = threading.current_thread().ident
+                if loop_thread is not None and current_tid != loop_thread:
+                    loop.call_soon_threadsafe(self._event_queue.put_nowait, payload)
+                    return
+            self._event_queue.put_nowait(payload)
+        except RuntimeError:
+            pass  # loop closed or queue full — best effort
 
     # -- tool call events ------------------------------------------------------
 

@@ -16,7 +16,9 @@ from app.context_graph_client import (
 )
 
 
-SYSTEM_PROMPT = """{{ system_prompt }}"""
+SYSTEM_PROMPT = """{{ system_prompt }}
+
+IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph."""
 
 # ---------------------------------------------------------------------------
 # Agent tools — domain-specific for {{ domain.name }}

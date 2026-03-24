@@ -280,6 +280,84 @@ decision_traces:
         action: "Check active grants and institutional agreements"
     outcome_template: "Collaboration assessment: {{assessment}} — {{rationale}}"
 
+  - id: grant_proposal_strategy
+    task: "Develop grant proposal strategy for researcher {{researcher.name}} targeting {{grant.funding_agency}}"
+    steps:
+      - thought: "Review researcher's publication record and funding history"
+        action: "Query papers authored and previous grants awarded to this researcher"
+      - thought: "Identify research gaps that align with funder priorities"
+        action: "Analyze funded experiments and identify underexplored areas in the researcher's field"
+      - thought: "Assess team composition and institutional strengths"
+        action: "Query co-authors, their institutions, and complementary expertise"
+      - thought: "Estimate competitiveness based on prior funding rates"
+        action: "Review grant outcomes by funding agency and research area"
+    outcome_template: "Strategy: {{strategy}}. Competitive strength: {{strength}}. Suggested budget: ${{budget}}"
+
+  - id: reproducibility_assessment
+    task: "Assess reproducibility of findings from experiment {{experiment.name}}"
+    steps:
+      - thought: "Review the original experiment methodology and results"
+        action: "Query experiment details, methodology, and result summary"
+      - thought: "Search for replication attempts by independent groups"
+        action: "Find experiments linked via REPLICATED relationship to the original"
+      - thought: "Compare datasets used and their availability"
+        action: "Check if the original dataset is publicly accessible and has been reused"
+      - thought: "Evaluate statistical rigor and effect size"
+        action: "Review evaluation metrics and sample sizes from the original and replications"
+    outcome_template: "Reproducibility: {{rating}}. Replications: {{count}}. Confidence: {{confidence}}"
+
+  - id: peer_review_synthesis
+    task: "Synthesize peer reviews for paper {{paper.title}} to guide revision"
+    steps:
+      - thought: "Collect and categorize all reviewer comments"
+        action: "Query documents linked to this paper for peer review reports"
+      - thought: "Identify common themes and critical concerns across reviewers"
+        action: "Find issues raised by multiple reviewers that require major revision"
+      - thought: "Prioritize revisions by impact on acceptance probability"
+        action: "Rank changes by severity and whether they address fundamental vs minor concerns"
+      - thought: "Identify additional experiments or analyses needed"
+        action: "Determine which reviewer requests require new data collection vs reanalysis"
+    outcome_template: "Revisions needed: {{count}}. Major: {{major}}. Additional experiments: {{experiments}}"
+
+  - id: literature_gap_analysis
+    task: "Identify gaps in the literature around the research area of {{paper.title}}"
+    steps:
+      - thought: "Map the citation network around this paper"
+        action: "Query papers cited by and citing this paper to build the network"
+      - thought: "Identify clusters of related work and their boundaries"
+        action: "Analyze citation patterns to find research sub-communities"
+      - thought: "Detect under-explored connections between clusters"
+        action: "Find topic areas with few cross-cluster citations indicating research gaps"
+      - thought: "Assess feasibility of addressing identified gaps"
+        action: "Evaluate available datasets, methods, and expertise for each gap"
+    outcome_template: "Gaps identified: {{gaps}}. Most promising: {{top_gap}}. Feasibility: {{feasibility}}"
+
+  - id: data_management_plan
+    task: "Create a data management plan for experiment {{experiment.name}} using dataset {{dataset.name}}"
+    steps:
+      - thought: "Assess dataset size, format, and access requirements"
+        action: "Query dataset metadata including size, format, and license"
+      - thought: "Determine appropriate storage and sharing platforms"
+        action: "Match dataset characteristics to repository requirements and funder mandates"
+      - thought: "Plan data versioning and provenance tracking"
+        action: "Define versioning strategy based on experiment pipeline and expected transformations"
+      - thought: "Address privacy, licensing, and long-term preservation"
+        action: "Review license restrictions and institutional data retention policies"
+    outcome_template: "DMP: {{plan}}. Repository: {{repository}}. Retention period: {{retention}}"
+
+  - id: impact_assessment
+    task: "Assess research impact of researcher {{researcher.name}} for tenure review"
+    steps:
+      - thought: "Quantify publication metrics and citation impact"
+        action: "Query papers authored, citation counts, h-index, and journal rankings"
+      - thought: "Evaluate grant funding success and amount"
+        action: "Review grants awarded, total funding, and funding agency diversity"
+      - thought: "Assess mentorship and collaboration breadth"
+        action: "Count co-authored papers, affiliated institutions, and supervised experiments"
+      - thought: "Identify broader impact beyond academia"
+        action: "Search for dataset reuse, media mentions, and practical applications of research"
+    outcome_template: "Impact summary: h-index {{h_index}}, total citations {{citations}}, grants ${{funding}}"
+
 demo_scenarios:
   - name: Literature Review
     prompts:

@@ -283,6 +283,93 @@ decision_traces:
         action: "Find patients with similar diagnoses and demographics, check their readmission rates"
     outcome_template: "Risk level: {{risk_level}}. Mitigation: {{actions}}"
 
+  - id: medication_reconciliation
+    task: "Reconcile medications for {{patient.name}} transitioning between {{facility.name}} and outpatient care"
+    steps:
+      - thought: "Compile complete list of current prescriptions and over-the-counter medications"
+        action: "Query all active medications and treatments for the patient"
+      - thought: "Identify discrepancies between inpatient and outpatient medication lists"
+        action: "Compare encounter-linked prescriptions with standing medication orders"
+      - thought: "Check for duplicate therapies and contraindicated combinations"
+        action: "Cross-reference medication pairs for CONTRAINDICATED_WITH relationships"
+      - thought: "Verify dosage appropriateness given current diagnoses and patient factors"
+        action: "Review patient allergies, blood type, and active diagnoses against medication profiles"
+    outcome_template: "Reconciled medications: {{medication_count}}. Discrepancies found: {{discrepancies}}. Actions: {{actions}}"
+
+  - id: triage_priority
+    task: "Determine triage priority for {{patient.name}} presenting at {{facility.name}} emergency department"
+    steps:
+      - thought: "Assess chief complaint severity and vital signs"
+        action: "Query patient encounter history for chief complaint and recent encounters"
+      - thought: "Review patient history for conditions that elevate risk"
+        action: "Check diagnosed conditions, especially chronic and critical severity diagnoses"
+      - thought: "Evaluate current facility capacity and provider availability"
+        action: "Query facility bed count and active encounters at the facility"
+      - thought: "Assign triage level based on acuity and resource needs"
+        action: "Compare patient profile with similar past emergency encounters and their dispositions"
+    outcome_template: "Triage level: {{triage_level}}. Rationale: {{rationale}}. Assigned provider: {{provider.name}}"
+
+  - id: discharge_planning
+    task: "Create discharge plan for {{patient.name}} after treatment for {{diagnosis.name}} at {{facility.name}}"
+    steps:
+      - thought: "Review treatment completion status and clinical outcomes"
+        action: "Query all treatments linked to the current encounter and their statuses"
+      - thought: "Identify follow-up care requirements and specialist referrals"
+        action: "Check for pending referrals and recommended follow-up providers by specialty"
+      - thought: "Assess patient support needs and medication regimen"
+        action: "Review prescribed medications, contraindications, and patient allergies"
+      - thought: "Coordinate with outpatient providers and schedule follow-ups"
+        action: "Query affiliated providers and available facilities for post-discharge care"
+    outcome_template: "Discharge plan: {{plan}}. Follow-up: {{follow_up_date}}. Medications: {{medication_list}}"
+
+  - id: infection_control
+    task: "Evaluate infection control risk for {{diagnosis.name}} cases at {{facility.name}}"
+    steps:
+      - thought: "Identify all patients with the infectious diagnosis at the facility"
+        action: "Query patients diagnosed with the condition who had encounters at the facility"
+      - thought: "Map provider and encounter overlaps for transmission risk"
+        action: "Find providers who attended encounters with affected patients and their other patients"
+      - thought: "Assess facility capacity for isolation and containment"
+        action: "Check facility type, bed count, and current patient load"
+    outcome_template: "Risk level: {{risk_level}}. Affected patients: {{patient_count}}. Containment: {{containment_plan}}"
+
+  - id: care_coordination
+    task: "Coordinate multi-provider care for {{patient.name}} with comorbid conditions"
+    steps:
+      - thought: "Map all active diagnoses and their treating providers"
+        action: "Query all DIAGNOSED_WITH and TREATED_BY relationships for the patient"
+      - thought: "Identify potential treatment conflicts across specialties"
+        action: "Cross-reference treatments and medications from different providers for contraindications"
+      - thought: "Determine gaps in care coverage"
+        action: "Check for diagnoses without active treatments or recent encounters"
+      - thought: "Recommend care team alignment and communication plan"
+        action: "Review provider referral network and facility affiliations for coordination"
+    outcome_template: "Care team: {{provider_count}} providers. Conflicts found: {{conflicts}}. Gaps: {{gaps}}"
+
+  - id: lab_result_interpretation
+    task: "Interpret lab results for {{patient.name}} ordered by {{provider.name}} related to {{diagnosis.name}}"
+    steps:
+      - thought: "Review the lab test results in context of the patient's diagnoses"
+        action: "Query lab_test treatments linked to the patient's encounters and diagnosis history"
+      - thought: "Compare results with patient's historical baseline values"
+        action: "Find previous lab-type treatments and encounters for trend analysis"
+      - thought: "Assess whether results indicate treatment adjustment"
+        action: "Cross-reference current medications and treatments with lab findings"
+    outcome_template: "Interpretation: {{interpretation}}. Trend: {{trend}}. Recommended action: {{action}}"
+
+  - id: resource_allocation
+    task: "Optimize resource allocation for {{facility.name}} during high patient volume"
+    steps:
+      - thought: "Assess current facility utilization and patient census"
+        action: "Query active encounters at the facility and compare to bed count"
+      - thought: "Identify providers available across affiliated facilities"
+        action: "Query providers affiliated with the facility and their current encounter load"
+      - thought: "Prioritize patient needs by diagnosis severity"
+        action: "Rank current patients by diagnosis severity and treatment status"
+      - thought: "Recommend patient transfers or provider reassignments"
+        action: "Find nearby facilities with available capacity and matching specialties"
+    outcome_template: "Utilization: {{utilization_pct}}%. Actions: {{actions}}. Transfers recommended: {{transfer_count}}"
+
 demo_scenarios:
   - name: Patient Lookup
     prompts:

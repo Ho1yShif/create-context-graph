@@ -274,6 +274,91 @@ decision_traces:
         action: "Search claim history for related or identical statements"
     outcome_template: "Verdict: {{verdict}}. Evidence strength: {{strength}}"
 
+  - id: source_verification
+    task: "Verify identity and background of source {{source.name}} before using in story {{story.headline}}"
+    steps:
+      - thought: "Confirm source identity through independent channels"
+        action: "Cross-reference source name and affiliation against public records and databases"
+      - thought: "Check for prior media appearances and published statements"
+        action: "Search claim history for previous statements by this source"
+      - thought: "Assess potential motives for providing information"
+        action: "Review source connections to story subjects and competing interests"
+      - thought: "Verify that source has direct knowledge of claimed facts"
+        action: "Map source's professional and organizational proximity to the events described"
+    outcome_template: "Verification status: {{status}}. Confidence: {{confidence}}. Notes: {{notes}}"
+
+  - id: data_quality_assessment
+    task: "Assess quality and reliability of dataset {{dataset.name}} for story {{story.headline}}"
+    steps:
+      - thought: "Evaluate dataset completeness and coverage"
+        action: "Check record count, date range, and field completeness percentages"
+      - thought: "Identify potential biases in data collection methodology"
+        action: "Review how the dataset was obtained and by whom"
+      - thought: "Cross-validate key figures against independent sources"
+        action: "Compare dataset totals and distributions with published statistics"
+      - thought: "Assess data freshness and relevance to current story"
+        action: "Check dataset date range against story timeline requirements"
+    outcome_template: "Data quality: {{rating}}. Usability: {{usability}}. Caveats: {{caveats}}"
+
+  - id: story_angle_selection
+    task: "Determine the strongest story angle for investigation {{investigation.name}}"
+    steps:
+      - thought: "Review all evidence gathered and identify key findings"
+        action: "Query all sources, claims, and datasets linked to this investigation"
+      - thought: "Assess public interest and news value of different angles"
+        action: "Evaluate which findings have the broadest impact and are most actionable"
+      - thought: "Consider legal risks and editorial standards for each angle"
+        action: "Review claims by verification status and flag potential defamation concerns"
+    outcome_template: "Recommended angle: {{angle}}. News value: {{value}}. Risk level: {{risk}}"
+
+  - id: foia_request_strategy
+    task: "Plan FOIA request strategy for investigation {{investigation.name}} targeting {{dataset.source_agency}}"
+    steps:
+      - thought: "Identify specific records needed to advance the investigation"
+        action: "Review evidence gaps and determine which agency records would fill them"
+      - thought: "Assess likelihood of disclosure based on agency track record"
+        action: "Search prior FOIA requests to the same agency and their outcomes"
+      - thought: "Draft request scope to maximize useful records while minimizing processing time"
+        action: "Define precise record types, date ranges, and search terms"
+      - thought: "Plan fallback strategies if initial request is denied or delayed"
+        action: "Identify alternative sources, appeal pathways, and litigation options"
+    outcome_template: "Strategy: {{strategy}}. Estimated response time: {{timeline}}. Fallback: {{fallback}}"
+
+  - id: visualization_selection
+    task: "Select the best data visualization approach for story {{story.headline}} using dataset {{dataset.name}}"
+    steps:
+      - thought: "Analyze the type of data and key relationships to communicate"
+        action: "Review dataset structure, key variables, and story narrative requirements"
+      - thought: "Consider audience comprehension and engagement"
+        action: "Evaluate chart types based on story beat and target readership"
+      - thought: "Assess data density and interactive vs static presentation"
+        action: "Determine whether interactive exploration or static snapshots serve the story better"
+    outcome_template: "Visualization: {{type}}. Format: {{format}}. Key insight highlighted: {{insight}}"
+
+  - id: editorial_review
+    task: "Conduct editorial review of story {{story.headline}} before publication"
+    steps:
+      - thought: "Verify all factual claims have supporting evidence"
+        action: "Query all claims in this story and confirm each has verified or mostly_true status"
+      - thought: "Check that all sources are properly attributed and protected sources are anonymized"
+        action: "Review source list for proper attribution and flag any protected sources"
+      - thought: "Assess fairness and balance of the reporting"
+        action: "Verify that subjects of criticism were given opportunity to respond"
+      - thought: "Review legal exposure and potential for corrections"
+        action: "Flag unverified claims, single-source assertions, and potentially defamatory language"
+    outcome_template: "Review result: {{result}}. Issues found: {{issues}}. Publication ready: {{ready}}"
+
+  - id: correction_assessment
+    task: "Assess whether a correction is needed for story {{story.headline}} regarding claim {{claim.statement}}"
+    steps:
+      - thought: "Compare the published claim against new evidence"
+        action: "Query datasets and sources that contradict the original claim"
+      - thought: "Evaluate the materiality of the error"
+        action: "Determine whether the error affects the story's central thesis or is peripheral"
+      - thought: "Draft appropriate correction language and placement"
+        action: "Review correction standards and draft text that accurately describes the error and fix"
+    outcome_template: "Correction needed: {{needed}}. Severity: {{severity}}. Recommended action: {{action}}"
+
 demo_scenarios:
   - name: Investigation Management
     prompts:

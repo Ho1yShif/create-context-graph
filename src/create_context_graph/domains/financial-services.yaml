@@ -238,6 +238,80 @@ decision_traces:
         action: "Estimate tax impact of proposed sells and buys"
     outcome_template: "Rebalance plan: {{plan}} with estimated cost of {{cost}}"
 
+  - id: fraud_detection
+    task: "Investigate potential fraud on account {{account.account_id}} owned by {{person.name}}"
+    steps:
+      - thought: "Analyze recent transaction velocity and amount patterns"
+        action: "Query transactions to and from the account over the last 30 days, flag outliers"
+      - thought: "Check for unusual counterparty relationships"
+        action: "Map transaction flow to identify new or suspicious counterparty accounts"
+      - thought: "Cross-reference with known fraud indicators and AML policies"
+        action: "Match transaction patterns against fraud detection policies"
+      - thought: "Assess client profile consistency with transaction behavior"
+        action: "Compare recent activity with historical transaction norms for this account type"
+    outcome_template: "Fraud risk: {{risk_level}}. Suspicious transactions: {{tx_count}}. Recommended action: {{action}}"
+
+  - id: credit_assessment
+    task: "Assess credit risk for {{person.name}} requesting new {{account.account_type}} facility"
+    steps:
+      - thought: "Review existing account relationships and balances"
+        action: "Query all accounts owned or managed by the person, including current balances and statuses"
+      - thought: "Analyze transaction history for financial stability indicators"
+        action: "Evaluate deposit/withdrawal patterns and income consistency across accounts"
+      - thought: "Check for prior compliance issues or risk flags"
+        action: "Review decisions and policy applications related to the person"
+      - thought: "Determine appropriate credit limit and terms"
+        action: "Compare profile with similar clients and their account performance"
+    outcome_template: "Credit decision: {{decision}}. Recommended limit: {{limit}}. Risk tier: {{risk_tier}}"
+
+  - id: market_risk_evaluation
+    task: "Evaluate market risk exposure for portfolio holding {{security.name}} ({{security.ticker}})"
+    steps:
+      - thought: "Assess concentration of the security across client portfolios"
+        action: "Query all accounts with transactions involving this security and calculate total exposure"
+      - thought: "Analyze sector correlation and diversification impact"
+        action: "Find other securities in the same sector held across portfolios"
+      - thought: "Review recent trading volume and price volatility signals"
+        action: "Query recent buy/sell transactions for the security and calculate net flow"
+    outcome_template: "Market risk: {{risk_level}}. Total exposure: ${{exposure}}. Recommendation: {{recommendation}}"
+
+  - id: client_onboarding_review
+    task: "Complete onboarding review for new client {{person.name}} opening {{account.account_type}} account"
+    steps:
+      - thought: "Verify client identity and relationship mapping"
+        action: "Query person entity and any existing organizational affiliations"
+      - thought: "Check KYC and AML compliance requirements"
+        action: "Match client profile against onboarding policies and AML criteria"
+      - thought: "Assess appropriate product suitability"
+        action: "Review account type against client risk profile and investment objectives"
+      - thought: "Establish risk classification and monitoring tier"
+        action: "Assign risk level based on account type, expected volumes, and client background"
+    outcome_template: "Onboarding status: {{status}}. Risk classification: {{classification}}. Missing items: {{missing}}"
+
+  - id: regulatory_reporting
+    task: "Prepare regulatory report for {{policy.name}} compliance across all accounts"
+    steps:
+      - thought: "Identify all accounts and transactions subject to this regulation"
+        action: "Query accounts and transactions that fall under the policy category"
+      - thought: "Check for any compliance violations or near-misses"
+        action: "Cross-reference transactions against policy thresholds and restrictions"
+      - thought: "Compile required metrics and disclosure data"
+        action: "Aggregate transaction volumes, account counts, and decision audit trails for the reporting period"
+    outcome_template: "Report status: {{status}}. Violations found: {{violation_count}}. Filing deadline: {{deadline}}"
+
+  - id: investment_suitability
+    task: "Evaluate investment suitability of {{security.name}} for client {{person.name}}"
+    steps:
+      - thought: "Review client risk tolerance and investment objectives"
+        action: "Query client profile, account types, and past advisory decisions"
+      - thought: "Analyze the security's risk characteristics and sector exposure"
+        action: "Check security type, sector, and recent transaction activity"
+      - thought: "Assess portfolio impact and concentration risk"
+        action: "Calculate current portfolio allocation and projected allocation after investment"
+      - thought: "Verify compliance with suitability policies"
+        action: "Match proposed investment against applicable trading and risk policies"
+    outcome_template: "Suitability: {{suitability}}. Risk alignment: {{alignment}}. Recommendation: {{recommendation}}"
+
 demo_scenarios:
   - name: Portfolio Analysis
     prompts:

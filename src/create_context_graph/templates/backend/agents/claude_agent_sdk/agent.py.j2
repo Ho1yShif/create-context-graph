@@ -15,7 +15,9 @@ from app.context_graph_client import (
 )
 
 
-SYSTEM_PROMPT = """{{ system_prompt }}"""
+SYSTEM_PROMPT = """{{ system_prompt }}
+
+IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph."""
 
 client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
 
@@ -116,14 +118,17 @@ async def handle_message(message: str, session_id: str | None = None) -> dict:
 
     # Build messages list with conversation history
     messages = history + [{"role": "user", "content": message}]
+    max_iterations = 15
 
-    while True:
+    response_text = ""
+    for _iteration in range(max_iterations):
         response = await client.messages.create(
             model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
             max_tokens=4096,
             system=SYSTEM_PROMPT,
             tools=TOOLS,
             messages=messages,
+            timeout=60.0,
         )
 
         if response.stop_reason == "tool_use":
@@ -146,6 +151,8 @@ async def handle_message(message: str, session_id: str | None = None) -> dict:
             ]
             response_text = "\n".join(text_parts)
             break
+    else:
+        response_text = "I've reached the maximum number of tool calls. Here's what I found so far based on the queries executed."
 
     if not response_text.strip():
         response_text = "I searched the knowledge graph but couldn't find relevant results for your query. Could you try rephrasing your question?"
@@ -171,8 +178,10 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
     await store_message(session_id, "user", message)
 
     messages = history + [{"role": "user", "content": message}]
+    max_iterations = 15
 
-    while True:
+    response_text = ""
+    for _iteration in range(max_iterations):
         full_text_parts = []
         async with client.messages.stream(
             model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
@@ -180,6 +189,7 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
             system=SYSTEM_PROMPT,
             tools=TOOLS,
             messages=messages,
+            timeout=60.0,
         ) as stream:
             async for event in stream:
                 if (
@@ -210,6 +220,8 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
             ]
             response_text = "\n".join(text_parts)
             break
+    else:
+        response_text = "I've reached the maximum number of tool calls. Here's what I found so far based on the queries executed."
 
     if not response_text.strip():
         response_text = "I searched the knowledge graph but couldn't find relevant results for your query. Could you try rephrasing your question?"

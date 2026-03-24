@@ -275,6 +275,76 @@ decision_traces:
         action: "Factor in expected conditions and adjust strategy"
     outcome_template: "Strategy: {{strategy}} targeting score of {{target_score}}"
 
+  - id: practice_plan
+    task: "Design a practice plan for {{player.name}} to address scoring weaknesses"
+    steps:
+      - thought: "Identify statistical weaknesses from recent rounds"
+        action: "Query round statistics for putting, fairways hit, and greens in regulation trends"
+      - thought: "Compare player stats against peer group benchmarks"
+        action: "Calculate percentile rankings for each stat among players at similar handicap"
+      - thought: "Prioritize practice areas by impact on scoring"
+        action: "Correlate each stat with score-to-par to find highest-impact improvement areas"
+      - thought: "Design targeted drills and time allocation"
+        action: "Map improvement priorities to specific practice activities and session plans"
+    outcome_template: "Focus areas: {{areas}}. Expected improvement: {{improvement}} strokes over {{timeframe}}"
+
+  - id: club_fitting_recommendation
+    task: "Recommend equipment changes for {{player.name}} based on performance data"
+    steps:
+      - thought: "Analyze distance and accuracy patterns across rounds"
+        action: "Query round statistics and hole-by-hole performance data"
+      - thought: "Identify holes where equipment limitations affect scoring"
+        action: "Find holes where player consistently underperforms relative to handicap stroke"
+      - thought: "Compare current equipment gaps with available fitting options"
+        action: "Match performance gaps to equipment categories and fitting parameters"
+    outcome_template: "Recommendation: {{equipment}}. Expected benefit: {{benefit}}. Priority: {{priority}}"
+
+  - id: weather_strategy_adjustment
+    task: "Adjust course strategy for {{player.name}} at {{course.name}} given weather conditions"
+    steps:
+      - thought: "Analyze how weather conditions affect scoring at this course"
+        action: "Query rounds played at this course grouped by weather_conditions and compare scores"
+      - thought: "Identify holes most affected by adverse conditions"
+        action: "Find holes where scores diverge most between calm and adverse conditions"
+      - thought: "Adjust club selections and target lines for conditions"
+        action: "Modify strategy for affected holes based on historical performance in similar weather"
+    outcome_template: "Adjusted strategy for {{conditions}}: {{adjustments}}. Expected score impact: {{impact}}"
+
+  - id: tournament_field_analysis
+    task: "Analyze competitive field strength for {{tournament.name}} relative to {{player.name}}"
+    steps:
+      - thought: "Assess field composition by player ranking and recent form"
+        action: "Query all players competing and their recent scoring averages"
+      - thought: "Evaluate player's historical performance at the host course"
+        action: "Query player's round history at the tournament course"
+      - thought: "Project realistic finish range and cut line"
+        action: "Model expected cut score based on course difficulty and field strength"
+      - thought: "Identify head-to-head matchups with key competitors"
+        action: "Compare player stats against top-ranked competitors in the field"
+    outcome_template: "Field strength: {{strength}}. Projected finish: {{range}}. Cut line: {{cut}}"
+
+  - id: course_rating_review
+    task: "Review whether course rating for {{course.name}} accurately reflects difficulty"
+    steps:
+      - thought: "Compare actual scoring averages against course rating"
+        action: "Calculate average score-to-par across all rounds at this course"
+      - thought: "Analyze scoring distribution by player handicap range"
+        action: "Group rounds by handicap bracket and compare actual vs expected differentials"
+      - thought: "Identify specific holes where rating may be inaccurate"
+        action: "Compare hole-by-hole scoring averages against individual hole pars and handicap strokes"
+    outcome_template: "Rating accuracy: {{accuracy}}. Suggested adjustment: {{adjustment}}. Affected holes: {{holes}}"
+
+  - id: player_comparison
+    task: "Compare performance profiles of {{player_a}} and {{player_b}} for competitive analysis"
+    steps:
+      - thought: "Compare overall scoring statistics and handicap trends"
+        action: "Query handicap history and recent round averages for both players"
+      - thought: "Identify relative strengths and weaknesses"
+        action: "Compare putting, fairway, and GIR statistics head to head"
+      - thought: "Analyze performance on shared courses and tournaments"
+        action: "Find courses and tournaments where both players have competed and compare results"
+    outcome_template: "Comparison: {{player_a}} excels at {{strengths_a}}; {{player_b}} excels at {{strengths_b}}"
+
 demo_scenarios:
   - name: Player Performance
     prompts:

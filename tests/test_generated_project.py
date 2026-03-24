@@ -942,3 +942,192 @@ class TestDeferredBugFixes:
         renderer.render(out)
         pyproject = (out / "backend" / "pyproject.toml").read_text()
         assert "nest-asyncio" not in pyproject
+
+
+class TestAsyncBridgingFixes:
+    """Verify sync frameworks use run_coroutine_threadsafe instead of asyncio.run()."""
+
+    @pytest.mark.parametrize("framework", ["crewai", "strands"])
+    def test_uses_run_coroutine_threadsafe(self, tmp_path, framework):
+        config = ProjectConfig(
+            project_name="Async Bridge Test",
+            domain="financial-services",
+            framework=framework,
+        )
+        ontology = load_domain("financial-services")
+        out = tmp_path / f"async-bridge-{framework}"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_py = (out / "backend" / "app" / "agent.py").read_text()
+        assert "run_coroutine_threadsafe" in agent_py
+        assert "_capture_loop" in agent_py
+
+    @pytest.mark.parametrize("framework", ["crewai", "strands"])
+    def test_no_bare_asyncio_run(self, tmp_path, framework):
+        """asyncio.run() should only appear in the fallback, not as primary."""
+        config = ProjectConfig(
+            project_name="No Bare Asyncio Test",
+            domain="financial-services",
+            framework=framework,
+        )
+        ontology = load_domain("financial-services")
+        out = tmp_path / f"no-bare-asyncio-{framework}"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_py = (out / "backend" / "app" / "agent.py").read_text()
+        # asyncio.run should only appear in the fallback branch of _run_sync
+        lines_with_asyncio_run = [
+            line.strip() for line in agent_py.splitlines()
+            if "asyncio.run(" in line and not line.strip().startswith("#")
+        ]
+        assert len(lines_with_asyncio_run) <= 1, (
+            f"Expected at most 1 asyncio.run() call (fallback), found {len(lines_with_asyncio_run)}"
+        )
+
+
+class TestMaxIterationGuards:
+    """Verify agentic loop frameworks have bounded iterations."""
+
+    @pytest.mark.parametrize("framework", ["anthropic-tools", "claude-agent-sdk"])
+    def test_has_max_iterations(self, tmp_path, framework):
+        config = ProjectConfig(
+            project_name="Max Iter Test",
+            domain="financial-services",
+            framework=framework,
+        )
+        ontology = load_domain("financial-services")
+        out = tmp_path / f"max-iter-{framework}"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_py = (out / "backend" / "app" / "agent.py").read_text()
+        assert "max_iterations" in agent_py or "range(" in agent_py
+        # Must not have unbounded while True loops for the agentic loop
+        assert "while True:" not in agent_py, "Agentic loop should use bounded iteration"
+
+
+class TestOpenAIStreamFiltering:
+    """Verify OpenAI Agents filters tool argument deltas from text stream."""
+
+    def test_filters_tool_deltas(self, tmp_path):
+        config = ProjectConfig(
+            project_name="OpenAI Filter Test",
+            domain="financial-services",
+            framework="openai-agents",
+        )
+        ontology = load_domain("financial-services")
+        out = tmp_path / "openai-filter"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_py = (out / "backend" / "app" / "agent.py").read_text()
+        # Should filter by event type, not just check for delta attribute
+        assert "output_text.delta" in agent_py or "ResponseTextDeltaEvent" in agent_py
+
+
+class TestCollectorThreadSafety:
+    """Verify CypherResultCollector has thread-safe event pushing."""
+
+    def test_collector_has_threadsafe_push(self, generated_project):
+        out, _ = generated_project
+        client_py = (out / "backend" / "app" / "context_graph_client.py").read_text()
+        assert "call_soon_threadsafe" in client_py
+        assert "threading" in client_py
+
+    def test_collector_captures_loop(self, generated_project):
+        out, _ = generated_project
+        client_py = (out / "backend" / "app" / "context_graph_client.py").read_text()
+        assert "_loop" in client_py
+
+
+class TestToolPromptSuffix:
+    """Verify all agent frameworks include tool-use emphasis in system prompt."""
+
+    @pytest.mark.parametrize("framework", [
+        "pydanticai", "claude-agent-sdk", "openai-agents", "langgraph",
+        "crewai", "strands", "google-adk", "anthropic-tools",
+    ])
+    def test_has_tool_use_emphasis(self, tmp_path, framework):
+        config = ProjectConfig(
+            project_name="Tool Prompt Test",
+            domain="financial-services",
+            framework=framework,
+        )
+        ontology = load_domain("financial-services")
+        out = tmp_path / f"tool-prompt-{framework}"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_py = (out / "backend" / "app" / "agent.py").read_text()
+        assert "MUST use the available tools" in agent_py
+
+
+class TestChatHistoryScoping:
+    """Verify chat history localStorage keys are scoped by domain."""
+
+    def test_storage_key_includes_domain(self, generated_project):
+        out, _ = generated_project
+        chat_tsx = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "DOMAIN.id" in chat_tsx or "DOMAIN" in chat_tsx
+        # Must not have hardcoded generic key
+        assert '"ccg-chat-history"' not in chat_tsx
+
+    def test_imports_domain_config(self, generated_project):
+        out, _ = generated_project
+        chat_tsx = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "DOMAIN" in chat_tsx
+
+
+class TestHydrationFix:
+    """Verify sessionStorage reads are deferred to useEffect."""
+
+    def test_no_direct_sessionstorage_in_usestate(self, generated_project):
+        out, _ = generated_project
+        chat_tsx = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        # Should not call loadStoredMessages in useState initializer
+        assert "useState<Message[]>(loadStoredMessages)" not in chat_tsx
+        assert "useState(loadStoredMessages)" not in chat_tsx
+
+    def test_has_hydrated_state(self, generated_project):
+        out, _ = generated_project
+        chat_tsx = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "hydrated" in chat_tsx
+
+
+class TestNeo4jAgentMemoryDeps:
+    """Verify neo4j-agent-memory includes openai extra."""
+
+    def test_pyproject_has_openai_extra(self, generated_project):
+        out, _ = generated_project
+        pyproject = (out / "backend" / "pyproject.toml").read_text()
+        assert "openai" in pyproject
+        assert "neo4j-agent-memory" in pyproject
+
+
+class TestStreamingEndpointTimeout:
+    """Verify SSE endpoint has overall timeout."""
+
+    def test_routes_has_overall_timeout(self, generated_project):
+        out, _ = generated_project
+        routes_py = (out / "backend" / "app" / "routes.py").read_text()
+        assert "overall_timeout" in routes_py
+
+
+class TestDomainSpecificNamePools:
+    """Verify static data uses domain-specific names."""
+
+    def test_label_names_exist(self):
+        from create_context_graph.name_pools import LABEL_NAMES
+        assert "Diagnosis" in LABEL_NAMES
+        assert "Account" in LABEL_NAMES
+        assert "Repository" in LABEL_NAMES
+        assert "Species" in LABEL_NAMES
+
+    def test_get_names_for_label_uses_label_pool(self):
+        from create_context_graph.name_pools import get_names_for_label
+        names = get_names_for_label("Diagnosis", "OBJECT", 5)
+        # Should be medical terms, not generic object names
+        assert any("Diabetes" in n or "Hypertension" in n for n in names)
+
+    def test_get_names_for_label_falls_back(self):
+        from create_context_graph.name_pools import get_names_for_label
+        names = get_names_for_label("UnknownLabel", "PERSON", 3)
+        # Should fall back to PERSON_NAMES pool
+        assert len(names) == 3

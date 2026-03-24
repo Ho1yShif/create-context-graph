@@ -290,6 +290,80 @@ decision_traces:
         action: "Match recovery option to issue severity and guest profile"
     outcome_template: "Recovery: {{action}} with estimated retention impact {{impact}}"
 
+  - id: staffing_optimization
+    task: "Optimize staffing levels for {{hotel.name}} across departments"
+    steps:
+      - thought: "Analyze occupancy patterns and guest arrival/departure schedules"
+        action: "Query reservations grouped by check-in/check-out dates and guest counts"
+      - thought: "Map service demand to staffing requirements by department"
+        action: "Correlate service request volumes with staff shift schedules"
+      - thought: "Identify over-staffed and under-staffed periods"
+        action: "Compare current staff schedules against demand patterns"
+      - thought: "Model optimal shift assignments"
+        action: "Calculate minimum staff needed per shift while maintaining service standards"
+    outcome_template: "Optimized schedule: {{schedule}}. Cost savings: ${{savings}}/week. Coverage: {{coverage}}%"
+
+  - id: loyalty_program_evaluation
+    task: "Evaluate loyalty program effectiveness for {{hotel.name}} guest retention"
+    steps:
+      - thought: "Analyze repeat visit rates across loyalty tiers"
+        action: "Query guest revisit frequency segmented by loyalty_tier"
+      - thought: "Compare lifetime value between loyalty members and non-members"
+        action: "Calculate average lifetime_value and total_stays by loyalty tier"
+      - thought: "Assess upgrade and benefit utilization costs"
+        action: "Review service usage and room upgrade frequency by loyalty tier"
+      - thought: "Calculate program ROI"
+        action: "Compare loyalty program costs against incremental revenue from member retention"
+    outcome_template: "Program ROI: {{roi}}%. Top-performing tier: {{tier}}. Recommendation: {{recommendation}}"
+
+  - id: channel_mix_optimization
+    task: "Optimize booking channel mix for {{hotel.name}} to maximize profitability"
+    steps:
+      - thought: "Analyze revenue and margin by booking channel"
+        action: "Query reservations grouped by channel with total revenue and average rates"
+      - thought: "Evaluate channel-specific guest quality and repeat rates"
+        action: "Compare guest lifetime value and loyalty enrollment by booking channel"
+      - thought: "Assess channel costs including commissions and marketing spend"
+        action: "Calculate net revenue per booking after channel-specific costs"
+      - thought: "Model optimal channel allocation"
+        action: "Determine target mix that maximizes net revenue while maintaining occupancy"
+    outcome_template: "Optimal mix: {{mix}}. Projected net revenue increase: {{increase}}%"
+
+  - id: room_assignment_optimization
+    task: "Optimize room assignment for reservation {{reservation.reservation_id}} at {{hotel.name}}"
+    steps:
+      - thought: "Review guest preferences and loyalty status"
+        action: "Query guest profile, past room preferences, and special requests"
+      - thought: "Check available rooms matching guest requirements"
+        action: "Search rooms by type, view, floor, and occupancy matching reservation needs"
+      - thought: "Consider operational efficiency and housekeeping schedules"
+        action: "Factor in room turnover status, maintenance schedule, and floor utilization"
+    outcome_template: "Assigned room: {{room}}. Guest match score: {{score}}. Upgrade applied: {{upgrade}}"
+
+  - id: competitive_benchmarking
+    task: "Benchmark {{hotel.name}} performance against competitive set"
+    steps:
+      - thought: "Compare key performance indicators with market averages"
+        action: "Calculate hotel ADR, occupancy, and RevPAR against targets"
+      - thought: "Analyze guest satisfaction scores by service category"
+        action: "Query service satisfaction scores and compare against industry benchmarks"
+      - thought: "Identify differentiating strengths and competitive gaps"
+        action: "Map highest and lowest scoring services against competitor offerings"
+      - thought: "Recommend strategic improvements"
+        action: "Prioritize service improvements by impact on guest satisfaction and revenue"
+    outcome_template: "Market position: {{position}}. Strengths: {{strengths}}. Gaps: {{gaps}}"
+
+  - id: maintenance_priority
+    task: "Prioritize room maintenance requests across {{hotel.name}} properties"
+    steps:
+      - thought: "Assess urgency based on room status and upcoming reservations"
+        action: "Check rooms in maintenance or out_of_order status against booking calendar"
+      - thought: "Evaluate revenue impact of each out-of-service room"
+        action: "Calculate lost revenue per night for each affected room type"
+      - thought: "Allocate maintenance staff based on skill requirements and availability"
+        action: "Match maintenance tasks to available staff by department and shift"
+    outcome_template: "Priority order: {{order}}. Estimated completion: {{timeline}}. Revenue recovered: ${{revenue}}"
+
 demo_scenarios:
   - name: Guest Management
     prompts:

@@ -285,6 +285,82 @@ decision_traces:
         action: "Determine resource requirements based on demand forecast"
     outcome_template: "Plan: {{plan}} with estimated occupancy {{occupancy}}% and revenue ${{revenue}}"
 
+  - id: guest_loyalty_intervention
+    task: "Design loyalty intervention for guest {{guest.name}} to increase retention"
+    steps:
+      - thought: "Review guest booking history and loyalty tier progression"
+        action: "Query all bookings made by this guest and their loyalty tier"
+      - thought: "Analyze guest activity preferences and satisfaction signals"
+        action: "Check activities participated in and resort reviews submitted"
+      - thought: "Identify personalized upgrade or package opportunity"
+        action: "Match guest travel style with available packages at preferred resorts"
+      - thought: "Calculate intervention ROI based on guest lifetime value potential"
+        action: "Estimate incremental bookings and revenue from loyalty tier advancement"
+    outcome_template: "Intervention: {{offer}}. Expected tier advancement: {{tier}}. Projected LTV increase: ${{ltv}}"
+
+  - id: activity_profitability
+    task: "Evaluate profitability and guest satisfaction balance for activity {{activity.name}} at {{resort.name}}"
+    steps:
+      - thought: "Analyze participation rates and revenue per guest"
+        action: "Query guest participation counts and total activity revenue"
+      - thought: "Assess guest satisfaction and repeat participation"
+        action: "Check how many guests participate more than once and review feedback"
+      - thought: "Compare costs including staffing, equipment, and insurance"
+        action: "Calculate fully loaded cost per activity session"
+      - thought: "Recommend pricing or format adjustments"
+        action: "Model profitability at different price points and session sizes"
+    outcome_template: "Profitability: {{margin}}%. Satisfaction: {{score}}/5. Recommendation: {{recommendation}}"
+
+  - id: new_market_evaluation
+    task: "Evaluate potential for opening a new resort in {{location}} targeting {{travel_style}} travelers"
+    steps:
+      - thought: "Analyze existing guest demand from this market"
+        action: "Query guests by nationality and travel style who book similar resort types"
+      - thought: "Assess seasonal demand patterns for the target location"
+        action: "Review booking patterns by season for comparable resort types"
+      - thought: "Evaluate competitive landscape in the target market"
+        action: "Analyze existing resort types and star ratings in the region"
+      - thought: "Project revenue and occupancy based on comparable properties"
+        action: "Model expected performance using data from similar existing resorts"
+    outcome_template: "Market assessment: {{assessment}}. Projected occupancy: {{occupancy}}%. Break-even: {{months}} months"
+
+  - id: cancellation_analysis
+    task: "Investigate high cancellation rate for bookings at {{resort.name}} during {{season.name}}"
+    steps:
+      - thought: "Quantify cancellation rates and compare to other periods"
+        action: "Query bookings by status and compare cancellation rates across seasons"
+      - thought: "Identify patterns in cancelled bookings"
+        action: "Analyze cancelled bookings by channel, guest type, and lead time"
+      - thought: "Assess pricing and policy factors contributing to cancellations"
+        action: "Compare cancellation rates at different price points and booking channels"
+      - thought: "Recommend interventions to reduce cancellations"
+        action: "Propose deposit policies, pricing adjustments, or rebooking incentives"
+    outcome_template: "Cancellation rate: {{rate}}%. Root causes: {{causes}}. Projected reduction: {{reduction}}%"
+
+  - id: upsell_strategy
+    task: "Develop upsell strategy for guests booking {{package.name}} at {{resort.name}}"
+    steps:
+      - thought: "Identify activities not included in the package that have high satisfaction"
+        action: "Compare package inclusions against top-rated activities at the resort"
+      - thought: "Analyze which guest segments respond to upsells"
+        action: "Review participation in add-on activities by guest loyalty tier and travel style"
+      - thought: "Determine optimal timing and channel for upsell offers"
+        action: "Analyze when guests are most likely to add activities (pre-arrival vs on-site)"
+    outcome_template: "Upsell opportunities: {{activities}}. Expected uptake: {{uptake}}%. Revenue per guest: ${{revenue}}"
+
+  - id: weather_contingency
+    task: "Plan weather contingency activities for {{resort.name}} during {{season.name}}"
+    steps:
+      - thought: "Identify weather-dependent activities at risk"
+        action: "Query outdoor and water activities available in this season"
+      - thought: "Analyze guest satisfaction impact of weather disruptions"
+        action: "Review feedback from periods with adverse weather conditions"
+      - thought: "Design indoor and alternative activity programs"
+        action: "Identify underutilized indoor facilities and create replacement activity options"
+      - thought: "Develop guest communication protocol"
+        action: "Plan proactive notification and rebooking workflows for affected guests"
+    outcome_template: "Contingency plan: {{plan}}. Alternative activities: {{count}}. Satisfaction protection: {{score}}"
+
 demo_scenarios:
   - name: Guest Experience
     prompts:

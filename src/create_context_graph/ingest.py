@@ -267,6 +267,20 @@ def _get_pole_type(label: str, ontology: DomainOntology) -> str:
     return "OBJECT"
 
 
+def reset_neo4j(
+    neo4j_uri: str,
+    neo4j_username: str,
+    neo4j_password: str,
+) -> None:
+    """Clear all data from Neo4j."""
+    from neo4j import GraphDatabase
+
+    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_username, neo4j_password))
+    with driver.session() as session:
+        session.run("MATCH (n) DETACH DELETE n")
+    driver.close()
+
+
 def ingest_data(
     fixture_path: Path,
     ontology: DomainOntology,

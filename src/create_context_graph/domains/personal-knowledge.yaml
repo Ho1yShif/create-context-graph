@@ -256,6 +256,80 @@ decision_traces:
         action: "Pull shared notes, projects, and recent bookmarks relevant to each contact"
     outcome_template: "Suggest reconnecting with {{contacts}} about {{topics}}"
 
+  - id: learning_path_design
+    task: "Design a learning path for exploring {{topic.name}} based on existing knowledge"
+    steps:
+      - thought: "Assess current knowledge depth from notes and bookmarks on this topic"
+        action: "Query all notes tagged with this topic and their note types to gauge depth"
+      - thought: "Identify prerequisite topics and knowledge gaps"
+        action: "Traverse related topics and check which have sparse or no notes"
+      - thought: "Find relevant unread bookmarks and reading materials"
+        action: "Search bookmarks related to this topic with read_status of unread or reading"
+      - thought: "Sequence resources from foundational to advanced"
+        action: "Order materials by topic dependency and complexity level"
+    outcome_template: "Learning path: {{steps}} covering {{count}} resources over {{duration}}"
+
+  - id: weekly_review
+    task: "Generate a weekly review of knowledge activities and insights"
+    steps:
+      - thought: "Summarize notes created and updated during the week"
+        action: "Query notes by created_at and updated_at within the last 7 days"
+      - thought: "Review journal entries for mood trends and reflections"
+        action: "Query journal entries for the week and analyze mood patterns"
+      - thought: "Identify progress on active projects"
+        action: "Check for notes and updates linked to active projects this week"
+      - thought: "Surface emerging themes and connections"
+        action: "Find topics that appeared across multiple notes and journal entries"
+    outcome_template: "Weekly summary: {{notes_count}} notes, mood trend: {{mood}}, active topics: {{topics}}"
+
+  - id: bookmark_triage
+    task: "Triage unread bookmarks to prioritize reading queue"
+    steps:
+      - thought: "Identify all unread bookmarks and their age"
+        action: "Query bookmarks with read_status unread ordered by saved_at"
+      - thought: "Match bookmarks to active projects and current interests"
+        action: "Cross-reference bookmark topics with active project topics and recent notes"
+      - thought: "Prioritize by relevance to current goals"
+        action: "Rank bookmarks by connection strength to active projects and recent journal themes"
+    outcome_template: "Priority queue: {{top_bookmarks}}. Archive candidates: {{archive_count}}"
+
+  - id: project_scoping
+    task: "Scope out a new project idea inspired by {{topic.name}} connections"
+    steps:
+      - thought: "Review notes and bookmarks that sparked the idea"
+        action: "Query notes and bookmarks tagged with this topic and related topics"
+      - thought: "Identify contacts with relevant expertise or interest"
+        action: "Find contacts connected to this topic through projects or notes"
+      - thought: "Assess effort and define milestones"
+        action: "Review similar past projects for duration and complexity patterns"
+      - thought: "Draft a project outline with key resources"
+        action: "Compile relevant notes, bookmarks, and contacts into a project brief"
+    outcome_template: "Project scope: {{scope}}. Key contacts: {{contacts}}. Estimated effort: {{effort}}"
+
+  - id: journal_pattern_analysis
+    task: "Analyze patterns in journal entries to identify recurring themes and triggers"
+    steps:
+      - thought: "Identify mood patterns over time"
+        action: "Query journal entries grouped by mood and analyze frequency trends"
+      - thought: "Correlate moods with topics and activities"
+        action: "Cross-reference journal mood with topics and contacts mentioned"
+      - thought: "Surface recurring concerns or aspirations"
+        action: "Find themes that appear in multiple journal entries across different periods"
+    outcome_template: "Patterns: {{patterns}}. Positive triggers: {{positive}}. Attention areas: {{attention}}"
+
+  - id: note_consolidation
+    task: "Consolidate fragmented notes on {{topic.name}} into coherent knowledge"
+    steps:
+      - thought: "Find all notes related to this topic across types"
+        action: "Query fleeting, literature, and reference notes tagged with this topic"
+      - thought: "Identify overlapping content and contradictions"
+        action: "Compare note contents for redundancy and conflicting information"
+      - thought: "Determine which notes should be merged into permanent notes"
+        action: "Assess note quality and identify candidates for consolidation"
+      - thought: "Identify gaps that need additional research"
+        action: "Find questions raised in notes that remain unanswered"
+    outcome_template: "Consolidation: {{merged}} notes merged, {{gaps}} gaps identified, {{permanent}} permanent notes created"
+
 demo_scenarios:
   - name: Knowledge Exploration
     prompts:

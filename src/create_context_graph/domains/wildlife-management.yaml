@@ -276,6 +276,84 @@ decision_traces:
         action: "Evaluate candidate locations for feasibility"
     outcome_template: "Deployment plan: {{plan}} with expected coverage improvement of {{improvement}}"
 
+  - id: anti_poaching_response
+    task: "Plan anti-poaching response for threat {{threat.name}} affecting {{species.common_name}} in {{habitat.name}}"
+    steps:
+      - thought: "Assess the scope and severity of the poaching threat"
+        action: "Query threat details and recent incident reports in the affected area"
+      - thought: "Map the most vulnerable populations and high-risk zones"
+        action: "Cross-reference sighting locations with threat proximity and habitat access points"
+      - thought: "Evaluate current patrol coverage and camera monitoring gaps"
+        action: "Query camera positions and ranger patrol routes in the affected habitat"
+      - thought: "Design targeted response plan with resource allocation"
+        action: "Plan patrol schedules, camera redeployment, and coordination with authorities"
+    outcome_template: "Response plan: {{plan}}. Resources deployed: {{resources}}. Risk reduction: {{reduction}}"
+
+  - id: translocation_assessment
+    task: "Assess feasibility of translocating {{species.common_name}} individuals to {{habitat.name}}"
+    steps:
+      - thought: "Evaluate source population health and surplus capacity"
+        action: "Query population estimates and recent sighting trends for the species"
+      - thought: "Assess destination habitat suitability and carrying capacity"
+        action: "Review habitat type, area, health status, and existing species composition"
+      - thought: "Identify potential ecological impacts at source and destination"
+        action: "Analyze predator-prey relationships and competitive species in both habitats"
+      - thought: "Evaluate logistics, costs, and regulatory requirements"
+        action: "Check protection levels at both sites and required permits"
+    outcome_template: "Feasibility: {{feasibility}}. Recommended individuals: {{count}}. Success probability: {{probability}}%"
+
+  - id: disease_outbreak_response
+    task: "Respond to disease threat {{threat.name}} detected in {{species.common_name}} population"
+    steps:
+      - thought: "Assess the spread and severity of the disease outbreak"
+        action: "Query recent sightings for behavioral anomalies and deceased individuals"
+      - thought: "Identify affected area and potential transmission pathways"
+        action: "Map sighting locations of affected individuals and species contacts"
+      - thought: "Evaluate quarantine and containment options"
+        action: "Determine habitat boundaries and movement corridors to establish containment zones"
+      - thought: "Coordinate with veterinary and research teams"
+        action: "Identify available sampling equipment, lab capacity, and expert contacts"
+    outcome_template: "Response: {{response}}. Containment zone: {{zone}}. Estimated affected: {{count}} individuals"
+
+  - id: corridor_connectivity
+    task: "Assess wildlife corridor connectivity between {{habitat_a}} and {{habitat_b}} for {{species.common_name}}"
+    steps:
+      - thought: "Map sighting locations between the two habitats"
+        action: "Query sightings with coordinates falling between habitat boundaries"
+      - thought: "Identify barriers and threats along potential corridors"
+        action: "Search threats and human infrastructure in the area between habitats"
+      - thought: "Analyze movement patterns of tagged individuals"
+        action: "Track individual sighting sequences to identify actual movement paths"
+      - thought: "Recommend corridor protection or restoration measures"
+        action: "Identify critical pinch points requiring protection or habitat restoration"
+    outcome_template: "Connectivity: {{status}}. Critical corridors: {{corridors}}. Priority actions: {{actions}}"
+
+  - id: population_viability
+    task: "Assess long-term population viability of {{species.common_name}} in {{habitat.name}}"
+    steps:
+      - thought: "Analyze current population size and trend"
+        action: "Query population estimates and sighting frequency trends over multiple years"
+      - thought: "Assess reproductive success indicators"
+        action: "Analyze age class distribution looking for juvenile recruitment rates"
+      - thought: "Evaluate cumulative threat impact on population growth"
+        action: "Query all threats affecting this species and model combined population impact"
+      - thought: "Determine minimum viable population and time to critical thresholds"
+        action: "Compare current population against minimum viable estimates for the species"
+    outcome_template: "Viability: {{status}}. Population trend: {{trend}}. Time to critical: {{years}} years"
+
+  - id: monitoring_budget_allocation
+    task: "Allocate monitoring budget across habitats to maximize conservation impact"
+    steps:
+      - thought: "Rank habitats by conservation priority based on species and threats"
+        action: "Query habitats with their species counts, conservation statuses, and active threats"
+      - thought: "Assess current monitoring coverage and equipment condition"
+        action: "Query cameras by habitat with status and battery levels"
+      - thought: "Identify habitats with the largest monitoring gaps"
+        action: "Compare camera density and sighting coverage against habitat area"
+      - thought: "Allocate budget proportional to priority and gap size"
+        action: "Model budget distribution scenarios maximizing coverage of high-priority habitats"
+    outcome_template: "Allocation: {{plan}}. Coverage improvement: {{improvement}}%. Priority habitats addressed: {{count}}"
+
 demo_scenarios:
   - name: Population Monitoring
     prompts:

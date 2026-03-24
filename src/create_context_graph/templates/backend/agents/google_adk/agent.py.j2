@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import uuid
 
 # Google ADK calls sync tool functions from within its async run_async() loop,
@@ -22,21 +23,42 @@ from app.context_graph_client import (
 )
 
 
+_main_loop: asyncio.AbstractEventLoop | None = None
+
+
 def _run_sync(coro):
     """Run an async coroutine from a synchronous context.
 
-    Prefers asyncio.run() when no event loop is running (worker threads).
-    Falls back to nest_asyncio-patched loop.run_until_complete() when
-    called from within ADK's async run_async() context.
+    When called from the event loop's thread (ADK's sync tool callbacks inside
+    run_async), uses nest_asyncio-patched ``run_until_complete``.
+    When called from a worker thread, uses ``run_coroutine_threadsafe`` to
+    schedule on the main loop.
+    Falls back to ``asyncio.run()`` when no event loop is available.
     """
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
+        # No event loop — use the captured main loop if available, else new loop
+        loop = _main_loop
+        if loop is not None and loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(coro, loop)
+            return future.result(timeout=30)
         return asyncio.run(coro)
-    return loop.run_until_complete(coro)
+
+    # Same thread as the event loop: reentrant call via nest_asyncio
+    loop_thread = getattr(loop, "_thread_id", None)
+    current_tid = threading.current_thread().ident
+    if loop_thread is None or current_tid == loop_thread:
+        return loop.run_until_complete(coro)
+
+    # Different thread: schedule on the loop safely
+    future = asyncio.run_coroutine_threadsafe(coro, loop)
+    return future.result(timeout=30)
 
 
-SYSTEM_PROMPT = """{{ system_prompt }}"""
+SYSTEM_PROMPT = """{{ system_prompt }}
+
+IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph."""
 
 # ---------------------------------------------------------------------------
 # Agent tools — domain-specific for {{ domain.name }}

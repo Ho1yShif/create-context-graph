@@ -284,6 +284,80 @@ decision_traces:
         action: "Compare legal descriptions with survey coordinates"
     outcome_template: "Finding: {{finding}}. Discrepancy of {{area}} sq km. Recommendation: {{recommendation}}"
 
+  - id: accuracy_assessment
+    task: "Perform accuracy assessment for layer {{layer.name}} against survey {{survey.name}} control points"
+    steps:
+      - thought: "Identify control points from the reference survey"
+        action: "Query coordinates referenced in the survey with known accuracy class"
+      - thought: "Compare layer feature positions against control point coordinates"
+        action: "Calculate positional offsets between layer features and control points"
+      - thought: "Compute statistical accuracy metrics"
+        action: "Calculate RMSE, circular error probable, and compliance with accuracy standards"
+      - thought: "Determine if the layer meets project accuracy requirements"
+        action: "Compare computed accuracy against map project specification thresholds"
+    outcome_template: "Accuracy: RMSE {{rmse}}m. Standard met: {{met}}. Recommendation: {{recommendation}}"
+
+  - id: coordinate_transformation
+    task: "Determine the best coordinate transformation approach for converting {{layer.name}} from {{source_crs}} to {{target_crs}}"
+    steps:
+      - thought: "Assess the geographic extent of the data and transformation requirements"
+        action: "Query layer extents and coordinate ranges to determine transformation complexity"
+      - thought: "Identify available transformation parameters and datum shifts"
+        action: "Look up published transformation parameters for the CRS pair"
+      - thought: "Evaluate accuracy impact of different transformation methods"
+        action: "Compare Helmert, Molodensky, and grid-based methods for this area"
+    outcome_template: "Method: {{method}}. Expected accuracy: {{accuracy}}m. Parameters: {{params}}"
+
+  - id: layer_conflation
+    task: "Resolve conflicts when merging features from {{layer.name}} with existing data"
+    steps:
+      - thought: "Identify overlapping features between the layers"
+        action: "Perform spatial join to find features within positional tolerance"
+      - thought: "Compare attribute accuracy and data currency of conflicting features"
+        action: "Check survey dates and accuracy metadata for both data sources"
+      - thought: "Determine merge rules for geometry and attributes"
+        action: "Define precedence rules based on accuracy class and survey date"
+      - thought: "Validate the merged output for topological integrity"
+        action: "Check for gaps, overlaps, and dangling edges in the result"
+    outcome_template: "Conflation result: {{count}} features merged. Conflicts resolved: {{resolved}}. Manual review: {{manual}}"
+
+  - id: survey_planning
+    task: "Plan field survey for map project {{map_project.name}} covering boundary {{boundary.name}}"
+    steps:
+      - thought: "Determine survey requirements based on project specifications"
+        action: "Review map project scale, accuracy needs, and output format"
+      - thought: "Assess existing control network coverage"
+        action: "Query control points and benchmarks within and near the boundary"
+      - thought: "Select appropriate survey methodology and equipment"
+        action: "Match survey type and instrument to accuracy class requirements"
+      - thought: "Estimate field time and resource requirements"
+        action: "Calculate coverage area, point density needs, and crew requirements"
+    outcome_template: "Survey plan: {{method}} with {{points}} control points. Duration: {{days}} days. Cost: ${{cost}}"
+
+  - id: cartographic_generalization
+    task: "Determine generalization approach for features in {{layer.name}} at scale {{map_project.scale}}"
+    steps:
+      - thought: "Assess feature density relative to output scale"
+        action: "Query feature count and calculate density per map sheet area"
+      - thought: "Identify features that require simplification, aggregation, or elimination"
+        action: "Classify features by minimum display size at target scale"
+      - thought: "Apply appropriate generalization operators"
+        action: "Select simplification tolerance, aggregation thresholds, and displacement rules"
+    outcome_template: "Generalization: {{approach}}. Features retained: {{retained}}%. Visual quality: {{quality}}"
+
+  - id: quality_control_review
+    task: "Perform quality control review of map project {{map_project.name}} before publication"
+    steps:
+      - thought: "Verify all layers meet positional accuracy requirements"
+        action: "Check each layer's accuracy assessment results against project specifications"
+      - thought: "Review cartographic symbolization and labeling"
+        action: "Validate symbology consistency, label placement, and legend completeness"
+      - thought: "Check topological relationships and edge matching"
+        action: "Verify boundary continuity, feature connectivity, and sheet-to-sheet matching"
+      - thought: "Validate metadata and coordinate reference system documentation"
+        action: "Confirm CRS declarations, projection parameters, and data source attribution"
+    outcome_template: "QC result: {{result}}. Issues: {{issues}}. Publication ready: {{ready}}"
+
 demo_scenarios:
   - name: Survey & Mapping
     prompts:

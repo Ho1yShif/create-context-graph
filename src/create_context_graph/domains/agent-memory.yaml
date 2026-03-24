@@ -259,6 +259,76 @@ decision_traces:
         action: "Search agent memories for previous references to this entity"
     outcome_template: "Resolved to: {{resolved_entity}} with confidence {{confidence}}"
 
+  - id: session_goal_assessment
+    task: "Evaluate whether session {{session.session_id}} achieved its stated goal"
+    steps:
+      - thought: "Review the session goal and all conversations within the session"
+        action: "Query session details and all conversations linked via PART_OF_SESSION"
+      - thought: "Assess tool call success rates during the session"
+        action: "Check tool call outcomes for failures or timeouts that may have blocked progress"
+      - thought: "Compare extracted entities and memories against expected outcomes"
+        action: "Review entities extracted and memories created during the session"
+    outcome_template: "Goal achievement: {{status}}. Completion: {{percentage}}%. Gaps: {{gaps}}"
+
+  - id: knowledge_gap_detection
+    task: "Identify knowledge gaps in agent {{agent.name}}'s memory about {{entity.name}}"
+    steps:
+      - thought: "Catalog what the agent currently knows about this entity"
+        action: "Query all memories referencing this entity and their types"
+      - thought: "Compare against conversations where this entity was discussed"
+        action: "Find conversations that extracted this entity and check for unrecorded information"
+      - thought: "Identify topics related to this entity with no corresponding memories"
+        action: "Traverse entity relationships to find connected concepts with no memory coverage"
+    outcome_template: "Knowledge gaps found: {{count}}. Priority areas: {{areas}}"
+
+  - id: tool_failure_diagnosis
+    task: "Diagnose repeated failures of tool {{toolcall.tool_name}} invoked by agent {{agent.name}}"
+    steps:
+      - thought: "Analyze recent failure patterns for this tool"
+        action: "Query tool calls filtered by tool name and failure status"
+      - thought: "Examine input parameters that led to failures vs successes"
+        action: "Compare input_params across successful and failed invocations"
+      - thought: "Check if failures correlate with specific conversation topics or entities"
+        action: "Link failed tool calls to their triggering conversations and extracted entities"
+      - thought: "Recommend corrective action or parameter adjustments"
+        action: "Identify parameter patterns most likely to succeed based on historical data"
+    outcome_template: "Root cause: {{cause}}. Fix: {{fix}}. Expected success rate improvement: {{improvement}}%"
+
+  - id: conversation_escalation
+    task: "Decide whether to escalate conversation {{conversation.conversation_id}} to a human operator"
+    steps:
+      - thought: "Assess conversation sentiment and user satisfaction signals"
+        action: "Review conversation history for frustration indicators and repeated requests"
+      - thought: "Check if the agent has exhausted available tools and knowledge"
+        action: "Query tool calls made and memories accessed during this conversation"
+      - thought: "Evaluate the complexity of the remaining unresolved request"
+        action: "Compare against similar past conversations and their resolution patterns"
+    outcome_template: "Escalation decision: {{decision}}. Reason: {{reason}}. Priority: {{priority}}"
+
+  - id: memory_type_classification
+    task: "Classify incoming information from conversation {{conversation.conversation_id}} into appropriate memory types"
+    steps:
+      - thought: "Analyze the nature of information extracted from the conversation"
+        action: "Review entities and context from the conversation"
+      - thought: "Determine if information is episodic, semantic, or procedural"
+        action: "Classify based on whether it describes events, facts, or how-to knowledge"
+      - thought: "Check for existing memories that should be updated vs creating new ones"
+        action: "Search for similar existing memories to prevent duplication"
+    outcome_template: "Classification: {{types}} across {{count}} new memories. Updated: {{updated}} existing"
+
+  - id: agent_performance_review
+    task: "Review overall performance of agent {{agent.name}} across recent sessions"
+    steps:
+      - thought: "Analyze session outcomes and goal achievement rates"
+        action: "Query all recent sessions and their outcome status"
+      - thought: "Evaluate tool usage efficiency and error rates"
+        action: "Calculate tool call success rates and average durations"
+      - thought: "Assess memory utilization and knowledge growth"
+        action: "Review memory creation frequency, importance distribution, and access patterns"
+      - thought: "Identify areas for improvement in agent capabilities"
+        action: "Find conversation topics with low resolution rates or high escalation counts"
+    outcome_template: "Performance: {{rating}}. Strengths: {{strengths}}. Improvement areas: {{areas}}"
+
 demo_scenarios:
   - name: Agent Introspection
     prompts:

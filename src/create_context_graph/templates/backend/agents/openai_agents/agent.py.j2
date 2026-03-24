@@ -14,7 +14,9 @@ from app.context_graph_client import (
 )
 
 
-SYSTEM_PROMPT = """{{ system_prompt }}"""
+SYSTEM_PROMPT = """{{ system_prompt }}
+
+IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph."""
 
 # ---------------------------------------------------------------------------
 # Agent tools — domain-specific for {{ domain.name }}
@@ -131,11 +133,16 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
     result = Runner.run_streamed(agent, input_message)
     response_text = ""
     async for event in result.stream_events():
-        if event.type == "raw_response_event" and hasattr(event.data, "delta"):
-            delta = getattr(event.data, "delta", "")
-            if delta:
-                collector.emit_text_delta(delta)
-                response_text += delta
+        if event.type == "raw_response_event":
+            data = event.data
+            # Only emit text content deltas — skip tool call argument deltas
+            # which would otherwise leak raw JSON into the response stream.
+            event_type = getattr(data, "type", "")
+            if event_type == "response.output_text.delta":
+                delta = getattr(data, "delta", "")
+                if delta:
+                    collector.emit_text_delta(delta)
+                    response_text += delta
 
     if not response_text:
         response_text = result.final_output or ""

@@ -292,6 +292,89 @@ decision_traces:
         action: "Analyze median price trends and development indicators"
     outcome_template: "Investment grade: {{grade}} with projected ROI of {{roi}}"
 
+  - id: property_valuation
+    task: "Determine fair market value for {{property.address}} in {{neighborhood.name}}"
+    steps:
+      - thought: "Pull recent comparable sales within the neighborhood"
+        action: "Query transactions for similar property type, size, and bedroom count in the area"
+      - thought: "Adjust for property-specific features and condition"
+        action: "Review inspection history, year built, lot size, and unique amenities"
+      - thought: "Factor in neighborhood trends and market momentum"
+        action: "Analyze median home price changes, walkability score, and school ratings"
+      - thought: "Cross-reference tax assessed value with market indicators"
+        action: "Compare tax_assessed_value to recent sale prices for calibration"
+    outcome_template: "Estimated fair market value: ${{value}} (range ${{low}}-${{high}})"
+
+  - id: inspection_assessment
+    task: "Assess overall property condition for {{property.address}} based on inspection history"
+    steps:
+      - thought: "Gather all inspection reports for the property"
+        action: "Query inspections linked to property by type and date"
+      - thought: "Categorize findings by severity and system"
+        action: "Group inspection results by type: structural, electrical, plumbing, pest, roof"
+      - thought: "Estimate total repair cost and timeline"
+        action: "Sum estimated_repair_cost across all inspections with fail or conditional results"
+      - thought: "Determine impact on property value and negotiation leverage"
+        action: "Compare repair costs to listing price and comparable property conditions"
+    outcome_template: "Condition: {{condition_grade}}. Total estimated repairs: ${{repair_total}}. Negotiation credit recommended: ${{credit}}"
+
+  - id: market_analysis
+    task: "Perform comparative market analysis for {{neighborhood.name}}, {{neighborhood.city}}"
+    steps:
+      - thought: "Analyze current active listings in the neighborhood"
+        action: "Query listings with active status for properties in the neighborhood"
+      - thought: "Review recent sold transactions and price trends"
+        action: "Pull transaction closing prices and dates for the past 12 months"
+      - thought: "Calculate absorption rate and inventory levels"
+        action: "Compare active listing count to monthly sales velocity"
+    outcome_template: "Market type: {{market_type}}. Median price: ${{median}}. Avg days on market: {{dom}}"
+
+  - id: client_matching
+    task: "Match buyer {{person.name}} with suitable properties based on their preferences"
+    steps:
+      - thought: "Identify buyer requirements from transaction history and preferences"
+        action: "Review past transactions and property interactions for the buyer"
+      - thought: "Search active listings matching criteria"
+        action: "Query properties by type, bedroom count, price range, and neighborhood"
+      - thought: "Rank matches by neighborhood fit and value proposition"
+        action: "Score properties by school rating, walkability, and price relative to comps"
+    outcome_template: "Top {{count}} matches identified, best fit: {{property}} at ${{price}}"
+
+  - id: zoning_compliance
+    task: "Evaluate zoning and usage compliance for {{property.address}}"
+    steps:
+      - thought: "Check property type against neighborhood zoning designations"
+        action: "Query property type and neighborhood characteristics for the address"
+      - thought: "Review comparable properties in the area for precedent"
+        action: "Find properties with COMPARABLE_TO relationship and their usage types"
+      - thought: "Assess impact on property value if rezoning is needed"
+        action: "Compare values of similar properties across different zoning areas"
+    outcome_template: "Zoning status: {{status}}. {{recommendation}}"
+
+  - id: offer_negotiation
+    task: "Develop negotiation strategy for {{property.address}} listed at ${{listing.list_price}}"
+    steps:
+      - thought: "Analyze listing history and seller motivation"
+        action: "Check days on market, price reductions, and listing status changes"
+      - thought: "Review inspection findings for negotiation leverage"
+        action: "Pull inspection results and estimated repair costs for the property"
+      - thought: "Compare to recent comparable transactions"
+        action: "Query nearby sales of similar properties to establish fair value range"
+      - thought: "Factor in current market conditions and competing interest"
+        action: "Assess neighborhood absorption rate and active listing inventory"
+    outcome_template: "Recommended offer: ${{offer}} ({{pct_of_list}}% of list). Strategy: {{strategy}}"
+
+  - id: agent_selection
+    task: "Recommend the best agent for {{transaction.transaction_type}} in {{neighborhood.name}}"
+    steps:
+      - thought: "Identify agents with transaction history in the target neighborhood"
+        action: "Query agents linked to transactions for properties in the neighborhood"
+      - thought: "Compare performance metrics across candidates"
+        action: "Rank agents by total sales volume, transaction count, and average sale price"
+      - thought: "Evaluate specialization match and experience level"
+        action: "Filter agents by specialization matching the transaction type and years of experience"
+    outcome_template: "Recommended agent: {{agent}} — {{transactions}} transactions, ${{volume}} volume in area"
+
 demo_scenarios:
   - name: Property Search
     prompts:

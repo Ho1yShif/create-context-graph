@@ -260,6 +260,80 @@ decision_traces:
         action: "Create experiment comparing top prompt candidates"
     outcome_template: "Optimized prompt: {{result}} with {{improvement}}% gain"
 
+  - id: dataset_quality_review
+    task: "Assess quality of training dataset {{dataset.name}} for model {{model.name}}"
+    steps:
+      - thought: "Evaluate dataset size and coverage relative to training requirements"
+        action: "Query dataset metadata and compare against model architecture needs"
+      - thought: "Check for known biases or data quality issues"
+        action: "Review papers that previously used this dataset and reported limitations"
+      - thought: "Assess data freshness and domain relevance"
+        action: "Compare dataset domain and date range against model's intended use case"
+      - thought: "Identify potential data contamination with evaluation sets"
+        action: "Cross-reference dataset records against evaluation benchmark contents"
+    outcome_template: "Quality assessment: {{assessment}}. Issues: {{issues}}. Recommendation: {{recommendation}}"
+
+  - id: cost_optimization
+    task: "Optimize inference costs for model {{model.name}} deployed at {{deployment.endpoint_url}}"
+    steps:
+      - thought: "Analyze current inference volume and cost breakdown"
+        action: "Query deployment metrics for request volume, latency, and compute utilization"
+      - thought: "Evaluate model distillation or quantization opportunities"
+        action: "Check if smaller model variants achieve acceptable quality on evaluation benchmarks"
+      - thought: "Assess batching and caching strategies"
+        action: "Analyze request patterns for cache hit potential and batch optimization"
+    outcome_template: "Cost reduction: {{reduction}}% via {{strategy}} with {{quality_impact}} quality impact"
+
+  - id: safety_evaluation
+    task: "Evaluate safety characteristics of model {{model.name}} before production deployment"
+    steps:
+      - thought: "Run model against safety benchmark suite"
+        action: "Query evaluation results filtered by safety-related metrics"
+      - thought: "Identify failure modes and high-risk prompt categories"
+        action: "Analyze evaluation failures by error type and input category"
+      - thought: "Assess guardrail coverage and effectiveness"
+        action: "Review prompt templates for system prompts and safety instructions"
+      - thought: "Compare against regulatory and policy requirements"
+        action: "Check compliance with safety thresholds and deployment guidelines"
+    outcome_template: "Safety score: {{score}}. Gaps: {{gaps}}. Deployment ready: {{ready}}"
+
+  - id: model_regression_diagnosis
+    task: "Diagnose performance regression in model {{model.name}} v{{model.version}}"
+    steps:
+      - thought: "Compare evaluation scores against the previous version baseline"
+        action: "Query evaluations for current and prior model versions side by side"
+      - thought: "Identify which benchmarks and metrics declined"
+        action: "Find evaluations where scores dropped below previous version"
+      - thought: "Trace regression to training data or hyperparameter changes"
+        action: "Compare experiment configurations between the two versions"
+      - thought: "Determine whether to fix forward or roll back"
+        action: "Assess severity of regression vs cost of rollback and retraining"
+    outcome_template: "Regression root cause: {{cause}}. Affected metrics: {{metrics}}. Action: {{action}}"
+
+  - id: fine_tuning_strategy
+    task: "Determine optimal fine-tuning approach for adapting {{model.name}} to new domain"
+    steps:
+      - thought: "Assess base model capabilities on the target domain"
+        action: "Query evaluation scores on domain-relevant benchmarks"
+      - thought: "Evaluate available domain-specific training data"
+        action: "Search datasets matching the target domain and assess size and quality"
+      - thought: "Compare full fine-tuning vs parameter-efficient approaches"
+        action: "Review experiment results for similar adaptations and compute requirements"
+      - thought: "Plan evaluation strategy for the fine-tuned model"
+        action: "Identify appropriate benchmarks and design validation experiment"
+    outcome_template: "Strategy: {{approach}} using {{dataset}} with estimated {{improvement}}% improvement"
+
+  - id: ab_test_decision
+    task: "Decide winner of A/B test between prompt {{prompt.name}} variants for model {{model.name}}"
+    steps:
+      - thought: "Compare evaluation scores across the prompt variants"
+        action: "Query experiment results for each variant and their evaluation metrics"
+      - thought: "Assess statistical significance of observed differences"
+        action: "Review sample sizes and confidence intervals for key metrics"
+      - thought: "Consider secondary metrics and edge case performance"
+        action: "Check for quality regressions on safety, latency, or cost metrics"
+    outcome_template: "Winner: {{variant}} with {{metric}} improvement of {{improvement}}% (p={{p_value}})"
+
 demo_scenarios:
   - name: Model Lifecycle
     prompts:

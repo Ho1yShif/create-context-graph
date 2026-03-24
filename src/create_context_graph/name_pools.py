@@ -81,6 +81,298 @@ OBJECT_NAMES = [
 ]
 
 # ---------------------------------------------------------------------------
+# Domain-specific label name pools — override POLE+O pools for known labels
+# ---------------------------------------------------------------------------
+
+LABEL_NAMES: dict[str, list[str]] = {
+    # Healthcare
+    "Patient": [
+        "James Morrison", "Maria Rodriguez", "David Park", "Aisha Patel",
+        "Carlos Gutierrez", "Lisa Nakamura", "Thomas Weber", "Grace Nguyen",
+        "Ahmed Hassan", "Emily Hartman", "Robert Kim", "Priya Sharma",
+    ],
+    "Provider": [
+        "Dr. Sarah Chen", "Dr. Michael O'Brien", "Dr. Elena Volkov",
+        "Dr. Yuki Tanaka", "Dr. Rachel Okonkwo", "Dr. Andreas Mueller",
+        "Dr. Sofia Petrova", "Dr. Benjamin Adeyemi",
+    ],
+    "Diagnosis": [
+        "Type 2 Diabetes Mellitus", "Essential Hypertension",
+        "Acute Myocardial Infarction", "Major Depressive Disorder",
+        "Chronic Obstructive Pulmonary Disease", "Atrial Fibrillation",
+        "Rheumatoid Arthritis", "Asthma", "Chronic Kidney Disease Stage 3",
+        "Iron Deficiency Anemia", "Generalized Anxiety Disorder",
+        "Osteoporosis",
+    ],
+    "Medication": [
+        "Metformin 500mg", "Lisinopril 10mg", "Atorvastatin 40mg",
+        "Amoxicillin 250mg", "Sertraline 50mg", "Metoprolol 25mg",
+        "Omeprazole 20mg", "Levothyroxine 50mcg", "Amlodipine 5mg",
+        "Prednisone 10mg",
+    ],
+    "Treatment": [
+        "Cardiac Catheterization", "Physical Therapy Program",
+        "Cognitive Behavioral Therapy", "Chemotherapy Cycle 1",
+        "Joint Replacement Surgery", "Dialysis Treatment",
+        "Radiation Therapy", "Pulmonary Rehabilitation",
+    ],
+    "Encounter": [
+        "Annual Physical Exam", "Emergency Room Visit",
+        "Follow-Up Appointment", "Surgical Consultation",
+        "Lab Work Review", "Telehealth Visit",
+    ],
+    "Facility": [
+        "Memorial General Hospital", "Riverside Medical Center",
+        "St. Mary's Regional Hospital", "University Health System",
+        "Cedar Grove Clinic", "Pacific Northwest Medical",
+    ],
+    # Financial Services
+    "Account": [
+        "Premium Checking - 4821", "Retirement IRA - 7293",
+        "Business Savings - 5618", "High-Yield Money Market - 3047",
+        "Joint Checking - 8156", "Trust Fund - 2394",
+        "Corporate Treasury - 6712", "Student Savings - 1985",
+    ],
+    "Transaction": [
+        "Wire Transfer #TXN-2025-0142", "ACH Payment #TXN-2025-0287",
+        "Stock Purchase #TXN-2025-0351", "Dividend Payout #TXN-2025-0419",
+        "Loan Disbursement #TXN-2025-0508", "Currency Exchange #TXN-2025-0623",
+        "Bond Redemption #TXN-2025-0741", "Fee Assessment #TXN-2025-0855",
+    ],
+    "Security": [
+        "Apple Inc (AAPL)", "US Treasury 10Y Bond", "Vanguard S&P 500 ETF (VOO)",
+        "Microsoft Corp (MSFT)", "Amazon.com Inc (AMZN)",
+        "Municipal Bond Fund AAA", "Gold Futures Dec 2025",
+        "Tesla Inc (TSLA)",
+    ],
+    "Policy": [
+        "Anti-Money Laundering Policy", "Know Your Customer Guidelines",
+        "Credit Risk Management Framework", "Trading Compliance Manual",
+        "Data Privacy Standards", "Conflict of Interest Policy",
+    ],
+    "Decision": [
+        "Loan Approval Q4-2025", "Portfolio Rebalance Dec-2025",
+        "Risk Assessment Client-847", "Compliance Review Case-192",
+        "Investment Committee Vote Jan-2026", "Credit Line Extension Review",
+    ],
+    # Software Engineering
+    "Repository": [
+        "auth-service", "frontend-dashboard", "api-gateway",
+        "data-pipeline", "notification-engine", "user-management",
+        "payment-processor", "analytics-platform",
+    ],
+    "Issue": [
+        "Memory leak in worker pool", "OAuth2 token refresh fails silently",
+        "Dashboard shows stale data", "Rate limiter too aggressive",
+        "Search results not paginated", "Mobile layout broken on tablets",
+        "Batch job timeout at 10K records", "CORS headers missing on /api/v2",
+    ],
+    "PullRequest": [
+        "Fix OAuth2 token refresh", "Add rate limiting middleware",
+        "Migrate to PostgreSQL 16", "Implement WebSocket notifications",
+        "Add Prometheus metrics", "Refactor user service to DDD",
+        "Enable gzip compression", "Add OpenTelemetry tracing",
+    ],
+    "Deployment": [
+        "Production v2.4.1", "Staging v2.5.0-rc1",
+        "Canary deploy auth-service", "Hotfix v2.4.2",
+        "Blue/Green switch v3.0.0", "Rollback v2.3.9",
+    ],
+    "Service": [
+        "user-api", "payment-gateway", "notification-service",
+        "search-indexer", "cdn-proxy", "auth-provider",
+    ],
+    "Incident": [
+        "INC-2025-041 Database failover", "INC-2025-078 API latency spike",
+        "INC-2025-112 Certificate expiry", "INC-2025-156 DDoS mitigation",
+        "INC-2025-189 Data corruption", "INC-2025-201 Region outage",
+    ],
+    # Gaming
+    "Player": [
+        "ShadowKnight_42", "CrystalMage99", "IronWolf_X",
+        "StarFire_Legend", "ThunderBlade77", "MysticArcher_V",
+        "DragonSlayer_88", "FrostQueen_12",
+    ],
+    "Character": [
+        "Kael the Shadowblade", "Lyra Starweaver", "Thane Ironjaw",
+        "Zara the Enchantress", "Grimm Darkhollow", "Aria Lightbringer",
+        "Rex Stormfist", "Nyx the Silent",
+    ],
+    "Item": [
+        "Sword of Eternal Flame", "Shield of the Ancient Guardian",
+        "Amulet of Whispered Secrets", "Boots of Swift Shadow",
+        "Staff of Arcane Mastery", "Ring of Undying Resolve",
+        "Cloak of Invisibility", "Helm of the Dragon King",
+    ],
+    "Quest": [
+        "The Dragon's Lair", "Lost Temple of Shadows",
+        "The Merchant's Dilemma", "Siege of the Crystal Fortress",
+        "The Cursed Forest Path", "Rescue the King's Heir",
+    ],
+    "Guild": [
+        "Order of the Silver Dawn", "The Crimson Brotherhood",
+        "Shadow Covenant", "Ironforge Alliance",
+        "Celestial Guardians", "The Wild Hunt",
+    ],
+    "Achievement": [
+        "Dragon Slayer", "Master Explorer", "First Blood",
+        "Legendary Crafter", "Undefeated Champion", "Treasure Hunter",
+    ],
+    # Trip Planning
+    "Destination": [
+        "Paris, France", "Tokyo, Japan", "Barcelona, Spain",
+        "Bali, Indonesia", "Reykjavik, Iceland", "Cape Town, South Africa",
+        "Machu Picchu, Peru", "Kyoto, Japan",
+    ],
+    "Hotel": [
+        "Grand Hyatt Riverview", "Boutique Hotel du Marais",
+        "Seaside Resort & Spa", "Mountain Lodge Retreat",
+        "Metropolitan Tower Hotel", "Historic Inn at the Harbor",
+    ],
+    "Activity": [
+        "Guided Walking Tour", "Sunset Kayak Adventure",
+        "Cooking Class with Local Chef", "Wine Tasting Experience",
+        "Scenic Helicopter Tour", "Snorkeling Expedition",
+        "Historical Museum Visit", "Mountain Hiking Trail",
+    ],
+    "Restaurant": [
+        "Le Petit Bistro", "Sakura Sushi Bar", "Trattoria del Porto",
+        "The Rooftop Garden", "Casa de Tapas", "Café des Artistes",
+    ],
+    "Itinerary": [
+        "European Summer 2025", "Southeast Asia Backpacking",
+        "Mediterranean Cruise Week", "Japan Cherry Blossom Tour",
+        "African Safari Adventure", "Nordic Winter Escape",
+    ],
+    "Review": [
+        "5-Star Beach Resort Review", "Budget Hostel Feedback",
+        "Restaurant Dining Experience", "Tour Guide Rating",
+    ],
+    # Real Estate
+    "Property": [
+        "123 Oak Lane Colonial", "456 Marina Drive Condo",
+        "789 Hilltop Estate", "321 Riverside Loft",
+        "654 Sunset Blvd Townhouse", "987 Park Avenue Penthouse",
+    ],
+    "Listing": [
+        "MLS#2025-4821 Waterfront Home", "MLS#2025-7293 Downtown Studio",
+        "MLS#2025-5618 Suburban Ranch", "MLS#2025-3047 Mountain Cabin",
+        "MLS#2025-8156 Urban Duplex", "MLS#2025-2394 Farm Estate",
+    ],
+    "Agent": [
+        "Jennifer Walsh, Realtor", "Marcus Thompson, Broker",
+        "Sandra Liu, CCIM", "David Brennan, CRS",
+        "Amy Richardson, ABR", "Kevin Ortiz, SRS",
+    ],
+    "Inspection": [
+        "Pre-Purchase Home Inspection", "Termite and Pest Report",
+        "Foundation Assessment", "Roof Condition Survey",
+        "HVAC System Evaluation", "Plumbing Inspection",
+    ],
+    "Neighborhood": [
+        "Willow Creek Estates", "Downtown Arts District",
+        "Harbour Point", "Cedar Hills", "University Quarter",
+        "Lakeside Commons",
+    ],
+    # Manufacturing
+    "Machine": [
+        "CNC Mill Station A3", "Hydraulic Press HP-200",
+        "Laser Cutter LC-5000", "Assembly Robot AR-12",
+        "Injection Molder IM-800", "Packaging Line PL-3",
+    ],
+    "Part": [
+        "Titanium Gear Assembly TGA-401", "Steel Bearing Housing SBH-220",
+        "Aluminum Heat Sink AHS-150", "Carbon Fiber Panel CFP-88",
+        "Precision Valve PV-610", "Rubber Gasket Set RGS-44",
+    ],
+    "WorkOrder": [
+        "WO-2025-0412 Batch Production", "WO-2025-0587 Custom Fabrication",
+        "WO-2025-0721 Maintenance Overhaul", "WO-2025-0893 Quality Rework",
+        "WO-2025-1045 Prototype Build", "WO-2025-1198 Emergency Repair",
+    ],
+    "Supplier": [
+        "Pacific Steel Corp", "Rhine Valley Components",
+        "Shanghai Precision Parts", "Great Lakes Polymers",
+        "Nordic Metals AB", "Atlas Industrial Supply",
+    ],
+    "QualityReport": [
+        "QR-2025-041 Dimensional Check", "QR-2025-078 Material Test",
+        "QR-2025-112 Surface Finish Audit", "QR-2025-156 Stress Analysis",
+    ],
+    "ProductionLine": [
+        "Line A - High Volume", "Line B - Custom Orders",
+        "Line C - Precision Parts", "Line D - Assembly",
+    ],
+    # Conservation
+    "Species": [
+        "African Elephant (Loxodonta africana)", "Bengal Tiger (Panthera tigris tigris)",
+        "Blue Whale (Balaenoptera musculus)", "Giant Panda (Ailuropoda melanoleuca)",
+        "Monarch Butterfly (Danaus plexippus)", "Gray Wolf (Canis lupus)",
+        "Green Sea Turtle (Chelonia mydas)", "Snow Leopard (Panthera uncia)",
+    ],
+    "Site": [
+        "Yellowstone Corridor", "Amazon Basin Reserve",
+        "Coral Triangle Marine Sanctuary", "Serengeti Conservation Area",
+        "Borneo Rainforest Preserve", "Arctic Tundra Research Station",
+    ],
+    "Program": [
+        "Wildlife Corridor Restoration", "Anti-Poaching Patrol Network",
+        "Species Recovery Program", "Habitat Reforestation Initiative",
+        "Marine Protected Area Management", "Community Conservation Partnership",
+    ],
+    "Funding": [
+        "WWF Grant #G-2025-4821", "National Geographic Society Award",
+        "EPA Conservation Fund", "Private Foundation Endowment",
+        "Government Habitat Protection Grant", "Corporate Sustainability Pledge",
+    ],
+    "Monitoring": [
+        "GPS Collar Tracking Study", "Camera Trap Survey",
+        "Water Quality Assessment", "Population Census 2025",
+        "Migration Pattern Analysis", "Vegetation Cover Mapping",
+    ],
+    # Data Journalism
+    "Source": [
+        "Federal Budget Database 2025", "Census Bureau ACS 5-Year",
+        "SEC EDGAR Filings", "EPA Toxic Release Inventory",
+        "FBI Uniform Crime Reports", "Medicare Provider Data",
+    ],
+    "Story": [
+        "Investigation: Corporate Tax Havens", "Analysis: Housing Affordability Crisis",
+        "Deep Dive: Police Use of Force Data", "Exposé: Water Contamination Risk",
+        "Series: Healthcare Deserts in Rural America",
+    ],
+    "Dataset": [
+        "Municipal Spending 2020-2025", "Campaign Finance Records",
+        "Public School Performance Metrics", "Air Quality Index by County",
+        "Hospital Readmission Rates", "Lobbying Disclosure Reports",
+    ],
+    "Claim": [
+        "Claim: Unemployment Rate Trending Down", "Claim: Tax Reform Revenue Neutral",
+        "Claim: Crime Rates at Historic Low", "Claim: Renewable Energy Cost Parity",
+    ],
+    "Investigation": [
+        "INV-2025-01 Shell Company Network", "INV-2025-02 Procurement Fraud Pattern",
+        "INV-2025-03 Environmental Violations", "INV-2025-04 Campaign Finance Links",
+    ],
+}
+
+# Mapping of entity labels to preferred ID prefixes
+LABEL_ID_PREFIXES: dict[str, str] = {
+    "Patient": "PAT", "Provider": "PRV", "Diagnosis": "DX",
+    "Medication": "MED", "Treatment": "TRT", "Encounter": "ENC",
+    "Account": "ACT", "Transaction": "TXN", "Security": "SEC",
+    "Repository": "REPO", "Issue": "ISS", "PullRequest": "PR",
+    "Deployment": "DEP", "Incident": "INC", "Service": "SVC",
+    "Player": "PLY", "Character": "CHR", "Item": "ITM",
+    "Quest": "QST", "Guild": "GLD", "Achievement": "ACH",
+    "Property": "PRP", "Listing": "LST", "Machine": "MCH",
+    "Part": "PRT", "WorkOrder": "WO", "Supplier": "SUP",
+    "Species": "SPE", "Site": "SIT", "Program": "PRG",
+    "Source": "SRC", "Story": "STR", "Dataset": "DS",
+    "Destination": "DST", "Hotel": "HTL", "Activity": "ACT",
+}
+
+# ---------------------------------------------------------------------------
 # Property name patterns for contextual value generation
 # ---------------------------------------------------------------------------
 
@@ -212,6 +504,24 @@ def get_names_for_pole_type(pole_type: str, count: int) -> list[str]:
     return names[:count]
 
 
+def get_names_for_label(label: str, pole_type: str, count: int) -> list[str]:
+    """Get names appropriate for a specific entity label.
+
+    Checks the domain-specific ``LABEL_NAMES`` pool first, then falls back to
+    the generic POLE+O pool via ``get_names_for_pole_type``.
+    """
+    if label in LABEL_NAMES:
+        pool = LABEL_NAMES[label]
+        names = list(pool)
+        # Extend if more names needed than available
+        suffix = 0
+        while len(names) < count:
+            suffix += 1
+            names.extend(f"{n} {suffix}" for n in pool)
+        return names[:count]
+    return get_names_for_pole_type(pole_type, count)
+
+
 def generate_property_value(
     prop_name: str,
     prop_type: str,
@@ -245,7 +555,7 @@ def generate_property_value(
         if name_lower in _DESCRIPTION_PROPERTIES:
             return f"{label} record for {entity_name}. Created as part of the {label.lower()} management workflow."
         if any(id_word in name_lower for id_word in ("_id", "code", "number", "identifier")):
-            prefix = label[:3].upper()
+            prefix = LABEL_ID_PREFIXES.get(label, label[:3].upper())
             return generate_id(prefix, index)
         return f"{entity_name} - {prop_name.replace('_', ' ').title()}"
     if prop_type in ("integer", "int"):

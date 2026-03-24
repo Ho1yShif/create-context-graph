@@ -142,11 +142,11 @@ def _generate_static_entities(et) -> list[dict]:
     """Generate realistic static entities when no LLM is available."""
     from create_context_graph.name_pools import (
         generate_property_value,
-        get_names_for_pole_type,
+        get_names_for_label,
     )
 
     count = 5
-    names = get_names_for_pole_type(et.pole_type, count)
+    names = get_names_for_label(et.label, et.pole_type, count)
     entities = []
 
     for i in range(count):

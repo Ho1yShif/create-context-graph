@@ -293,6 +293,84 @@ decision_traces:
         action: "Estimate ROI of persona-targeted features"
     outcome_template: "Recommendation: {{level}} investment for {{persona}} based on {{rationale}}"
 
+  - id: technical_debt_assessment
+    task: "Assess technical debt impact on feature velocity for epic {{epic.name}}"
+    steps:
+      - thought: "Review features blocked or delayed by infrastructure issues"
+        action: "Query features in this epic with dependencies on platform or infrastructure themes"
+      - thought: "Analyze the trend of effort estimates increasing over time"
+        action: "Compare effort estimates for similar features across recent quarters"
+      - thought: "Estimate the cost of addressing debt vs working around it"
+        action: "Calculate engineering time spent on workarounds and bug fixes"
+      - thought: "Quantify impact on key product metrics"
+        action: "Correlate delivery delays with metric performance gaps"
+    outcome_template: "Debt impact: {{impact}}. Recommended investment: {{investment}}. Expected velocity gain: {{gain}}%"
+
+  - id: metric_attribution
+    task: "Attribute changes in metric {{metric.name}} to recently shipped features"
+    steps:
+      - thought: "Identify features shipped during the metric change period"
+        action: "Query features with status shipped and their release dates"
+      - thought: "Correlate feature release dates with metric movement"
+        action: "Map metric value changes against feature ship dates"
+      - thought: "Control for external factors and seasonal effects"
+        action: "Compare with same period in previous cycles and check for confounding releases"
+      - thought: "Estimate each feature's contribution to the metric change"
+        action: "Isolate feature-specific impact using segment analysis and rollout data"
+    outcome_template: "Attribution: {{feature}} contributed {{contribution}}% of {{metric}} change. Confidence: {{confidence}}"
+
+  - id: competitive_response
+    task: "Determine product response to competitor launch affecting {{user_persona.name}} segment"
+    steps:
+      - thought: "Assess the competitive threat based on feature comparison"
+        action: "Review feedback mentioning competitor features and user reactions"
+      - thought: "Evaluate urgency based on at-risk user segment size"
+        action: "Query user persona metrics for the affected segment"
+      - thought: "Identify existing roadmap items that could address the gap"
+        action: "Search features in discovery or defined status that match the competitive gap"
+      - thought: "Recommend prioritization adjustment"
+        action: "Calculate impact of accelerating gap-closing features vs maintaining current roadmap"
+    outcome_template: "Response: {{response}}. Timeline: {{timeline}}. Risk if no action: {{risk}}"
+
+  - id: experiment_design
+    task: "Design a product experiment to validate feature {{feature.name}} hypothesis"
+    steps:
+      - thought: "Define the hypothesis and success criteria"
+        action: "Review feature description and linked metric targets"
+      - thought: "Determine experiment type and audience"
+        action: "Select A/B test vs beta rollout based on feature scope and risk"
+      - thought: "Calculate required sample size and duration"
+        action: "Estimate sample needs based on current metric values and minimum detectable effect"
+      - thought: "Plan rollback criteria and monitoring"
+        action: "Define guardrail metrics and automated rollback triggers"
+    outcome_template: "Experiment: {{type}} with {{audience}} for {{duration}}. Success criteria: {{criteria}}"
+
+  - id: scope_negotiation
+    task: "Negotiate scope reduction for {{feature.name}} to meet {{release.name}} deadline"
+    steps:
+      - thought: "Identify the core value proposition vs nice-to-have elements"
+        action: "Review feature requirements and map to user persona pain points"
+      - thought: "Evaluate which requirements address the most feedback items"
+        action: "Query feedback items linked to this feature and rank by volume"
+      - thought: "Assess minimum viable scope that still moves target metrics"
+        action: "Identify the smallest feature set that delivers measurable metric improvement"
+      - thought: "Propose phased delivery plan"
+        action: "Split requirements into must-have for current release and fast-follow items"
+    outcome_template: "Reduced scope: {{scope}}. Deferred items: {{deferred}}. Metric coverage: {{coverage}}%"
+
+  - id: feedback_pattern_analysis
+    task: "Analyze feedback patterns for {{user_persona.name}} to identify unmet needs"
+    steps:
+      - thought: "Aggregate feedback by type and sentiment"
+        action: "Query feedback items from this persona grouped by feedback_type and sentiment"
+      - thought: "Identify recurring themes across multiple feedback sources"
+        action: "Find common keywords and topics across interview, survey, and support feedback"
+      - thought: "Map themes to existing features or roadmap gaps"
+        action: "Match feedback themes against current features and backlog items"
+      - thought: "Prioritize unmet needs by frequency and business impact"
+        action: "Rank gaps by feedback volume, sentiment negativity, and affected segment revenue"
+    outcome_template: "Top unmet needs: {{needs}}. Affected users: {{count}}. Revenue at risk: ${{revenue}}"
+
 demo_scenarios:
   - name: Roadmap Planning
     prompts:

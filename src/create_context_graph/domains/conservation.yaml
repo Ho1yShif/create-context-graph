@@ -272,6 +272,93 @@ decision_traces:
         action: "Check stakeholder positions and community engagement history"
     outcome_template: "Recommendation: {{recommendation}} with justification {{justification}}"
 
+  - id: species_reintroduction
+    task: "Evaluate feasibility of reintroducing {{species.common_name}} to {{site.name}}"
+    steps:
+      - thought: "Assess habitat suitability and carrying capacity at the target site"
+        action: "Query site area, protection level, and existing species for competition analysis"
+      - thought: "Review historical presence and reasons for local extinction"
+        action: "Check monitoring records and threat data for the species at this site"
+      - thought: "Evaluate source population availability and genetic viability"
+        action: "Query population_estimate and conservation_status across all sites where species exists"
+      - thought: "Assess stakeholder support and community readiness"
+        action: "Review stakeholder partnerships and community engagement programs at the site"
+    outcome_template: "Reintroduction feasibility: {{feasibility}}. Recommended source: {{source_site}}. Timeline: {{timeline}}"
+
+  - id: habitat_assessment
+    task: "Assess habitat condition and restoration needs at {{site.name}}"
+    steps:
+      - thought: "Review recent monitoring data for habitat quality indicators"
+        action: "Query monitoring events of type habitat_assessment and satellite at the site"
+      - thought: "Evaluate species diversity as a habitat health proxy"
+        action: "Count species protected at the site grouped by conservation_status"
+      - thought: "Identify degradation factors and encroachment patterns"
+        action: "Check site status and review threat-related monitoring findings"
+      - thought: "Estimate restoration costs and prioritize interventions"
+        action: "Cross-reference with active habitat_restoration programs and available funding"
+    outcome_template: "Habitat grade: {{grade}}. Priority restoration: {{area}} hectares. Estimated cost: ${{cost}}"
+
+  - id: threat_response
+    task: "Develop response plan for emerging threat to {{species.common_name}} at {{site.name}}"
+    steps:
+      - thought: "Characterize the nature and severity of the threat"
+        action: "Query THREATENS relationships and recent monitoring findings for the species"
+      - thought: "Assess current protection measures and their effectiveness"
+        action: "Review active anti_poaching and species_recovery programs at the site"
+      - thought: "Identify available resources for rapid response"
+        action: "Check funding with remaining budget and stakeholder capacity for emergency action"
+      - thought: "Coordinate with partner organizations"
+        action: "Query stakeholders partnered with programs at this site for rapid deployment"
+    outcome_template: "Threat level: {{level}}. Response plan: {{plan}}. Resources mobilized: {{resources}}"
+
+  - id: community_engagement
+    task: "Design community engagement strategy for conservation at {{site.name}} with {{stakeholder.name}}"
+    steps:
+      - thought: "Map existing community relationships and engagement history"
+        action: "Query stakeholders of type community and indigenous_group partnered with site programs"
+      - thought: "Identify community benefits and livelihood dependencies on the site"
+        action: "Review program types and outcomes that directly benefit local communities"
+      - thought: "Design participatory monitoring and stewardship roles"
+        action: "Match community capabilities to monitoring needs at the site"
+    outcome_template: "Engagement plan: {{plan}}. Community partners: {{partners}}. Expected participation: {{participation}}"
+
+  - id: monitoring_protocol
+    task: "Design monitoring protocol for {{species.common_name}} across sites in {{site.country}}"
+    steps:
+      - thought: "Review existing monitoring methods and their data quality"
+        action: "Query monitoring events for the species grouped by monitoring_type and data_quality"
+      - thought: "Identify gaps in spatial and temporal coverage"
+        action: "Map monitoring frequency and site coverage against species range"
+      - thought: "Select optimal monitoring techniques for the species taxonomy"
+        action: "Match taxonomy_class to appropriate methods: camera_trap, acoustic, or population_survey"
+      - thought: "Estimate resource requirements and assign responsibilities"
+        action: "Cross-reference with stakeholder capabilities and program budgets"
+    outcome_template: "Protocol: {{method}} at {{frequency}} intervals across {{sites}} sites. Annual cost: ${{cost}}"
+
+  - id: corridor_planning
+    task: "Plan wildlife corridor connecting {{site.name}} to adjacent protected areas"
+    steps:
+      - thought: "Identify species that would benefit from improved connectivity"
+        action: "Query species protected at the site with large range requirements by taxonomy_class"
+      - thought: "Assess land use and barriers between target sites"
+        action: "Review site types and protection levels of nearby conservation areas"
+      - thought: "Evaluate stakeholder and landowner cooperation potential"
+        action: "Query stakeholders of type community and government in the site's country"
+      - thought: "Estimate costs and seek aligned funding sources"
+        action: "Check available funding for habitat_restoration programs in the region"
+    outcome_template: "Corridor: {{length}} km connecting {{sites}}. Species benefited: {{count}}. Estimated cost: ${{cost}}"
+
+  - id: funding_renewal
+    task: "Prepare funding renewal case for {{funding.name}} supporting {{program.name}}"
+    steps:
+      - thought: "Document measurable outcomes achieved during the funding period"
+        action: "Query monitoring results for species benefiting from the program since funding award_date"
+      - thought: "Calculate cost-effectiveness of the program"
+        action: "Compare funding amount to species population changes and habitat area protected"
+      - thought: "Identify remaining gaps and future priorities"
+        action: "Review program status and unfunded components against conservation targets"
+    outcome_template: "Renewal case: {{outcomes}} achieved. Cost per species outcome: ${{cost_per_outcome}}. Requested: ${{amount}}"
+
 demo_scenarios:
   - name: Species Monitoring
     prompts:

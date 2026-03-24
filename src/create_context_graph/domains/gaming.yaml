@@ -282,6 +282,80 @@ decision_traces:
         action: "Check item rarity distribution and achievement unlock gaps"
     outcome_template: "Event design: {{event}} targeting {{audience}} with {{rewards}}"
 
+  - id: loot_distribution
+    task: "Determine fair loot distribution for {{item.name}} ({{item.rarity}}) after raid quest {{quest.name}}"
+    steps:
+      - thought: "Identify all characters who participated in the quest"
+        action: "Query characters who completed the quest and their class/level"
+      - thought: "Check each character's existing inventory for the item or similar items"
+        action: "Query OWNS and EQUIPPED relationships for participating characters against the item type"
+      - thought: "Evaluate contribution and need based on class and level"
+        action: "Compare character power ratings, levels, and class-appropriate item synergies"
+      - thought: "Apply guild loot rules if participants are guild members"
+        action: "Check guild membership of participating players and guild rank/policies"
+    outcome_template: "Loot awarded to: {{character.name}}. Method: {{method}}. Rationale: {{rationale}}"
+
+  - id: quest_difficulty_scaling
+    task: "Adjust difficulty scaling for quest {{quest.name}} ({{quest.difficulty}}) based on completion data"
+    steps:
+      - thought: "Analyze completion rates across player level brackets"
+        action: "Query characters who completed the quest grouped by level range and class"
+      - thought: "Identify classes that over-perform or under-perform on this quest"
+        action: "Compare completion rates and attempt counts by character class"
+      - thought: "Evaluate reward-to-difficulty ratio against similar quests"
+        action: "Compare experience and gold rewards with other quests of the same difficulty tier"
+      - thought: "Recommend specific tuning adjustments"
+        action: "Check achievement unlock rates for quest-related achievements to gauge difficulty perception"
+    outcome_template: "Scaling adjustment: {{adjustment}}. Target completion rate: {{target_pct}}%. Changes: {{changes}}"
+
+  - id: player_matchmaking
+    task: "Create balanced matchmaking for PvP event involving {{player.username}} in {{player.region}} region"
+    steps:
+      - thought: "Assess the player's character roster and power ratings"
+        action: "Query characters played by the player, their levels, classes, and power ratings"
+      - thought: "Find potential opponents with similar skill profiles"
+        action: "Search active players in the same region with characters of comparable level and power rating"
+      - thought: "Balance team composition for class diversity"
+        action: "Check character class distribution among matched players to ensure varied matchups"
+    outcome_template: "Match created: {{match_id}}. Players: {{player_count}}. Balance score: {{balance_score}}"
+
+  - id: guild_conflict_resolution
+    task: "Resolve resource conflict between {{guild.name}} and a rival guild over quest {{quest.name}}"
+    steps:
+      - thought: "Assess both guilds' current standings and member activity"
+        action: "Query guild levels, member counts, ranks, and recent quest completions"
+      - thought: "Review trade history between guild members for existing relationships"
+        action: "Check TRADED_WITH relationships between players of the two guilds"
+      - thought: "Evaluate quest participation and contribution from each guild"
+        action: "Count characters from each guild who completed or attempted the contested quest"
+      - thought: "Propose resolution based on fairness metrics"
+        action: "Compare guild ranks, member engagement levels, and historical quest completion data"
+    outcome_template: "Resolution: {{resolution}}. Primary access: {{guild.name}}. Terms: {{terms}}"
+
+  - id: economy_balancing
+    task: "Rebalance gold economy around {{item.item_type}} items in the {{item.rarity}} tier"
+    steps:
+      - thought: "Analyze current gold value distribution for items in this tier"
+        action: "Query all items of the specified type and rarity, check gold values and ownership counts"
+      - thought: "Measure gold generation vs gold sinks for active players"
+        action: "Compare quest gold rewards with item gold values and trade volumes"
+      - thought: "Identify items that are significantly over- or under-valued"
+        action: "Find items with high owned count but low gold value, or low owned count with high value"
+      - thought: "Model impact of proposed price adjustments on player progression"
+        action: "Check level requirements and equipped counts to gauge impact on different player brackets"
+    outcome_template: "Adjustments: {{item_count}} items repriced. Gold sink change: {{sink_change}}%. Impact: {{impact}}"
+
+  - id: achievement_validation
+    task: "Validate integrity of achievement {{achievement.name}} unlock patterns"
+    steps:
+      - thought: "Analyze unlock distribution across player segments"
+        action: "Query characters who unlocked the achievement, grouped by level, class, and guild membership"
+      - thought: "Check for anomalous unlock patterns suggesting exploits"
+        action: "Identify clusters of unlocks in short time windows or from low-level characters"
+      - thought: "Cross-reference with quest completion prerequisites"
+        action: "Verify that characters who unlocked the achievement also completed required quests"
+    outcome_template: "Validation: {{status}}. Anomalous unlocks: {{anomaly_count}}. Action: {{action}}"
+
 demo_scenarios:
   - name: Player Analytics
     prompts:

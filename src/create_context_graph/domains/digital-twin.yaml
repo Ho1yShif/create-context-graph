@@ -273,6 +273,80 @@ decision_traces:
         action: "Simulate adjustments based on historical sensor-performance correlations"
     outcome_template: "Optimization plan: {{plan}} with expected {{improvement}}% gain"
 
+  - id: sensor_anomaly_investigation
+    task: "Investigate anomalous readings from sensor {{sensor.name}} on asset {{asset.name}}"
+    steps:
+      - thought: "Determine if the anomaly is a sensor malfunction or genuine asset issue"
+        action: "Compare readings against sensor calibration data and other sensors on the same asset"
+      - thought: "Check for environmental factors that could explain the anomaly"
+        action: "Review correlated readings from nearby sensors and system conditions"
+      - thought: "Assess historical patterns for similar anomalies on this asset type"
+        action: "Query maintenance records and past alerts for comparable deviation patterns"
+      - thought: "Recommend immediate action based on severity assessment"
+        action: "Evaluate risk of continued operation vs shutting down for inspection"
+    outcome_template: "Finding: {{finding}}. Cause: {{cause}}. Action: {{action}}"
+
+  - id: spare_parts_planning
+    task: "Plan spare parts inventory for system {{system.name}} based on failure predictions"
+    steps:
+      - thought: "Identify assets most likely to require maintenance in the next quarter"
+        action: "Query assets by degradation status and time since last maintenance"
+      - thought: "Analyze historical failure modes and parts consumed"
+        action: "Review maintenance records for common replacement parts by asset type"
+      - thought: "Calculate optimal stock levels based on lead times and criticality"
+        action: "Model parts demand against supplier lead times and system criticality"
+    outcome_template: "Parts plan: {{plan}} with estimated cost ${{cost}} covering {{coverage}}% of expected needs"
+
+  - id: asset_retirement_decision
+    task: "Evaluate whether to retire asset {{asset.name}} or extend its operational life"
+    steps:
+      - thought: "Review total maintenance cost history and trend"
+        action: "Query all maintenance records and calculate cumulative and trending costs"
+      - thought: "Assess current performance against design specifications"
+        action: "Compare recent sensor readings with baseline operating parameters"
+      - thought: "Evaluate impact on system if asset is removed"
+        action: "Check connected assets and system dependencies"
+      - thought: "Compare cost of continued operation vs replacement"
+        action: "Estimate remaining useful life, ongoing maintenance costs, and replacement capital cost"
+    outcome_template: "Decision: {{decision}}. Remaining useful life: {{life}} months. Net savings: ${{savings}}"
+
+  - id: root_cause_analysis
+    task: "Perform root cause analysis for critical alert {{alert.alert_id}} on asset {{asset.name}}"
+    steps:
+      - thought: "Trace the alert back to originating sensor readings"
+        action: "Follow the alert trigger chain to specific sensor reading deviations"
+      - thought: "Identify concurrent events and correlated failures"
+        action: "Search for alerts and readings on connected assets within the same time window"
+      - thought: "Review maintenance and operational changes prior to the event"
+        action: "Query recent maintenance records and system configuration changes"
+      - thought: "Determine root cause vs contributing factors"
+        action: "Classify findings into primary cause, contributing factors, and coincidental events"
+    outcome_template: "Root cause: {{cause}}. Contributing factors: {{factors}}. Corrective action: {{action}}"
+
+  - id: digital_twin_calibration
+    task: "Calibrate digital twin model for system {{system.name}} against real-world data"
+    steps:
+      - thought: "Compare predicted sensor values from the model against actual readings"
+        action: "Query recent readings and calculate deviation from model predictions"
+      - thought: "Identify parameters with the largest prediction errors"
+        action: "Rank sensors and assets by prediction accuracy gap"
+      - thought: "Adjust model parameters based on latest operating conditions"
+        action: "Update calibration factors using recent maintenance records and operating data"
+    outcome_template: "Calibration result: prediction accuracy improved from {{before}}% to {{after}}%"
+
+  - id: energy_efficiency_audit
+    task: "Audit energy efficiency of system {{system.name}} and identify waste"
+    steps:
+      - thought: "Analyze power consumption patterns across system assets"
+        action: "Query sensor readings for voltage, current, and power metrics"
+      - thought: "Identify assets operating outside optimal efficiency ranges"
+        action: "Compare current readings against manufacturer efficiency curves"
+      - thought: "Calculate potential savings from operational adjustments"
+        action: "Model energy savings from scheduling changes and maintenance interventions"
+      - thought: "Prioritize improvements by cost-effectiveness"
+        action: "Rank opportunities by energy savings per dollar invested"
+    outcome_template: "Efficiency: {{current}}%. Potential: {{target}}%. Annual savings: ${{savings}}"
+
 demo_scenarios:
   - name: Asset Monitoring
     prompts:

@@ -8,7 +8,7 @@ import {
 import { Send, RotateCcw, ChevronDown, Wrench, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { API_BASE, DEMO_SCENARIOS } from "@/lib/config";
+import { API_BASE, DEMO_SCENARIOS, DOMAIN } from "@/lib/config";
 import type { GraphData } from "@/lib/config";
 
 interface ToolCall {
@@ -24,14 +24,15 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   toolCalls?: ToolCall[];
+  retryInput?: string;
 }
 
 interface ChatInterfaceProps {
   onGraphUpdate?: (data: GraphData) => void;
 }
 
-const STORAGE_KEY = "ccg-chat-history";
-const SESSION_KEY = "ccg-session-id";
+const STORAGE_KEY = `ccg-chat-history-${DOMAIN.id}`;
+const SESSION_KEY = `ccg-session-id-${DOMAIN.id}`;
 
 function loadStoredMessages(): Message[] {
   try {
@@ -52,20 +53,36 @@ function loadStoredSessionId(): string | null {
 }
 
 export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(loadStoredSessionId);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState("");
   const [streamingToolCalls, setStreamingToolCalls] = useState<ToolCall[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textBufferRef = useRef("");
   const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Hydrate from sessionStorage after mount to avoid SSR mismatch
+  useEffect(() => {
+    setMessages(loadStoredMessages());
+    setSessionId(loadStoredSessionId());
+    setHydrated(true);
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingContent, streamingToolCalls]);
+
+  // Elapsed time counter during loading
+  useEffect(() => {
+    if (!loading) { setElapsedSeconds(0); return; }
+    const interval = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   // Persist chat history to sessionStorage
   useEffect(() => {
@@ -120,7 +137,7 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
-    const timeout = setTimeout(() => controller.abort(), 120000);
+    const timeout = setTimeout(() => controller.abort(), 60000);
 
     try {
       const res = await fetch(`${API_BASE}/chat/stream`, {
@@ -259,7 +276,7 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
       }
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: "assistant", content: `**Error:** ${errorMsg}` },
+        { id: crypto.randomUUID(), role: "assistant", content: `**Error:** ${errorMsg}`, retryInput: messageText },
       ]);
       setStreamingContent("");
       setStreamingToolCalls([]);
@@ -341,6 +358,20 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
               {msg.role === "assistant" ? (
                 <Box fontSize="sm" className="markdown-content">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                  {msg.retryInput && (
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      mt={2}
+                      onClick={() => {
+                        setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                        sendMessage(msg.retryInput);
+                      }}
+                    >
+                      <RotateCcw size={12} />
+                      Retry
+                    </Button>
+                  )}
                 </Box>
               ) : (
                 <Text fontSize="sm" whiteSpace="pre-wrap">
@@ -375,6 +406,9 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
                     <HStack gap={2}>
                       <Spinner size="xs" />
                       <Text fontSize="sm" color="gray.500">Thinking...</Text>
+                      {elapsedSeconds > 3 && (
+                        <Text fontSize="xs" color="gray.400">{elapsedSeconds}s</Text>
+                      )}
                     </HStack>
                     <Skeleton height="4" width="80%" />
                     <Skeleton height="4" width="60%" />
@@ -385,6 +419,9 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
                     <Text fontSize="sm" color="gray.500">
                       Generating response...
                     </Text>
+                    {elapsedSeconds > 3 && (
+                      <Text fontSize="xs" color="gray.400">{elapsedSeconds}s</Text>
+                    )}
                   </HStack>
                 )}
                 <Button
@@ -418,9 +455,10 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
           aria-label="Send"
           onClick={() => sendMessage()}
           disabled={!input.trim() || loading}
-          size="sm"
+          size="md"
+          colorPalette="blue"
         >
-          <Send size={16} />
+          <Send size={20} />
         </IconButton>
       </HStack>
     </Flex>

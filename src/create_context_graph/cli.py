@@ -55,6 +55,7 @@ console = Console()
 @click.option("--connector", multiple=True, help="SaaS connector to enable (github, slack, jira, notion, gmail, gcal, salesforce)")
 @click.option("--output-dir", type=click.Path(), help="Output directory (default: ./<project-name>)")
 @click.option("--dry-run", is_flag=True, help="Preview what would be generated without creating files")
+@click.option("--reset-database", is_flag=True, help="Clear all Neo4j data before ingesting")
 @click.option("--verbose", is_flag=True, help="Enable verbose debug output")
 @click.option("--list-domains", is_flag=True, help="List available domains and exit")
 @click.version_option(package_name="create-context-graph")
@@ -75,6 +76,7 @@ def main(
     connector: tuple[str, ...],
     output_dir: str | None,
     dry_run: bool,
+    reset_database: bool,
     verbose: bool,
     list_domains: bool,
 ) -> None:
@@ -256,6 +258,21 @@ def main(
             fixture_path.parent.mkdir(parents=True, exist_ok=True)
             fixture_path.write_text(json.dumps(merged.model_dump(), indent=2, default=str))
             console.print(f"\n[green]Imported data written to {fixture_path}[/green]")
+
+    # Reset Neo4j database if requested
+    if reset_database:
+        console.print("\n[bold]Resetting Neo4j database...[/bold]")
+        from create_context_graph.ingest import reset_neo4j
+
+        try:
+            reset_neo4j(
+                config.neo4j_uri,
+                config.neo4j_username,
+                config.neo4j_password,
+            )
+            console.print("  [green]Database cleared[/green]")
+        except Exception as e:
+            console.print(f"  [red]Failed to reset database:[/red] {e}")
 
     # Ingest into Neo4j if requested
     if ingest and fixture_path.exists():

@@ -275,6 +275,93 @@ decision_traces:
         action: "Review similar past work for effort estimation"
     outcome_template: "Priority list: {{items}}. Total estimated effort: {{effort}}"
 
+  - id: incident_triage
+    task: "Triage incoming incident report for {{service.name}} with severity {{incident.severity}}"
+    steps:
+      - thought: "Assess the blast radius by checking service dependencies"
+        action: "Query service dependency graph to identify upstream and downstream affected services"
+      - thought: "Check for correlated incidents or ongoing issues"
+        action: "Query active incidents affecting the same or dependent services"
+      - thought: "Identify the on-call engineer and recent changes"
+        action: "Find on-call person for the service and recent deployments in the last 24 hours"
+      - thought: "Assign severity and route to appropriate responder"
+        action: "Evaluate impact scope and assign final severity based on affected service count"
+    outcome_template: "Triage result: {{severity}}. Assigned to: {{assignee}}. Affected services: {{service_count}}"
+
+  - id: code_review_assessment
+    task: "Assess review readiness and risk of {{pr.title}} targeting {{repository.name}}"
+    steps:
+      - thought: "Evaluate the scope and complexity of changes"
+        action: "Check PR lines added/removed and number of files changed"
+      - thought: "Assess test coverage and CI status"
+        action: "Query the PR status and linked issues for context"
+      - thought: "Check for dependency on other PRs or blocked issues"
+        action: "Find issues fixed by this PR and their current status"
+      - thought: "Identify appropriate reviewers based on code ownership"
+        action: "Query developers who have authored or reviewed PRs for the same repository"
+    outcome_template: "Review readiness: {{readiness}}. Risk: {{risk_level}}. Recommended reviewers: {{reviewers}}"
+
+  - id: deployment_rollback
+    task: "Decide whether to rollback deployment {{deployment.deployment_id}} to {{service.name}}"
+    steps:
+      - thought: "Assess the severity and scope of the post-deployment issue"
+        action: "Query incidents caused by this deployment and affected services"
+      - thought: "Evaluate if a forward-fix is feasible within the SLA"
+        action: "Check for open PRs that fix the related issues and their review status"
+      - thought: "Verify rollback safety by checking for data migrations or breaking changes"
+        action: "Review the PR that triggered the deployment and its change scope"
+      - thought: "Confirm rollback target version and dependencies"
+        action: "Query previous successful deployments for the service"
+    outcome_template: "Decision: {{decision}}. Rollback to: {{target_version}}. Estimated recovery: {{eta}}"
+
+  - id: capacity_planning
+    task: "Plan capacity for {{service.name}} ahead of anticipated traffic increase"
+    steps:
+      - thought: "Assess current service health and resource utilization"
+        action: "Query service status and recent incident history for degradation patterns"
+      - thought: "Map service dependencies that may become bottlenecks"
+        action: "Traverse the DEPENDS_ON graph to identify critical path services"
+      - thought: "Review deployment frequency and recent scaling changes"
+        action: "Query deployment history for the service and its dependencies"
+    outcome_template: "Capacity plan: {{plan}}. Bottleneck services: {{bottlenecks}}. Scaling actions: {{actions}}"
+
+  - id: security_vulnerability
+    task: "Respond to security vulnerability reported in {{repository.name}} affecting {{service.name}}"
+    steps:
+      - thought: "Assess the exposure scope across services"
+        action: "Query services contained in the repository and their downstream dependents"
+      - thought: "Identify all deployments running the vulnerable version"
+        action: "Find recent deployments for affected services and their versions"
+      - thought: "Determine patching priority based on service criticality"
+        action: "Check incident history and dependency count for affected services"
+      - thought: "Coordinate fix through PR and expedited deployment"
+        action: "Query open PRs targeting the repository and on-call engineers for the services"
+    outcome_template: "Severity: {{severity}}. Affected services: {{service_count}}. Patch ETA: {{eta}}"
+
+  - id: dependency_upgrade
+    task: "Evaluate upgrading a critical dependency in {{repository.name}}"
+    steps:
+      - thought: "Map all services and repositories affected by this dependency"
+        action: "Query services contained in the repository and their dependents"
+      - thought: "Review historical incidents linked to dependency-related changes"
+        action: "Find incidents caused by deployments to affected services"
+      - thought: "Assess testing requirements and breaking change risk"
+        action: "Query open issues tagged against the repository and recent PR merge rates"
+    outcome_template: "Upgrade decision: {{decision}}. Impact: {{service_count}} services. Effort: {{effort}}"
+
+  - id: performance_optimization
+    task: "Investigate and optimize performance degradation in {{service.name}}"
+    steps:
+      - thought: "Correlate performance degradation with recent deployments"
+        action: "Query deployment history for the service in the last 7 days"
+      - thought: "Check if dependent services are contributing to latency"
+        action: "Traverse DEPENDS_ON relationships and check health status of dependencies"
+      - thought: "Identify relevant incidents and their resolution patterns"
+        action: "Find similar past incidents affecting this service and their resolution steps"
+      - thought: "Recommend optimization approach based on findings"
+        action: "Review PRs that previously addressed performance issues in the same repository"
+    outcome_template: "Root cause: {{root_cause}}. Optimization: {{optimization}}. Expected improvement: {{improvement}}"
+
 demo_scenarios:
   - name: Code Review & PRs
     prompts:

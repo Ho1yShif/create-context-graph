@@ -276,6 +276,93 @@ decision_traces:
         action: "Correlate defects with machine, shift, material batch, or operator"
     outcome_template: "Root cause: {{cause}}. Corrective action: {{action}}"
 
+  - id: supply_chain_disruption
+    task: "Assess impact and alternatives when supplier {{supplier.name}} reports delivery delay for {{part.name}}"
+    steps:
+      - thought: "Identify all work orders depending on the delayed part"
+        action: "Query work orders with DEPENDS_ON relationship to the affected part"
+      - thought: "Check current stock levels against immediate production needs"
+        action: "Compare part stock_quantity to work order quantities with upcoming due dates"
+      - thought: "Find alternative approved suppliers for the same part"
+        action: "Query other suppliers linked to the part or its category with approved status"
+      - thought: "Evaluate expedited shipping or substitute parts"
+        action: "Compare lead times and costs across alternative suppliers and compatible parts"
+    outcome_template: "Impact: {{affected_orders}} work orders at risk. Mitigation: {{mitigation}}"
+
+  - id: equipment_maintenance
+    task: "Determine maintenance priority for {{machine.name}} with {{machine.operating_hours}} operating hours"
+    steps:
+      - thought: "Review machine maintenance history and current status"
+        action: "Query maintenance logs and current status for the machine"
+      - thought: "Assess impact on production line if machine goes offline"
+        action: "Check production line assignment and active work orders using this machine"
+      - thought: "Compare operating hours to manufacturer maintenance intervals"
+        action: "Evaluate operating_hours against recommended service thresholds"
+      - thought: "Schedule maintenance window to minimize production disruption"
+        action: "Identify lowest-impact time slot based on work order due dates and line capacity"
+    outcome_template: "Maintenance priority: {{priority}}. Schedule: {{schedule}}. Estimated downtime: {{downtime}}"
+
+  - id: quality_audit
+    task: "Conduct quality audit for parts produced on {{production_line.name}} over the past period"
+    steps:
+      - thought: "Aggregate quality report outcomes for the production line"
+        action: "Query quality reports for parts produced on this line, grouped by result"
+      - thought: "Identify recurring defect types and patterns"
+        action: "Analyze defect_type distribution and correlate with specific machines or shifts"
+      - thought: "Compare pass rates against target quality thresholds"
+        action: "Calculate pass rate percentage and benchmark against line efficiency_rating"
+    outcome_template: "Audit result: {{pass_rate}}% pass rate. Top defect: {{defect_type}}. Action: {{action}}"
+
+  - id: material_selection
+    task: "Select optimal material supplier for {{part.name}} balancing cost, quality, and lead time"
+    steps:
+      - thought: "List all suppliers providing this part or compatible raw materials"
+        action: "Query suppliers linked to the part via SUPPLIED_BY relationship"
+      - thought: "Rank suppliers by quality rating and historical defect rates"
+        action: "Join supplier quality_rating with quality report pass rates for their parts"
+      - thought: "Factor in lead time urgency against work order due dates"
+        action: "Compare supplier lead_time_days to nearest work order deadlines"
+      - thought: "Calculate total cost including shipping and potential rework"
+        action: "Estimate unit_cost multiplied by quantity plus rework costs from defect rates"
+    outcome_template: "Selected: {{supplier}} — cost ${{cost}}/unit, {{lead_time}} day lead, {{quality}}% quality"
+
+  - id: capacity_optimization
+    task: "Optimize production capacity across all lines to meet pending work orders"
+    steps:
+      - thought: "Survey current utilization of all production lines"
+        action: "Query production lines with status, capacity_per_hour, and assigned work orders"
+      - thought: "Identify bottleneck lines with overloaded schedules"
+        action: "Compare total assigned quantity to available capacity for each line"
+      - thought: "Redistribute work orders to balance load across lines"
+        action: "Match work order requirements to capable machines on underutilized lines"
+      - thought: "Evaluate shift pattern changes to increase throughput"
+        action: "Model output gains from shifting idle lines to double or triple shifts"
+    outcome_template: "Optimization: {{rebalanced}} orders redistributed. Projected throughput increase: {{increase}}%"
+
+  - id: preventive_maintenance_planning
+    task: "Plan preventive maintenance schedule for machines on {{production_line.name}}"
+    steps:
+      - thought: "Inventory all machines assigned to the production line"
+        action: "Query machines with OPERATED_BY relationship to the production line"
+      - thought: "Assess each machine's operating hours and last maintenance date"
+        action: "Review operating_hours and install_date to estimate service intervals"
+      - thought: "Prioritize machines by criticality and failure risk"
+        action: "Rank machines by hours since last maintenance and impact on line output"
+    outcome_template: "Maintenance plan: {{count}} machines scheduled. Next critical: {{machine}} in {{days}} days"
+
+  - id: work_order_prioritization
+    task: "Reprioritize work orders when {{machine.name}} goes offline unexpectedly"
+    steps:
+      - thought: "Identify all work orders assigned to the offline machine"
+        action: "Query work orders with ASSIGNED_TO relationship to the machine"
+      - thought: "Assess due date urgency and customer impact for each order"
+        action: "Rank affected work orders by due_date and priority level"
+      - thought: "Find alternative machines capable of handling the work"
+        action: "Query machines of same type on other production lines with operational status"
+      - thought: "Reassign critical orders and adjust schedules"
+        action: "Move highest-priority orders to available machines and update timelines"
+    outcome_template: "Reassigned {{count}} orders. {{critical}} critical orders preserved. New completion: {{date}}"
+
 demo_scenarios:
   - name: Production Management
     prompts:

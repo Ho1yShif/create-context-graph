@@ -294,6 +294,84 @@ decision_traces:
         action: "Evaluate newer equipment options and efficiency improvements"
     outcome_template: "Decision: {{decision}} — {{rationale}} with net cost of ${{cost}}"
 
+  - id: regulatory_compliance_check
+    task: "Assess regulatory compliance status for well {{well.name}} ahead of upcoming inspection"
+    steps:
+      - thought: "Review all active permits and their condition requirements"
+        action: "Query permits linked to this well and check status and conditions"
+      - thought: "Verify that corrective actions from prior inspections are complete"
+        action: "Search inspection history for outstanding corrective actions"
+      - thought: "Check equipment certifications and testing schedules"
+        action: "Review equipment inspection records and identify overdue pressure tests or certifications"
+      - thought: "Prepare compliance documentation"
+        action: "Compile permit conditions, inspection results, and equipment records into compliance summary"
+    outcome_template: "Compliance status: {{status}}. Outstanding items: {{items}}. Risk: {{risk}}"
+
+  - id: production_optimization
+    task: "Optimize production strategy for well {{well.name}} producing from reservoir {{reservoir.name}}"
+    steps:
+      - thought: "Analyze current production rate and decline curve"
+        action: "Query production history and calculate decline rate and EUR"
+      - thought: "Evaluate reservoir pressure and water cut trends"
+        action: "Review reservoir pressure data and water production ratios over time"
+      - thought: "Assess artificial lift optimization or stimulation potential"
+        action: "Check equipment status and compare production against offset wells"
+      - thought: "Model economic impact of proposed changes"
+        action: "Calculate incremental production and net revenue for each optimization option"
+    outcome_template: "Optimization: {{action}} with projected uplift of {{uplift}} bbl/day and ROI of {{roi}}%"
+
+  - id: environmental_risk_assessment
+    task: "Assess environmental risk for operations at well {{well.name}}"
+    steps:
+      - thought: "Review environmental inspection history and findings"
+        action: "Query inspections of type environmental for this well and nearby wells"
+      - thought: "Check for proximity to sensitive environmental features"
+        action: "Assess well location relative to waterways, habitats, and populated areas"
+      - thought: "Evaluate spill prevention and containment measures"
+        action: "Review equipment condition for containment integrity and leak detection"
+      - thought: "Assess regulatory exposure and potential liabilities"
+        action: "Check environmental permit conditions and violation history"
+    outcome_template: "Risk level: {{risk}}. Key concerns: {{concerns}}. Mitigation: {{mitigation}}"
+
+  - id: well_spacing_analysis
+    task: "Determine optimal spacing for new development wells in {{formation.name}} formation"
+    steps:
+      - thought: "Analyze production performance of existing wells by spacing"
+        action: "Query wells in this formation and correlate spacing with production rates"
+      - thought: "Evaluate reservoir characteristics affecting drainage area"
+        action: "Review porosity, permeability, and pressure data for the formation"
+      - thought: "Identify interference patterns between closely spaced wells"
+        action: "Compare production decline rates for closely vs widely spaced wells"
+      - thought: "Model economic returns at different spacing scenarios"
+        action: "Calculate NPV for each spacing option considering well cost and production"
+    outcome_template: "Optimal spacing: {{spacing}} ft. Expected EUR per well: {{eur}} Mbbl. NPV improvement: {{npv}}%"
+
+  - id: plug_and_abandon_decision
+    task: "Evaluate whether to plug and abandon well {{well.name}}"
+    steps:
+      - thought: "Assess remaining economic production potential"
+        action: "Calculate current production rate and projected remaining reserves"
+      - thought: "Estimate plug and abandonment costs and timing"
+        action: "Review well depth, casing configuration, and regulatory requirements for P&A"
+      - thought: "Evaluate environmental obligations and liability timeline"
+        action: "Check environmental permit obligations and bonding requirements"
+      - thought: "Consider alternative uses such as injection or observation"
+        action: "Assess suitability for conversion to disposal well or observation well"
+    outcome_template: "Decision: {{decision}}. P&A cost estimate: ${{cost}}. Timeline: {{timeline}}"
+
+  - id: formation_evaluation
+    task: "Evaluate hydrocarbon potential of {{formation.name}} formation for exploration well planning"
+    steps:
+      - thought: "Review geological characteristics and regional data"
+        action: "Query formation properties including lithology, thickness, and depth"
+      - thought: "Analyze nearby well results in the same formation"
+        action: "Search wells drilled in this formation and their production outcomes"
+      - thought: "Assess reservoir quality indicators"
+        action: "Review porosity, permeability, and hydrocarbon-bearing indicators"
+      - thought: "Estimate risk-weighted resource potential"
+        action: "Calculate estimated reserves using volumetric method and apply geologic risk factors"
+    outcome_template: "Evaluation: {{rating}}. Estimated resources: {{resources}} MMbbl. Geological risk: {{risk}}"
+
 demo_scenarios:
   - name: Production Operations
     prompts:

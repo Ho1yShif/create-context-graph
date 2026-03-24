@@ -30,12 +30,32 @@ if not os.environ.get("ANTHROPIC_API_KEY"):
 {% endraw %}
 
 
+_main_loop: asyncio.AbstractEventLoop | None = None
+
+
+def _capture_loop():
+    """Capture the running event loop. Must be called from async context."""
+    global _main_loop
+    _main_loop = asyncio.get_running_loop()
+
+
 def _run_sync(coro):
-    """Run an async coroutine from a synchronous worker thread."""
+    """Run an async coroutine from a synchronous worker thread.
+
+    Schedules the coroutine on the main event loop (captured at request time)
+    using ``run_coroutine_threadsafe`` so that asyncio.Queue operations and
+    Neo4j async driver calls stay on the correct loop.
+    """
+    loop = _main_loop
+    if loop is not None and loop.is_running():
+        future = asyncio.run_coroutine_threadsafe(coro, loop)
+        return future.result(timeout=30)
     return asyncio.run(coro)
 
 
-SYSTEM_PROMPT = """{{ system_prompt }}"""
+SYSTEM_PROMPT = """{{ system_prompt }}
+
+IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph."""
 
 # ---------------------------------------------------------------------------
 # Agent tools — domain-specific for {{ domain.name }}
@@ -116,6 +136,7 @@ async def handle_message(message: str, session_id: str | None = None) -> dict:
     else:
         input_message = message
 
+    _capture_loop()
     result = await asyncio.to_thread(agent, input_message)
 
     response_text = str(result)
