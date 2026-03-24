@@ -207,11 +207,11 @@ async def get_conversation_history(session_id: str, limit: int = 20) -> list[dic
     if _memory_client is None:
         return []
     try:
-        messages = await _memory_client.short_term.get_conversation(
+        conversation = await _memory_client.short_term.get_conversation(
             session_id=session_id,
             limit=limit,
         )
-        return [{"role": m.role, "content": m.content} for m in messages]
+        return [{"role": m.role, "content": m.content} for m in conversation.messages]
     except Exception as e:
         logger.warning("Failed to retrieve conversation history: %s", e)
         return []
