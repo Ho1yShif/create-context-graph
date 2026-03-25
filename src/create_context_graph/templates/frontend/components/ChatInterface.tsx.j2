@@ -34,6 +34,36 @@ interface ChatInterfaceProps {
 const STORAGE_KEY = `ccg-chat-history-${DOMAIN.id}`;
 const SESSION_KEY = `ccg-session-id-${DOMAIN.id}`;
 
+const THINKING_PATTERNS = [
+  /^let me /i, /^i'll /i, /^i will /i, /^first,? i /i,
+  /^now let me /i, /^let me also /i, /^let me try /i,
+  /^i need to /i, /^i should /i, /^let me check /i,
+  /^let me look /i, /^let me search /i, /^let me query /i,
+  /^let me find /i, /^now i'll /i, /^now i need /i,
+];
+
+function splitThinkingAndResponse(text: string): { thinking: string; response: string } {
+  const lines = text.split("\n");
+  const thinkingLines: string[] = [];
+  const responseLines: string[] = [];
+  let foundResponse = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!foundResponse && trimmed && THINKING_PATTERNS.some((p) => p.test(trimmed))) {
+      thinkingLines.push(line);
+    } else {
+      if (trimmed) foundResponse = true;
+      responseLines.push(line);
+    }
+  }
+
+  return {
+    thinking: thinkingLines.join("\n").trim(),
+    response: responseLines.join("\n").trim(),
+  };
+}
+
 function loadStoredMessages(): Message[] {
   try {
     const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -357,7 +387,29 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
             >
               {msg.role === "assistant" ? (
                 <Box fontSize="sm" className="markdown-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                  {(() => {
+                    const { thinking, response } = splitThinkingAndResponse(msg.content);
+                    return (
+                      <>
+                        {thinking && (
+                          <Collapsible.Root>
+                            <Collapsible.Trigger asChild>
+                              <Button variant="ghost" size="xs" mb={1} color="gray.500">
+                                <ChevronDown size={12} />
+                                Show reasoning
+                              </Button>
+                            </Collapsible.Trigger>
+                            <Collapsible.Content>
+                              <Box px={2} py={1} mb={2} bg="gray.50" borderRadius="sm" fontSize="xs" color="gray.600">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{thinking}</ReactMarkdown>
+                              </Box>
+                            </Collapsible.Content>
+                          </Collapsible.Root>
+                        )}
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{response || msg.content}</ReactMarkdown>
+                      </>
+                    );
+                  })()}
                   {msg.retryInput && (
                     <Button
                       size="xs"

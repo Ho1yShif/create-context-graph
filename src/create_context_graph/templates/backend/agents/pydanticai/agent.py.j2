@@ -56,7 +56,7 @@ agent = Agent(
 
 {% for tool in agent_tools %}
 @agent.tool
-async def {{ tool.name }}(ctx: RunContext[AgentDeps]{% for param in tool.parameters %}, {{ param.name }}: {{ 'str' if param.type == 'string' else 'int' if param.type == 'integer' else 'float' if param.type == 'float' else 'str' }}{% if param.default is not none %} = {{ param.default if param.type != 'string' else '"' + param.default + '"' }}{% endif %}{% endfor %}) -> list[dict]:
+async def {{ tool.name }}(ctx: RunContext[AgentDeps]{% for param in tool.parameters %}, {{ param.name }}: {{ 'str' if param.type == 'string' else 'int' if param.type == 'integer' else 'float' if param.type == 'float' else 'str' }}{% if param.default is not none %} = {{ param.default if param.type != 'string' else '"' + param.default + '"' }}{% endif %}{% endfor %}) -> str:
     """{{ tool.description }}"""
     cypher = """{{ tool.cypher | indent(4) }}"""
     params = {
@@ -64,25 +64,28 @@ async def {{ tool.name }}(ctx: RunContext[AgentDeps]{% for param in tool.paramet
         "{{ param.name }}": {{ param.name }},
 {% endfor %}
     }
-    return await execute_cypher(cypher, params, tool_name="{{ tool.name }}")
+    result = await execute_cypher(cypher, params, tool_name="{{ tool.name }}")
+    return json.dumps(result, default=str)
 
 {% endfor %}
 
 {% raw %}
 @agent.tool
-async def run_cypher(ctx: RunContext[AgentDeps], query: str, parameters: str = "{}") -> list[dict]:
+async def run_cypher(ctx: RunContext[AgentDeps], query: str, parameters: str = "{}") -> str:
     """Execute a read-only Cypher query against the knowledge graph."""
     try:
         params = json.loads(parameters) if parameters else {}
     except json.JSONDecodeError:
-        return [{"error": "Invalid JSON parameters"}]
-    return await execute_cypher(query, params, tool_name="run_cypher")
+        return json.dumps([{"error": "Invalid JSON parameters"}])
+    result = await execute_cypher(query, params, tool_name="run_cypher")
+    return json.dumps(result, default=str)
 
 
 @agent.tool
-async def get_graph_schema(ctx: RunContext[AgentDeps]) -> dict:
+async def get_graph_schema(ctx: RunContext[AgentDeps]) -> str:
     """Get the knowledge graph schema (node labels and relationship types)."""
-    return await get_schema()
+    result = await get_schema()
+    return json.dumps(result, default=str)
 
 
 # ---------------------------------------------------------------------------

@@ -84,11 +84,12 @@ async def _ingest_with_memory_client(
                 for item in items:
                     name = item.get("name", f"{label}-{entity_count}")
                     try:
+                        attrs = {**item, "domain": ontology.domain.id}
                         await client.long_term.add_entity(
                             name=name,
                             entity_type=pole_type,
                             description=item.get("description", f"{label}: {name}"),
-                            attributes=item,
+                            attributes=attrs,
                         )
                         entity_count += 1
                     except Exception as e:
@@ -223,10 +224,11 @@ async def _ingest_with_driver(
         async with driver.session() as session:
             for label, items in entities.items():
                 for item in items:
-                    props = ", ".join(f"{k}: ${k}" for k in item.keys())
+                    enriched = {**item, "domain": ontology.domain.id}
+                    props = ", ".join(f"{k}: ${k}" for k in enriched.keys())
                     cypher = f"MERGE (n:{label} {{{props}}})"
                     try:
-                        await session.run(cypher, item)
+                        await session.run(cypher, enriched)
                         entity_count += 1
                     except Exception as e:
                         console.print(f"  [yellow]Warning:[/yellow] Entity {item.get('name', '?')}: {e}")

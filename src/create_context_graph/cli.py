@@ -286,6 +286,7 @@ def main(
             config.neo4j_username,
             config.neo4j_password,
         )
+        console.print("  [dim]Tip: Use --reset-database if you previously ingested a different domain into this Neo4j instance.[/dim]")
 
     # Success message
     console.print()
@@ -301,7 +302,10 @@ def main(
         console.print(f"  [bold]make docker-up[/bold]    # Start Neo4j")
     elif config.neo4j_type == "local":
         console.print(f"  [bold]make neo4j-start[/bold]  # Start Neo4j (requires Node.js)")
-    console.print(f"  [bold]make seed[/bold]          # Seed sample data")
+    if ingest:
+        console.print(f"  [bold]make seed[/bold]          # Re-seed sample data (already ingested)")
+    else:
+        console.print(f"  [bold]make seed[/bold]          # Seed sample data")
     if config.saas_connectors:
         console.print(f"  [bold]make import[/bold]         # Re-import from connected services")
     console.print(f"  [bold]make start[/bold]         # Start backend + frontend")

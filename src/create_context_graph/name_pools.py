@@ -410,6 +410,51 @@ _INDUSTRY_POOL = [
     "Environmental Services", "Logistics",
 ]
 
+_CURRENCY_POOL = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "CNY", "INR", "BRL"]
+
+_TICKER_POOL = [
+    "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "JPM", "BAC", "WMT",
+    "JNJ", "PG", "UNH", "V", "HD", "MA", "DIS", "NVDA", "PFE", "KO",
+]
+
+_DRUG_CLASS_POOL = [
+    "Biguanide", "ACE Inhibitor", "Statin", "Beta-Blocker", "SSRI",
+    "Anticoagulant", "Proton Pump Inhibitor", "Calcium Channel Blocker",
+    "Opioid Analgesic", "Benzodiazepine", "Diuretic", "Corticosteroid",
+]
+
+_STATUS_POOL = ["active", "inactive", "pending", "completed", "in_progress", "under_review"]
+
+_SEVERITY_POOL = ["low", "medium", "high", "critical"]
+
+_LANGUAGE_POOL = [
+    "English", "Spanish", "French", "Mandarin", "German",
+    "Japanese", "Portuguese", "Arabic", "Hindi", "Korean",
+]
+
+_COUNTRY_POOL = [
+    "United States", "United Kingdom", "Canada", "Germany", "France",
+    "Japan", "Australia", "Brazil", "India", "South Korea",
+    "Mexico", "Italy", "Spain", "Netherlands", "Sweden",
+]
+
+_COMPLAINT_POOL = [
+    "Chest pain", "Shortness of breath", "Headache", "Abdominal pain",
+    "Back pain", "Fever", "Cough", "Dizziness", "Fatigue",
+    "Joint pain", "Nausea", "Skin rash",
+]
+
+_DISPOSITION_POOL = [
+    "Discharged", "Admitted", "Transferred", "Observation",
+    "Against Medical Advice", "Follow-up scheduled",
+]
+
+_SPECIALTY_POOL = [
+    "Cardiology", "Oncology", "Neurology", "Orthopedics",
+    "Pediatrics", "Internal Medicine", "Emergency Medicine",
+    "Radiology", "Dermatology", "Psychiatry",
+]
+
 
 # ---------------------------------------------------------------------------
 # Value generators
@@ -549,14 +594,48 @@ def generate_property_value(
         return generate_latitude()
     if name_lower == "longitude" or name_lower in ("lon", "lng"):
         return generate_longitude()
+    if name_lower == "currency":
+        return _CURRENCY_POOL[index % len(_CURRENCY_POOL)]
+    if name_lower in ("ticker", "symbol", "stock_symbol"):
+        return _TICKER_POOL[index % len(_TICKER_POOL)]
+    if name_lower == "drug_class":
+        return _DRUG_CLASS_POOL[index % len(_DRUG_CLASS_POOL)]
+    if name_lower == "scientific_name":
+        return entity_name
+    if name_lower == "status":
+        return _STATUS_POOL[index % len(_STATUS_POOL)]
+    if name_lower in ("severity", "priority"):
+        return _SEVERITY_POOL[index % len(_SEVERITY_POOL)]
+    if name_lower in ("language", "primary_language"):
+        return _LANGUAGE_POOL[index % len(_LANGUAGE_POOL)]
+    if name_lower in ("country", "nationality", "country_of_origin"):
+        return _COUNTRY_POOL[index % len(_COUNTRY_POOL)]
+    if name_lower in ("gender", "sex"):
+        return random.choice(["Male", "Female", "Non-binary"])
+    if name_lower == "blood_type":
+        return random.choice(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
+    if name_lower in ("chief_complaint", "complaint"):
+        return _COMPLAINT_POOL[index % len(_COMPLAINT_POOL)]
+    if name_lower == "disposition":
+        return _DISPOSITION_POOL[index % len(_DISPOSITION_POOL)]
+    if name_lower in ("specialty", "specialization"):
+        return _SPECIALTY_POOL[index % len(_SPECIALTY_POOL)]
 
     # Handle by type
     if prop_type in ("string", "str"):
         if name_lower in _DESCRIPTION_PROPERTIES:
-            return f"{label} record for {entity_name}. Created as part of the {label.lower()} management workflow."
+            _desc_templates = [
+                f"Comprehensive {label.lower()} profile for {entity_name}.",
+                f"{entity_name} — detailed {label.lower()} information and attributes.",
+                f"Full {label.lower()} data for {entity_name}, including key metrics and history.",
+            ]
+            return _desc_templates[index % len(_desc_templates)]
         if any(id_word in name_lower for id_word in ("_id", "code", "number", "identifier")):
             prefix = LABEL_ID_PREFIXES.get(label, label[:3].upper())
             return generate_id(prefix, index)
+        # Return entity_name for name-like fields, or a contextual value
+        if "name" in name_lower or "label" in name_lower:
+            return entity_name
         return f"{entity_name} - {prop_name.replace('_', ' ').title()}"
     if prop_type in ("integer", "int"):
         if "count" in name_lower or "quantity" in name_lower:
@@ -565,6 +644,10 @@ def generate_property_value(
             return random.choice([2023, 2024, 2025, 2026])
         if "age" in name_lower:
             return random.randint(18, 75)
+        if "size" in name_lower:
+            return random.randint(100, 1000000)
+        if "score" in name_lower or "rating" in name_lower:
+            return random.randint(1, 100)
         return random.randint(10, 10000)
     if prop_type == "float":
         if "price" in name_lower or "cost" in name_lower or "amount" in name_lower or "balance" in name_lower:
@@ -573,6 +656,10 @@ def generate_property_value(
             return round(random.uniform(0.5, 500.0), 2)
         if "rate" in name_lower or "percentage" in name_lower:
             return round(random.uniform(0.01, 0.99), 4)
+        if "confidence" in name_lower or "score" in name_lower or "rating" in name_lower:
+            return round(random.uniform(0.5, 1.0), 2)
+        if "efficiency" in name_lower or "accuracy" in name_lower or "utilization" in name_lower:
+            return round(random.uniform(60.0, 99.0), 1)
         return round(random.uniform(1.0, 1000.0), 2)
     if prop_type in ("boolean", "bool"):
         return random.choice([True, False])

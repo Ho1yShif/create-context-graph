@@ -575,11 +575,62 @@ Comprehensive testing of v0.4.6 revealed that 6 of 9 agent frameworks were non-f
 
 ---
 
+## Phase 11 — v0.5.1 Testing Feedback Fixes
+
+Comprehensive end-to-end testing of v0.5.0 across all 9 framework/domain combinations revealed 3 critical framework bugs, data quality issues, and UX improvements. This phase addresses all actionable findings from the testing feedback.
+
+### Critical: Framework Bug Fixes
+
+- **PydanticAI tool serialization**: Changed all `@agent.tool` return types from `list[dict]` to `str` with `json.dumps(result, default=str)`. PydanticAI was the only framework returning raw Neo4j objects, causing silent serialization failures that prevented the LLM from seeing tool results.
+- **Google ADK agent name sanitization**: Added `| replace('-', '_')` to the agent name template. Hyphenated domain IDs (e.g., `real-estate`, `financial-services`) produced invalid Python identifiers like `real-estate_agent`, crashing ADK's `LlmAgent` validator.
+- **Strands max_tokens configuration**: Added `max_tokens=4096` to `AnthropicModel()` initialization. The Anthropic API requires this parameter; without it, Strands returned a `'max_tokens'` KeyError.
+
+### Cross-Domain Data Isolation
+
+- **Domain property on entities**: Both ingestion paths (MemoryClient and direct driver) now add `domain=ontology.domain.id` to all entity nodes. Enables future domain-scoped queries when sharing a Neo4j instance.
+- **CLI ingestion tip**: After `--ingest`, prints "Tip: Use --reset-database if you previously ingested a different domain into this Neo4j instance."
+- **Conditional make seed messaging**: Post-scaffold instructions now distinguish between "Seed sample data" (no `--ingest`) and "Re-seed sample data (already ingested)" (with `--ingest`).
+
+### Static Data Quality Improvements
+
+- **12 new property-specific value pools** in `name_pools.py`: `_CURRENCY_POOL` (USD, EUR, GBP...), `_TICKER_POOL` (AAPL, MSFT...), `_DRUG_CLASS_POOL` (Biguanide, ACE Inhibitor...), `_STATUS_POOL`, `_SEVERITY_POOL`, `_LANGUAGE_POOL`, `_COUNTRY_POOL`, `_COMPLAINT_POOL`, `_DISPOSITION_POOL`, `_SPECIALTY_POOL`, plus blood_type and gender handling.
+- **Float value clamping**: `confidence`/`score`/`rating` fields clamped to 0.0-1.0 range. `efficiency`/`accuracy`/`utilization` clamped to 60-99%. Prevents absurd values like confidence=552.92.
+- **Improved description templates**: Replaced generic "X record for Y. Created as part of the Z management workflow." with varied, natural-sounding descriptions.
+
+### Frontend UX
+
+- **Agent thinking text filter**: New `splitThinkingAndResponse()` function in `ChatInterface.tsx.j2` detects "thinking" patterns (lines starting with "Let me", "I'll", "First, I need to", etc.) and renders them in a collapsible "Show reasoning" `<Collapsible>` section, keeping responses focused.
+
+### Developer Experience
+
+- **HuggingFace warning suppression**: Added `HF_HUB_DISABLE_TELEMETRY=1` to `.env` and `.env.example` templates to suppress unauthenticated Hub warnings on backend startup.
+
+### Tests added (75 new → 510 total)
+
+- `TestCypherQueryValidation` — 66 tests: validates node labels, relationship types, and deprecated syntax across all 22 domain YAMLs' agent_tools Cypher queries
+- `TestV051Regressions` — 9 tests: PydanticAI returns `str` not `list[dict]`, Google ADK agent names have no hyphens, Strands has max_tokens, .env has HF telemetry setting, confidence/currency/ticker values are realistic, descriptions have no boilerplate, ChatInterface has thinking filter
+
+### Files modified
+
+- `src/create_context_graph/templates/backend/agents/pydanticai/agent.py.j2` — tool return type `str` + `json.dumps()`
+- `src/create_context_graph/templates/backend/agents/google_adk/agent.py.j2` — agent name hyphen sanitization
+- `src/create_context_graph/templates/backend/agents/strands/agent.py.j2` — `max_tokens=4096`
+- `src/create_context_graph/name_pools.py` — 12 new property pools, float clamping, description improvements
+- `src/create_context_graph/ingest.py` — `domain` property on all entities (both ingestion paths)
+- `src/create_context_graph/cli.py` — post-ingest tip, conditional `make seed` messaging
+- `src/create_context_graph/templates/frontend/components/ChatInterface.tsx.j2` — thinking text filter with collapsible reasoning
+- `src/create_context_graph/templates/base/dot_env.j2` — `HF_HUB_DISABLE_TELEMETRY=1`
+- `src/create_context_graph/templates/base/dot_env_example.j2` — HF telemetry + token guidance
+- `tests/test_ontology.py` — `TestCypherQueryValidation` class (66 tests)
+- `tests/test_generated_project.py` — `TestV051Regressions` class (9 tests)
+
+---
+
 ## Summary
 
 | Phase | Description | Status | Tests |
 |-------|-------------|--------|-------|
-| 1 | Core CLI & Template Engine | **Complete** | 435 passing |
+| 1 | Core CLI & Template Engine | **Complete** | 510 passing |
 | 2 | Domain Expansion & Data Generation | **Complete** | (included above) |
 | 3 | Framework Templates & Frontend | **Complete** | (included above) |
 | 4 | SaaS Import & Custom Domains | **Complete** | (included above) |
@@ -591,3 +642,4 @@ Comprehensive testing of v0.4.6 revealed that 6 of 9 agent frameworks were non-f
 | 8 | Streaming Chat & Real-Time Tool Viz | **Complete** | (included above) |
 | 9 | QA Hardening & DX Polish | **Complete** | (included above) |
 | 10 | Framework Reliability, Data Quality & UX | **Complete** | (included above) |
+| 11 | v0.5.1 Testing Feedback Fixes | **Complete** | (included above) |

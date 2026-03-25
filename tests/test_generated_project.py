@@ -1131,3 +1131,119 @@ class TestDomainSpecificNamePools:
         names = get_names_for_label("UnknownLabel", "PERSON", 3)
         # Should fall back to PERSON_NAMES pool
         assert len(names) == 3
+
+
+class TestV051Regressions:
+    """Regression tests for v0.5.1 bug fixes."""
+
+    def test_pydanticai_tools_return_json_string(self, tmp_path):
+        """PydanticAI tools must return str (JSON-serialized), not list[dict]."""
+        config = ProjectConfig(
+            project_name="pydantic-fix",
+            domain="healthcare",
+            framework="pydanticai",
+        )
+        ontology = load_domain("healthcare")
+        out = tmp_path / "pydantic-fix"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+
+        agent_source = (out / "backend" / "app" / "agent.py").read_text()
+        # Tools should return str, not list[dict]
+        assert "-> str:" in agent_source
+        assert "-> list[dict]:" not in agent_source
+        # Should use json.dumps for serialization
+        assert "json.dumps" in agent_source
+        compile(agent_source, "agent.py", "exec")
+
+    def test_google_adk_agent_name_no_hyphens(self, tmp_path):
+        """Google ADK agent name must not contain hyphens (invalid identifier)."""
+        for domain_id in ["real-estate", "financial-services", "oil-gas"]:
+            config = ProjectConfig(
+                project_name=f"adk-{domain_id}",
+                domain=domain_id,
+                framework="google-adk",
+            )
+            ontology = load_domain(domain_id)
+            out = tmp_path / f"adk-{domain_id}"
+            renderer = ProjectRenderer(config, ontology)
+            renderer.render(out)
+
+            agent_source = (out / "backend" / "app" / "agent.py").read_text()
+            # Extract the agent name= value
+            import re
+            match = re.search(r'name="(\w+)"', agent_source)
+            assert match, f"Could not find agent name in {domain_id}"
+            agent_name = match.group(1)
+            assert "-" not in agent_name, (
+                f"Agent name '{agent_name}' contains hyphens for domain {domain_id}"
+            )
+            assert agent_name.isidentifier(), (
+                f"Agent name '{agent_name}' is not a valid Python identifier"
+            )
+
+    def test_strands_has_max_tokens(self, tmp_path):
+        """Strands AnthropicModel must include max_tokens parameter."""
+        config = ProjectConfig(
+            project_name="strands-fix",
+            domain="trip-planning",
+            framework="strands",
+        )
+        ontology = load_domain("trip-planning")
+        out = tmp_path / "strands-fix"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+
+        agent_source = (out / "backend" / "app" / "agent.py").read_text()
+        assert "max_tokens" in agent_source
+        compile(agent_source, "agent.py", "exec")
+
+    def test_env_has_hf_telemetry_setting(self, tmp_path):
+        """Generated .env should suppress HuggingFace warnings."""
+        config = ProjectConfig(
+            project_name="hf-fix",
+            domain="healthcare",
+            framework="pydanticai",
+        )
+        ontology = load_domain("healthcare")
+        out = tmp_path / "hf-fix"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+
+        env_content = (out / ".env").read_text()
+        assert "HF_HUB_DISABLE_TELEMETRY" in env_content
+
+    def test_name_pools_confidence_clamped(self):
+        """Confidence/score/rating float values should be clamped to 0-1 range."""
+        from create_context_graph.name_pools import generate_property_value
+        for _ in range(20):
+            val = generate_property_value("confidence", "float", "Test", "Decision", 0)
+            assert 0.0 <= val <= 1.0, f"confidence={val} out of range"
+            val = generate_property_value("efficiency_rating", "float", "Line A", "ProductionLine", 0)
+            assert 0.0 <= val <= 100.0, f"efficiency_rating={val} out of range"
+
+    def test_name_pools_currency_realistic(self):
+        """Currency property should return actual currency codes, not template strings."""
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("currency", "string", "Wire Transfer", "Transaction", 0)
+        assert val in ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "CNY", "INR", "BRL"]
+
+    def test_name_pools_ticker_realistic(self):
+        """Ticker property should return actual ticker symbols."""
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("ticker", "string", "Apple Inc", "Security", 0)
+        assert len(val) <= 5 and val.isupper()
+
+    def test_name_pools_description_no_workflow(self):
+        """Description values should not contain 'management workflow' boilerplate."""
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("description", "string", "Test Entity", "Patient", 0)
+        assert "management workflow" not in val
+
+    def test_chat_interface_has_thinking_filter(self, generated_project):
+        """ChatInterface should have thinking text separation logic."""
+        out, _ = generated_project
+        chat = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "splitThinkingAndResponse" in chat
+        assert "THINKING_PATTERNS" in chat
+        assert "Show reasoning" in chat

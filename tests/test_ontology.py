@@ -14,6 +14,8 @@
 
 """Unit tests for the ontology module."""
 
+import re
+
 import pytest
 
 from create_context_graph.ontology import (
@@ -303,3 +305,75 @@ class TestEnumModelsCompileAllDomains:
             compile(source, f"{domain_id}/models.py", "exec")
         except SyntaxError as e:
             pytest.fail(f"models.py syntax error for {domain_id}: {e}")
+
+
+class TestCypherQueryValidation:
+    """Validate that agent_tools Cypher queries reference valid schema elements."""
+
+    ALL_DOMAINS = [d["id"] for d in list_available_domains()]
+
+    @staticmethod
+    def _extract_labels(cypher: str) -> set[str]:
+        """Extract node labels from Cypher patterns like (n:Label) or (n:Label {})."""
+        return set(re.findall(r"\(\w*:(\w+)", cypher))
+
+    @staticmethod
+    def _extract_rel_types(cypher: str) -> set[str]:
+        """Extract relationship types from Cypher patterns like -[:TYPE]- or -[r:TYPE]-."""
+        # Match :TYPE in relationship patterns, handling pipe-separated alternatives
+        raw = re.findall(r"\[[\w*]*:([A-Z_|]+)\]", cypher)
+        types = set()
+        for match in raw:
+            for t in match.split("|"):
+                t = t.strip().lstrip(":")
+                if t:
+                    types.add(t)
+        return types
+
+    @pytest.mark.parametrize("domain_id", ALL_DOMAINS)
+    def test_cypher_labels_exist_in_schema(self, domain_id):
+        """All node labels in agent_tools Cypher must exist in entity_types."""
+        ontology = load_domain(domain_id)
+        valid_labels = {et.label for et in ontology.entity_types}
+        # Add common Neo4j built-in labels
+        valid_labels.update({"Document", "DecisionTrace", "TraceStep", "Message"})
+
+        for tool in ontology.agent_tools:
+            labels = self._extract_labels(tool.cypher)
+            unknown = labels - valid_labels
+            if unknown:
+                pytest.fail(
+                    f"Domain '{domain_id}', tool '{tool.name}': "
+                    f"Cypher references unknown labels {unknown}. "
+                    f"Valid labels: {sorted(valid_labels)}"
+                )
+
+    @pytest.mark.parametrize("domain_id", ALL_DOMAINS)
+    def test_cypher_rel_types_exist_in_schema(self, domain_id):
+        """All relationship types in agent_tools Cypher must exist in relationships."""
+        ontology = load_domain(domain_id)
+        valid_rels = {r.type for r in ontology.relationships}
+        # Add common relationship types used by neo4j-agent-memory and built-in
+        valid_rels.update({"MENTIONS", "HAS_STEP", "HAS_DOCUMENT"})
+
+        for tool in ontology.agent_tools:
+            rel_types = self._extract_rel_types(tool.cypher)
+            unknown = rel_types - valid_rels
+            if unknown:
+                pytest.fail(
+                    f"Domain '{domain_id}', tool '{tool.name}': "
+                    f"Cypher references unknown relationship types {unknown}. "
+                    f"Valid types: {sorted(valid_rels)}"
+                )
+
+    @pytest.mark.parametrize("domain_id", ALL_DOMAINS)
+    def test_no_deprecated_colon_syntax_in_rel_patterns(self, domain_id):
+        """Check for deprecated :TYPE1|:TYPE2 syntax (should be TYPE1|TYPE2)."""
+        ontology = load_domain(domain_id)
+        for tool in ontology.agent_tools:
+            if re.search(r"\|:", tool.cypher):
+                pytest.fail(
+                    f"Domain '{domain_id}', tool '{tool.name}': "
+                    f"Uses deprecated colon syntax in pipe-separated relationship "
+                    f"pattern (e.g., ':TYPE1|:TYPE2'). Use 'TYPE1|TYPE2' instead."
+                )

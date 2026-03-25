@@ -274,12 +274,76 @@ uv venv && uv pip install -e ".[dev]"
 
 # Run tests (no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 435 tests
-pytest tests/ -v --slow        # Full: 633 tests (includes 176-combo domain x framework matrix + 22 perf tests)
+pytest tests/ -v               # Fast: 510 tests
+pytest tests/ -v --slow        # Full: 708 tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
 create-context-graph /tmp/test-app --domain software-engineering --framework pydanticai --demo-data
 ```
+
+### Makefile Targets
+
+| Target | Description | Requirements |
+|--------|-------------|--------------|
+| `make test` | Run fast unit tests (510 tests) | None |
+| `make test-slow` | Full suite including matrix + perf (708 tests) | None |
+| `make test-matrix` | Domain × framework matrix only (176 combos) | None |
+| `make test-coverage` | Tests with HTML coverage report | None |
+| `make smoke-test` | E2E smoke tests for 3 key frameworks | Neo4j + LLM API keys |
+| `make lint` | Run ruff linter | ruff |
+| `make scaffold` | Scaffold a test project to `/tmp/test-scaffold` | None |
+| `make build` | Build Python package (sdist + wheel) | None |
+| `make docs` | Start Docusaurus dev server | Node.js |
+
+### E2E Smoke Tests
+
+The smoke tests scaffold a real project, install dependencies, start the backend, and send chat prompts to verify the full pipeline works end-to-end. They test the 3 frameworks that had critical bug fixes in v0.5.1:
+
+```bash
+# Run all 3 smoke tests (requires Neo4j + at least one LLM API key)
+make smoke-test
+
+# Or run individual framework tests directly
+python scripts/e2e_smoke_test.py --domain financial-services --framework pydanticai --quick
+python scripts/e2e_smoke_test.py --domain real-estate --framework google-adk --quick
+python scripts/e2e_smoke_test.py --domain trip-planning --framework strands --quick
+
+# Test all 22 domains with one framework
+python scripts/e2e_smoke_test.py --all-domains --framework pydanticai --quick
+
+# Full mode (all prompts per scenario, not just first)
+python scripts/e2e_smoke_test.py --domain healthcare --framework claude-agent-sdk
+```
+
+**Required environment variables:**
+- `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` — Neo4j connection (Aura, Docker, or local)
+- `ANTHROPIC_API_KEY` — for Claude-based frameworks (PydanticAI, Claude Agent SDK, Anthropic Tools, Strands, CrewAI)
+- `OPENAI_API_KEY` — for OpenAI-based frameworks (OpenAI Agents, LangGraph)
+- `GOOGLE_API_KEY` — for Google ADK (Gemini)
+
+### CI Pipeline
+
+GitHub Actions (`.github/workflows/ci.yml`) runs automatically:
+
+| Job | Trigger | Description |
+|-----|---------|-------------|
+| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 |
+| **lint** | All pushes + PRs | Ruff linter on `src/` and `tests/` |
+| **matrix** | Push to `main` only | All 176 domain × framework scaffold combinations |
+| **smoke-test** | Push to `main` only | E2E tests for all 8 frameworks (scaffold → install → start → chat) |
+
+The smoke-test CI job is gated behind a `SMOKE_TESTS_ENABLED` repository variable. To enable it:
+
+1. Go to **Settings → Variables → Repository variables** and add `SMOKE_TESTS_ENABLED` = `true`
+2. Go to **Settings → Secrets → Repository secrets** and add:
+   - `NEO4J_URI` — e.g., `neo4j+s://xxxxx.databases.neo4j.io`
+   - `NEO4J_USERNAME`
+   - `NEO4J_PASSWORD`
+   - `ANTHROPIC_API_KEY`
+   - `OPENAI_API_KEY`
+   - `GOOGLE_API_KEY`
+
+The smoke-test job uses `fail-fast: false` so one framework failure doesn't block the others, and it only runs after the unit test job passes.
 
 ## Publishing
 
