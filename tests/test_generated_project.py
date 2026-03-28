@@ -1420,3 +1420,177 @@ class TestV052FrontendFixes:
         assert "error" in chat.lower()
         # Check for the error detection logic
         assert "\\berror\\b" in chat or "error" in chat
+
+
+class TestV060GoogleApiKey:
+    """Tests for v0.6.0 Google API key support."""
+
+    def test_env_has_google_api_key(self, tmp_path):
+        """Generated .env should include GOOGLE_API_KEY."""
+        config = ProjectConfig(
+            project_name="adk-test",
+            domain="healthcare",
+            framework="google-adk",
+            google_api_key="test-google-key",
+        )
+        ontology = load_domain("healthcare")
+        out = tmp_path / "adk-test"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        env_content = (out / ".env").read_text()
+        assert "GOOGLE_API_KEY=test-google-key" in env_content
+
+    def test_env_example_has_google_api_key(self, tmp_path):
+        """Generated .env.example should document GOOGLE_API_KEY."""
+        config = ProjectConfig(
+            project_name="adk-example",
+            domain="healthcare",
+            framework="google-adk",
+        )
+        ontology = load_domain("healthcare")
+        out = tmp_path / "adk-example"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        env_example = (out / ".env.example").read_text()
+        assert "GOOGLE_API_KEY" in env_example
+
+
+class TestV060CrewAIFix:
+    """Tests for v0.6.0 CrewAI explicit LLM config."""
+
+    def test_crewai_has_explicit_llm(self, tmp_path):
+        """CrewAI agent should configure LLM explicitly."""
+        config = ProjectConfig(
+            project_name="crewai-llm",
+            domain="healthcare",
+            framework="crewai",
+        )
+        ontology = load_domain("healthcare")
+        out = tmp_path / "crewai-llm"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_source = (out / "backend" / "app" / "agent.py").read_text()
+        assert "llm=" in agent_source, "CrewAI should configure LLM explicitly"
+        assert "anthropic/" in agent_source, "CrewAI should use Anthropic provider"
+
+    def test_crewai_has_logging(self, tmp_path):
+        """CrewAI agent should have logging."""
+        config = ProjectConfig(
+            project_name="crewai-log",
+            domain="healthcare",
+            framework="crewai",
+        )
+        ontology = load_domain("healthcare")
+        out = tmp_path / "crewai-log"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_source = (out / "backend" / "app" / "agent.py").read_text()
+        assert "logger" in agent_source, "CrewAI should use logging"
+
+
+class TestV060StrandsFix:
+    """Tests for v0.6.0 Strands result extraction fix."""
+
+    def test_strands_has_extract_text(self, tmp_path):
+        """Strands agent should have robust text extraction."""
+        config = ProjectConfig(
+            project_name="strands-extract",
+            domain="healthcare",
+            framework="strands",
+        )
+        ontology = load_domain("healthcare")
+        out = tmp_path / "strands-extract"
+        renderer = ProjectRenderer(config, ontology)
+        renderer.render(out)
+        agent_source = (out / "backend" / "app" / "agent.py").read_text()
+        assert "_extract_text" in agent_source, "Strands should have _extract_text helper"
+        assert "hasattr" in agent_source, "Should check for various result attributes"
+
+
+class TestV060DomainAwareNamePools:
+    """Tests for v0.6.0 domain-aware base entity pools."""
+
+    def test_healthcare_person_names_are_medical(self):
+        from create_context_graph.name_pools import get_names_for_pole_type
+        names = get_names_for_pole_type("PERSON", 5, domain_id="healthcare")
+        # Healthcare person names should include "Dr." or "Nurse" prefixes
+        assert any("Dr." in n or "Nurse" in n or "Pharmacist" in n for n in names)
+
+    def test_generic_person_names_without_domain(self):
+        from create_context_graph.name_pools import get_names_for_pole_type
+        names = get_names_for_pole_type("PERSON", 5)
+        # Without domain, should use generic names
+        assert not any("Dr." in n for n in names)
+
+    def test_contraindications_not_templated(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("contraindications", "string", "Metformin", "Medication", 0)
+        assert " - " not in val, "Contraindications should not use template pattern"
+
+    def test_dosage_form_realistic(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("dosage_form", "string", "Metformin", "Medication", 0)
+        assert val in ["Tablet", "Capsule", "Injectable", "Oral Solution", "Topical Cream",
+                        "Inhaler", "Transdermal Patch", "Suppository", "Sublingual Tablet",
+                        "Extended-Release Tablet", "Chewable Tablet", "Nasal Spray"]
+
+    def test_allergies_realistic(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("allergies", "string", "Patient A", "Patient", 0)
+        assert " - " not in val, "Allergies should not use template pattern"
+
+    def test_sector_realistic(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("sector", "string", "Apple Inc", "Security", 0)
+        assert val in ["Technology", "Healthcare", "Financial Services", "Energy",
+                        "Consumer Discretionary", "Industrials", "Real Estate",
+                        "Utilities", "Materials", "Communications", "Consumer Staples"]
+
+    def test_domain_aware_roles(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("role", "string", "Sarah", "Person", 0, domain_id="healthcare")
+        healthcare_roles = ["Attending Physician", "Charge Nurse", "Resident", "Pharmacist",
+                           "Lab Technician", "Radiologist", "Physical Therapist", "Surgeon"]
+        assert val in healthcare_roles
+
+    def test_population_trend_realistic(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("population_trend", "string", "Tiger", "Species", 0)
+        assert val in ["increasing", "stable", "decreasing", "unknown"]
+
+
+class TestV060ChatInterfaceUI:
+    """Tests for v0.6.0 ChatInterface UI improvements."""
+
+    def test_chat_has_avatars(self, generated_project):
+        """ChatInterface should have user and assistant avatars."""
+        out, _ = generated_project
+        chat = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "Bot" in chat, "Should import Bot icon"
+        assert "User" in chat, "Should import User icon"
+        assert "Circle" in chat, "Should use Circle for avatar"
+
+    def test_chat_has_keyboard_hint(self, generated_project):
+        """ChatInterface should show keyboard shortcut hint."""
+        out, _ = generated_project
+        chat = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "Enter to send" in chat, "Should show Enter hint"
+        assert "Shift+Enter" in chat, "Should show Shift+Enter hint"
+
+    def test_chat_suggested_questions_no_truncation(self, generated_project):
+        """Suggested questions should not truncate with 60 char limit."""
+        out, _ = generated_project
+        chat = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "slice(0, 60)" not in chat, "Should not truncate at 60 chars"
+
+    def test_chat_has_sparkles_icon(self, generated_project):
+        """Suggested questions should use Sparkles icon."""
+        out, _ = generated_project
+        chat = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "Sparkles" in chat, "Should import Sparkles icon"
+
+    def test_chat_tool_progress_counter(self, generated_project):
+        """Loading state should show tool progress count."""
+        out, _ = generated_project
+        chat = (out / "frontend" / "components" / "ChatInterface.tsx").read_text()
+        assert "Running tool" in chat, "Should show running tool count"

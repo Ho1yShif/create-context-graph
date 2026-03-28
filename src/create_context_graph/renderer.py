@@ -110,6 +110,7 @@ class ProjectRenderer:
             "neo4j_type": self.config.neo4j_type,
             "anthropic_api_key": self.config.anthropic_api_key or "",
             "openai_api_key": self.config.openai_api_key or "",
+            "google_api_key": self.config.google_api_key or "",
             "system_prompt": self.ontology.system_prompt,
             "cypher_schema": generate_cypher_schema(self.ontology),
             "pydantic_models": generate_pydantic_models(self.ontology),

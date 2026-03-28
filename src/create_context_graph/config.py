@@ -74,6 +74,7 @@ class ProjectConfig(BaseModel):
     neo4j_type: Literal["docker", "existing", "aura", "local"] = Field(default="docker")
     anthropic_api_key: str | None = Field(default=None)
     openai_api_key: str | None = Field(default=None)
+    google_api_key: str | None = Field(default=None)
     generate_data: bool = Field(default=False)
     custom_domain_yaml: str | None = Field(default=None, exclude=True)
     saas_connectors: list[str] = Field(default_factory=list)

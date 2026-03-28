@@ -120,51 +120,82 @@ async def _ingest_with_memory_client(
                     console.print(f"  [yellow]Warning:[/yellow] Relationship {rel.get('type', '?')}: {e}")
             console.print(f"  Created {rel_count} relationships")
 
-            # Step 3: Ingest documents (Short-term memory)
+            # Step 3: Ingest documents as :Document nodes (direct Cypher)
             task = progress.add_task("[3/4] Ingesting documents...", total=None)
             doc_count = 0
             documents = fixture_data.get("documents", [])
-            session_id = f"demo-{ontology.domain.id}"
             for doc in documents:
                 try:
-                    await client.short_term.add_message(
-                        session_id=session_id,
-                        role="assistant",
-                        content=doc["content"],
-                        metadata={
-                            "document_type": doc.get("template_id", "unknown"),
+                    cypher = """
+                    MERGE (d:Document {title: $title})
+                    SET d.content = $content,
+                        d.template_id = $template_id,
+                        d.template_name = $template_name,
+                        d.domain = $domain
+                    """
+                    await client.graph.execute_write(
+                        cypher,
+                        {
                             "title": doc.get("title", ""),
+                            "content": doc.get("content", ""),
+                            "template_id": doc.get("template_id", ""),
+                            "template_name": doc.get("template_name", ""),
                             "domain": ontology.domain.id,
                         },
                     )
                     doc_count += 1
                 except Exception as e:
                     console.print(f"  [yellow]Warning:[/yellow] Document: {e}")
+            # Link documents to mentioned entities
+            if doc_count > 0:
+                try:
+                    link_cypher = """
+                    MATCH (d:Document) WHERE d.domain = $domain
+                    MATCH (e) WHERE e.name IS NOT NULL
+                      AND NOT 'Document' IN labels(e)
+                      AND NOT 'DecisionTrace' IN labels(e)
+                      AND NOT 'TraceStep' IN labels(e)
+                      AND (e.domain IS NULL OR e.domain = $domain)
+                      AND d.content CONTAINS e.name
+                    MERGE (d)-[:MENTIONS]->(e)
+                    """
+                    await client.graph.execute_write(
+                        link_cypher, {"domain": ontology.domain.id}
+                    )
+                except Exception as e:
+                    console.print(f"  [yellow]Warning:[/yellow] Document links: {e}")
             progress.update(task, description=f"[3/4] Ingested {doc_count} documents")
 
-            # Step 4: Ingest decision traces (Reasoning memory)
+            # Step 4: Ingest decision traces as :DecisionTrace/:TraceStep nodes
             task = progress.add_task("[4/4] Ingesting decision traces...", total=None)
             trace_count = 0
             traces = fixture_data.get("traces", [])
             for trace_data in traces:
                 try:
-                    trace = await client.reasoning.start_trace(
-                        session_id=session_id,
-                        task=trace_data["task"],
+                    await client.graph.execute_write(
+                        "MERGE (t:DecisionTrace {id: $id}) "
+                        "SET t.task = $task, t.outcome = $outcome, t.domain = $domain",
+                        {
+                            "id": trace_data.get("id", ""),
+                            "task": trace_data.get("task", ""),
+                            "outcome": trace_data.get("outcome", ""),
+                            "domain": ontology.domain.id,
+                        },
                     )
                     for i, step in enumerate(trace_data.get("steps", [])):
-                        await client.reasoning.add_step(
-                            trace_id=trace.id,
-                            step_number=i + 1,
-                            thought=step.get("thought", ""),
-                            action=step.get("action", ""),
-                            observation=step.get("observation", ""),
+                        await client.graph.execute_write(
+                            "MATCH (t:DecisionTrace {id: $trace_id}) "
+                            "MERGE (s:TraceStep {trace_id: $trace_id, step_number: $step_number}) "
+                            "SET s.thought = $thought, s.action = $action, s.observation = $observation "
+                            "MERGE (t)-[:HAS_STEP]->(s)",
+                            {
+                                "trace_id": trace_data.get("id", ""),
+                                "step_number": i + 1,
+                                "thought": step.get("thought", ""),
+                                "action": step.get("action", ""),
+                                "observation": step.get("observation", ""),
+                            },
                         )
-                    await client.reasoning.complete_trace(
-                        trace_id=trace.id,
-                        outcome=trace_data.get("outcome", "Completed"),
-                        success=True,
-                    )
                     trace_count += 1
                 except Exception as e:
                     console.print(f"  [yellow]Warning:[/yellow] Trace: {e}")
@@ -204,7 +235,7 @@ async def _ingest_with_driver(
     ) as progress:
 
         # Apply schema
-        task = progress.add_task("[1/3] Applying schema...", total=None)
+        task = progress.add_task("[1/5] Applying schema...", total=None)
         cypher_schema = generate_cypher_schema(ontology)
         async with driver.session() as session:
             for statement in cypher_schema.split(";"):
@@ -215,27 +246,27 @@ async def _ingest_with_driver(
                     except Exception as e:
                         if "already exists" not in str(e).lower():
                             console.print(f"  [yellow]Warning:[/yellow] Schema: {e}")
-        progress.update(task, description="[1/3] Schema applied")
+        progress.update(task, description="[1/5] Schema applied")
 
         # Create entities
-        task = progress.add_task("[2/3] Creating entities...", total=None)
+        task = progress.add_task("[2/5] Creating entities...", total=None)
         entity_count = 0
         entities = fixture_data.get("entities", {})
         async with driver.session() as session:
             for label, items in entities.items():
                 for item in items:
                     enriched = {**item, "domain": ontology.domain.id}
-                    props = ", ".join(f"{k}: ${k}" for k in enriched.keys())
-                    cypher = f"MERGE (n:{label} {{{props}}})"
+                    set_clauses = ", ".join(f"n.{k} = ${k}" for k in enriched.keys())
+                    cypher = f"MERGE (n:{label} {{name: $name}}) SET {set_clauses}"
                     try:
                         await session.run(cypher, enriched)
                         entity_count += 1
                     except Exception as e:
                         console.print(f"  [yellow]Warning:[/yellow] Entity {item.get('name', '?')}: {e}")
-        progress.update(task, description=f"[2/3] Created {entity_count} entities")
+        progress.update(task, description=f"[2/5] Created {entity_count} entities")
 
         # Create relationships
-        task = progress.add_task("[3/3] Creating relationships...", total=None)
+        task = progress.add_task("[3/5] Creating relationships...", total=None)
         rel_count = 0
         relationships = fixture_data.get("relationships", [])
         async with driver.session() as session:
@@ -253,11 +284,88 @@ async def _ingest_with_driver(
                     rel_count += 1
                 except Exception as e:
                     console.print(f"  [yellow]Warning:[/yellow] Relationship {rel.get('type', '?')}: {e}")
-        progress.update(task, description=f"[3/3] Created {rel_count} relationships")
+        progress.update(task, description=f"[3/5] Created {rel_count} relationships")
+
+        # Create documents
+        task = progress.add_task("[4/5] Creating documents...", total=None)
+        doc_count = 0
+        documents = fixture_data.get("documents", [])
+        async with driver.session() as session:
+            for doc in documents:
+                try:
+                    await session.run(
+                        "MERGE (d:Document {title: $title}) "
+                        "SET d.content = $content, d.template_id = $template_id, "
+                        "d.template_name = $template_name, d.domain = $domain",
+                        {
+                            "title": doc.get("title", ""),
+                            "content": doc.get("content", ""),
+                            "template_id": doc.get("template_id", ""),
+                            "template_name": doc.get("template_name", ""),
+                            "domain": ontology.domain.id,
+                        },
+                    )
+                    doc_count += 1
+                except Exception as e:
+                    console.print(f"  [yellow]Warning:[/yellow] Document: {e}")
+            # Link documents to mentioned entities
+            if doc_count > 0:
+                try:
+                    await session.run(
+                        "MATCH (d:Document) WHERE d.domain = $domain "
+                        "MATCH (e) WHERE e.name IS NOT NULL "
+                        "AND NOT 'Document' IN labels(e) "
+                        "AND NOT 'DecisionTrace' IN labels(e) "
+                        "AND NOT 'TraceStep' IN labels(e) "
+                        "AND (e.domain IS NULL OR e.domain = $domain) "
+                        "AND d.content CONTAINS e.name "
+                        "MERGE (d)-[:MENTIONS]->(e)",
+                        {"domain": ontology.domain.id},
+                    )
+                except Exception as e:
+                    console.print(f"  [yellow]Warning:[/yellow] Document links: {e}")
+        progress.update(task, description=f"[4/5] Created {doc_count} documents")
+
+        # Create decision traces
+        task = progress.add_task("[5/5] Creating decision traces...", total=None)
+        trace_count = 0
+        traces = fixture_data.get("traces", [])
+        async with driver.session() as session:
+            for trace_data in traces:
+                try:
+                    await session.run(
+                        "MERGE (t:DecisionTrace {id: $id}) "
+                        "SET t.task = $task, t.outcome = $outcome, t.domain = $domain",
+                        {
+                            "id": trace_data.get("id", ""),
+                            "task": trace_data.get("task", ""),
+                            "outcome": trace_data.get("outcome", ""),
+                            "domain": ontology.domain.id,
+                        },
+                    )
+                    for i, step in enumerate(trace_data.get("steps", [])):
+                        await session.run(
+                            "MATCH (t:DecisionTrace {id: $trace_id}) "
+                            "MERGE (s:TraceStep {trace_id: $trace_id, step_number: $step_number}) "
+                            "SET s.thought = $thought, s.action = $action, s.observation = $observation "
+                            "MERGE (t)-[:HAS_STEP]->(s)",
+                            {
+                                "trace_id": trace_data.get("id", ""),
+                                "step_number": i + 1,
+                                "thought": step.get("thought", ""),
+                                "action": step.get("action", ""),
+                                "observation": step.get("observation", ""),
+                            },
+                        )
+                    trace_count += 1
+                except Exception as e:
+                    console.print(f"  [yellow]Warning:[/yellow] Trace: {e}")
+        progress.update(task, description=f"[5/5] Created {trace_count} decision traces")
 
     await driver.close()
     console.print(
-        f"\n  [green]Ingestion complete:[/green] {entity_count} entities, {rel_count} relationships"
+        f"\n  [green]Ingestion complete:[/green] {entity_count} entities, "
+        f"{rel_count} relationships, {doc_count} documents, {trace_count} traces"
     )
 
 

@@ -318,6 +318,15 @@ def run_wizard() -> ProjectConfig:
         default="",
     ).ask()
 
+    google_api_key = None
+    if framework == "google-adk":
+        google_api_key = questionary.password(
+            "Google/Gemini API key (required for Google ADK framework):",
+            default="",
+        ).ask()
+        if not google_api_key:
+            console.print("[yellow]Warning:[/yellow] Google ADK requires a Google API key. Set GOOGLE_API_KEY in your .env file.")
+
     # Step 7: Confirmation
     config = ProjectConfig(
         project_name=project_name,
@@ -330,6 +339,7 @@ def run_wizard() -> ProjectConfig:
         neo4j_type=neo4j_type,
         anthropic_api_key=anthropic_api_key or None,
         openai_api_key=openai_api_key or None,
+        google_api_key=google_api_key or None,
         generate_data=data_source == "demo",
         custom_domain_yaml=custom_domain_yaml,
         saas_connectors=selected_connectors,
@@ -360,6 +370,8 @@ def _show_summary(config: ProjectConfig) -> None:
     table.add_row("Neo4j", f"{config.neo4j_type} ({config.neo4j_uri})")
     table.add_row("Anthropic Key", "***" if config.anthropic_api_key else "(not set)")
     table.add_row("OpenAI Key", "***" if config.openai_api_key else "(not set)")
+    if config.google_api_key or config.resolved_framework == "google-adk":
+        table.add_row("Google Key", "***" if config.google_api_key else "(not set)")
 
     console.print()
     console.print(table)

@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Box, Flex, Heading, Text, Textarea, IconButton, VStack, HStack,
-  Badge, Button, Spinner, Skeleton, Collapsible, Timeline,
+  Badge, Button, Spinner, Skeleton, Collapsible, Timeline, Circle,
 } from "@chakra-ui/react";
-import { Send, RotateCcw, ChevronDown, Wrench, Check } from "lucide-react";
+import { Send, RotateCcw, ChevronDown, Wrench, Check, Bot, User, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { API_BASE, DEMO_SCENARIOS, DOMAIN } from "@/lib/config";
@@ -341,6 +341,9 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
     }
   }
 
+  // Collect all prompts for suggested questions display
+  const allPrompts = DEMO_SCENARIOS.flatMap((s) => s.prompts);
+
   return (
     <Flex direction="column" h="100%">
       <HStack px={4} py={3} borderBottom="1px solid" borderColor="gray.200" justifyContent="space-between">
@@ -353,100 +356,116 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
         )}
       </HStack>
 
-      {/* Demo scenario buttons */}
+      {/* Demo scenario suggested questions */}
       {messages.length === 0 && !loading && (
-        <Box px={4} py={3}>
-          <Text fontSize="xs" color="gray.500" mb={2}>
-            Try a demo scenario:
-          </Text>
-          <VStack gap={2} align="stretch">
-            {DEMO_SCENARIOS.map((scenario) => (
-              <Box key={scenario.name}>
-                <Text fontSize="xs" fontWeight="bold" mb={1}>
-                  {scenario.name}
-                </Text>
-                <Flex gap={1} flexWrap="wrap">
-                  {scenario.prompts.map((prompt, i) => (
-                    <Badge
-                      key={i}
-                      cursor="pointer"
-                      variant="outline"
-                      fontSize="xs"
-                      title={prompt}
-                      onClick={() => sendMessage(prompt)}
-                    >
-                      {prompt.length > 60 ? prompt.slice(0, 60) + "..." : prompt}
-                    </Badge>
-                  ))}
-                </Flex>
-              </Box>
-            ))}
+        <Flex direction="column" flex={1} justify="center" px={4} py={6}>
+          <VStack gap={4}>
+            <Text fontSize="lg" fontWeight="medium" color="gray.700">
+              {% endraw %}{{ domain.emoji }}{% raw %} How can I help you?
+            </Text>
+            <HStack gap={1} flexShrink={0} color="gray.500" fontSize="xs" fontWeight="medium">
+              <Sparkles size={14} />
+              <Text>Try these</Text>
+            </HStack>
+            <Flex gap={2} flexWrap="wrap" justify="center" maxW="500px">
+              {allPrompts.map((prompt, i) => (
+                <Button
+                  key={i}
+                  size="xs"
+                  variant="outline"
+                  rounded="full"
+                  px={3}
+                  fontWeight="normal"
+                  whiteSpace="normal"
+                  textAlign="start"
+                  height="auto"
+                  py={1.5}
+                  onClick={() => sendMessage(prompt)}
+                  title={prompt}
+                >
+                  {prompt}
+                </Button>
+              ))}
+            </Flex>
           </VStack>
-        </Box>
+        </Flex>
       )}
 
       {/* Messages */}
-      <VStack flex={1} overflow="auto" px={4} py={2} gap={3} align="stretch">
+      <VStack flex={1} overflow="auto" px={4} py={2} gap={3} align="stretch"
+        display={messages.length === 0 && !loading ? "none" : "flex"}
+      >
         {messages.map((msg) => (
           <Box key={msg.id}>
             {/* Completed tool call cards */}
             {msg.toolCalls && msg.toolCalls.length > 0 && (
               <ToolCallTimeline toolCalls={msg.toolCalls} />
             )}
-            <Box
-              bg={msg.role === "user" ? "blue.50" : "gray.100"}
-              px={3}
-              py={2}
-              borderRadius="md"
-              alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
-              maxW="90%"
-            >
-              {msg.role === "assistant" ? (
-                <Box fontSize="sm" className="markdown-content">
-                  {(() => {
-                    const { thinking, response } = splitThinkingAndResponse(msg.content);
-                    return (
-                      <>
-                        {thinking && (
-                          <Collapsible.Root>
-                            <Collapsible.Trigger asChild>
-                              <Button variant="ghost" size="xs" mb={1} color="gray.500">
-                                <ChevronDown size={12} />
-                                Show reasoning
-                              </Button>
-                            </Collapsible.Trigger>
-                            <Collapsible.Content>
-                              <Box px={2} py={1} mb={2} bg="gray.50" borderRadius="sm" fontSize="xs" color="gray.600">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{thinking}</ReactMarkdown>
-                              </Box>
-                            </Collapsible.Content>
-                          </Collapsible.Root>
-                        )}
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{response || msg.content}</ReactMarkdown>
-                      </>
-                    );
-                  })()}
-                  {msg.retryInput && (
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      mt={2}
-                      onClick={() => {
-                        setMessages((prev) => prev.filter((m) => m.id !== msg.id));
-                        sendMessage(msg.retryInput);
-                      }}
-                    >
-                      <RotateCcw size={12} />
-                      Retry
-                    </Button>
-                  )}
-                </Box>
-              ) : (
-                <Text fontSize="sm" whiteSpace="pre-wrap">
-                  {msg.content}
-                </Text>
-              )}
-            </Box>
+            <Flex gap={2} alignItems="flex-start">
+              <Circle
+                size="7"
+                bg={msg.role === "user" ? "blue.500" : "gray.600"}
+                color="white"
+                flexShrink={0}
+                mt={0.5}
+              >
+                {msg.role === "user" ? <User size={14} /> : <Bot size={14} />}
+              </Circle>
+              <Box
+                bg={msg.role === "user" ? "blue.50" : "gray.50"}
+                px={3}
+                py={2}
+                borderRadius="lg"
+                flex={1}
+                maxW="95%"
+              >
+                {msg.role === "assistant" ? (
+                  <Box fontSize="sm" className="markdown-content">
+                    {(() => {
+                      const { thinking, response } = splitThinkingAndResponse(msg.content);
+                      return (
+                        <>
+                          {thinking && (
+                            <Collapsible.Root>
+                              <Collapsible.Trigger asChild>
+                                <Button variant="ghost" size="xs" mb={1} color="gray.500">
+                                  <ChevronDown size={12} />
+                                  Show reasoning
+                                </Button>
+                              </Collapsible.Trigger>
+                              <Collapsible.Content>
+                                <Box px={2} py={1} mb={2} bg="gray.100" borderRadius="sm" fontSize="xs" color="gray.600">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{thinking}</ReactMarkdown>
+                                </Box>
+                              </Collapsible.Content>
+                            </Collapsible.Root>
+                          )}
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{response || msg.content}</ReactMarkdown>
+                        </>
+                      );
+                    })()}
+                    {msg.retryInput && (
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        mt={2}
+                        onClick={() => {
+                          setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                          sendMessage(msg.retryInput);
+                        }}
+                      >
+                        <RotateCcw size={12} />
+                        Retry
+                      </Button>
+                    )}
+                  </Box>
+                ) : (
+                  <Text fontSize="sm" whiteSpace="pre-wrap">
+                    {msg.content}
+                  </Text>
+                )}
+              </Box>
+            </Flex>
           </Box>
         ))}
 
@@ -459,76 +478,106 @@ export function ChatInterface({ onGraphUpdate }: ChatInterfaceProps) {
             )}
             {/* Streaming text */}
             {streamingContent ? (
-              <Box bg="gray.100" px={3} py={2} borderRadius="md">
-                <Box fontSize="sm" className="markdown-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {streamingContent}
-                  </ReactMarkdown>
+              <Flex gap={2} alignItems="flex-start">
+                <Circle size="7" bg="gray.600" color="white" flexShrink={0} mt={0.5}>
+                  <Bot size={14} />
+                </Circle>
+                <Box bg="gray.50" px={3} py={2} borderRadius="lg" flex={1}>
+                  <Box fontSize="sm" className="markdown-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {streamingContent}
+                    </ReactMarkdown>
+                  </Box>
                 </Box>
-              </Box>
+              </Flex>
             ) : (
               /* Loading skeleton when waiting for first content */
-              <Box bg="gray.100" px={3} py={2} borderRadius="md">
-                {streamingToolCalls.length === 0 ? (
-                  <VStack align="stretch" gap={2}>
+              <Flex gap={2} alignItems="flex-start">
+                <Circle size="7" bg="gray.600" color="white" flexShrink={0} mt={0.5}>
+                  <Bot size={14} />
+                </Circle>
+                <Box bg="gray.50" px={3} py={2} borderRadius="lg" flex={1}>
+                  {streamingToolCalls.length === 0 ? (
+                    <VStack align="stretch" gap={2}>
+                      <HStack gap={2}>
+                        <Spinner size="xs" />
+                        <Text fontSize="sm" color="gray.500">Thinking...</Text>
+                        {elapsedSeconds > 3 && (
+                          <Text fontSize="xs" color="gray.400">{elapsedSeconds}s</Text>
+                        )}
+                      </HStack>
+                      <Skeleton height="4" width="80%" />
+                      <Skeleton height="4" width="60%" />
+                    </VStack>
+                  ) : (
                     <HStack gap={2}>
                       <Spinner size="xs" />
-                      <Text fontSize="sm" color="gray.500">Thinking...</Text>
+                      <Text fontSize="sm" color="gray.500">
+                        Running tool {streamingToolCalls.filter(tc => tc.status === "complete").length + 1}
+                        {" of "}
+                        {streamingToolCalls.length}...
+                      </Text>
                       {elapsedSeconds > 3 && (
                         <Text fontSize="xs" color="gray.400">{elapsedSeconds}s</Text>
                       )}
                     </HStack>
-                    <Skeleton height="4" width="80%" />
-                    <Skeleton height="4" width="60%" />
-                  </VStack>
-                ) : (
-                  <HStack gap={2}>
-                    <Spinner size="xs" />
-                    <Text fontSize="sm" color="gray.500">
-                      Generating response...
-                    </Text>
-                    {elapsedSeconds > 3 && (
-                      <Text fontSize="xs" color="gray.400">{elapsedSeconds}s</Text>
-                    )}
-                  </HStack>
-                )}
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  mt={2}
-                  onClick={cancelRequest}
-                  color="gray.500"
-                >
-                  Cancel
-                </Button>
-              </Box>
+                  )}
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    mt={2}
+                    onClick={cancelRequest}
+                    color="gray.500"
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Flex>
             )}
           </Box>
         )}
         <div ref={messagesEndRef} />
       </VStack>
 
-      {/* Input */}
-      <HStack px={4} py={3} borderTop="1px solid" borderColor="gray.200">
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask about your {% endraw %}{{ domain.name | lower }}{% raw %} data..."
-          size="sm"
-          rows={2}
-          resize="none"
-        />
-        <IconButton
-          aria-label="Send"
-          onClick={() => sendMessage()}
-          disabled={!input.trim() || loading}
-          size="md"
-          colorPalette="blue"
+      {/* Input area — Chakra UI Pro inspired bordered container */}
+      <Box px={4} py={3} borderTop="1px solid" borderColor="gray.200">
+        <Box
+          borderWidth="1px"
+          borderColor="gray.200"
+          rounded="lg"
+          _focusWithin={{ borderColor: "blue.400", boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)" }}
+          transition="border-color 0.2s, box-shadow 0.2s"
         >
-          <Send size={20} />
-        </IconButton>
-      </HStack>
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask about your {% endraw %}{{ domain.name | lower }}{% raw %} data..."
+            border="none"
+            _focus={{ boxShadow: "none" }}
+            resize="none"
+            rows={2}
+            fontSize="sm"
+            px={3}
+            py={2}
+          />
+          <HStack px={2} py={1.5} justify="space-between">
+            <Text fontSize="xs" color="gray.400">
+              Enter to send, Shift+Enter for new line
+            </Text>
+            <IconButton
+              aria-label="Send"
+              onClick={() => sendMessage()}
+              disabled={!input.trim() || loading}
+              size="xs"
+              colorPalette="blue"
+              rounded="md"
+            >
+              <Send size={14} />
+            </IconButton>
+          </HStack>
+        </Box>
+      </Box>
     </Flex>
   );
 }

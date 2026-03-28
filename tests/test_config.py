@@ -172,3 +172,22 @@ class TestFrameworkAliases:
 
     def test_maf_not_in_supported(self):
         assert "maf" not in SUPPORTED_FRAMEWORKS
+
+
+class TestGoogleApiKey:
+    def test_google_api_key_default_none(self):
+        config = ProjectConfig(
+            project_name="Test",
+            domain="healthcare",
+            framework="pydanticai",
+        )
+        assert config.google_api_key is None
+
+    def test_google_api_key_set(self):
+        config = ProjectConfig(
+            project_name="Test",
+            domain="real-estate",
+            framework="google-adk",
+            google_api_key="test-key-123",
+        )
+        assert config.google_api_key == "test-key-123"
