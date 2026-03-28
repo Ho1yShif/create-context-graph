@@ -1558,6 +1558,68 @@ class TestV060DomainAwareNamePools:
         val = generate_property_value("population_trend", "string", "Tiger", "Species", 0)
         assert val in ["increasing", "stable", "decreasing", "unknown"]
 
+    def test_domain_organization_names(self):
+        from create_context_graph.name_pools import get_names_for_pole_type
+        names = get_names_for_pole_type("ORGANIZATION", 5, domain_id="healthcare")
+        assert any("Hospital" in n or "Medical" in n or "Health" in n for n in names)
+
+    def test_domain_event_names(self):
+        from create_context_graph.name_pools import get_names_for_pole_type
+        names = get_names_for_pole_type("EVENT", 5, domain_id="healthcare")
+        assert any("Grand Rounds" in n or "Code Blue" in n or "Committee" in n or "Audit" in n for n in names)
+
+    def test_domain_location_names(self):
+        from create_context_graph.name_pools import get_names_for_pole_type
+        names = get_names_for_pole_type("LOCATION", 5, domain_id="financial-services")
+        assert any("Trading" in n or "Branch" in n or "Office" in n or "Headquarters" in n for n in names)
+
+    def test_habitat_realistic(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("habitat", "string", "Tiger", "Species", 0)
+        assert " - " not in val
+        assert "forest" in val.lower() or "savanna" in val.lower() or "reef" in val.lower() or "tundra" in val.lower() or "wetland" in val.lower()
+
+    def test_mechanism_of_action_realistic(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("mechanism_of_action", "string", "Metformin", "Medication", 0)
+        assert " - " not in val
+        assert "inhibit" in val.lower() or "block" in val.lower() or "reduct" in val.lower() or "select" in val.lower()
+
+    def test_manufacturer_uses_org_names(self):
+        from create_context_graph.name_pools import generate_property_value
+        val = generate_property_value("manufacturer", "string", "Widget A", "Part", 0)
+        assert " - " not in val
+
+    def test_generator_passes_domain_id(self):
+        """Static generator should produce domain-aware names for healthcare Person entities."""
+        from create_context_graph.generator import _generate_static_entities
+        from create_context_graph.ontology import load_domain
+        ontology = load_domain("healthcare")
+        # Find the Person entity type
+        person_et = next((et for et in ontology.entity_types if et.label == "Person"), None)
+        if person_et:
+            entities = _generate_static_entities(person_et, domain_id="healthcare")
+            names = [e["name"] for e in entities]
+            assert any("Dr." in n or "Nurse" in n or "Pharmacist" in n for n in names), \
+                f"Healthcare Person entities should have medical names, got: {names}"
+
+
+class TestV060IngestHelpers:
+    """Tests for v0.6.0 ingest.py helper functions."""
+
+    def test_get_pole_type_known_label(self):
+        from create_context_graph.ingest import _get_pole_type
+        from create_context_graph.ontology import load_domain
+        ontology = load_domain("healthcare")
+        assert _get_pole_type("Patient", ontology) == "PERSON"
+        assert _get_pole_type("Medication", ontology) == "OBJECT"
+
+    def test_get_pole_type_unknown_label(self):
+        from create_context_graph.ingest import _get_pole_type
+        from create_context_graph.ontology import load_domain
+        ontology = load_domain("healthcare")
+        assert _get_pole_type("UnknownLabel", ontology) == "OBJECT"
+
 
 class TestV060ChatInterfaceUI:
     """Tests for v0.6.0 ChatInterface UI improvements."""

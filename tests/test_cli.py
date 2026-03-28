@@ -234,3 +234,62 @@ class TestCLIValidation:
             "--verbose",
         ])
         assert result.exit_code == 0
+
+
+class TestV060CLIFlags:
+    """Tests for v0.6.0 CLI additions."""
+
+    def test_demo_flag_accepted_dry_run(self, runner, tmp_path):
+        """--demo flag should be accepted and expand to --reset-database --demo-data --ingest."""
+        out = tmp_path / "demo-test"
+        result = runner.invoke(main, [
+            "demo-test",
+            "--domain", "healthcare",
+            "--framework", "pydanticai",
+            "--output-dir", str(out),
+            "--demo",
+            "--dry-run",
+        ])
+        assert result.exit_code == 0
+        assert "Dry run" in result.output
+
+    def test_google_api_key_flag(self, runner, tmp_path):
+        """--google-api-key should flow through to rendered .env."""
+        out = tmp_path / "gkey-test"
+        result = runner.invoke(main, [
+            "gkey-test",
+            "--domain", "healthcare",
+            "--framework", "google-adk",
+            "--google-api-key", "test-gkey-123",
+            "--output-dir", str(out),
+        ])
+        assert result.exit_code == 0, result.output
+        env_content = (out / ".env").read_text()
+        assert "GOOGLE_API_KEY=test-gkey-123" in env_content
+
+    def test_google_adk_warning_without_key(self, runner, tmp_path):
+        """google-adk without --google-api-key should print a warning."""
+        out = tmp_path / "adk-warn"
+        result = runner.invoke(main, [
+            "adk-warn",
+            "--domain", "healthcare",
+            "--framework", "google-adk",
+            "--output-dir", str(out),
+        ])
+        assert result.exit_code == 0, result.output
+        assert "Warning" in result.output
+        assert "GOOGLE_API_KEY" in result.output
+
+    def test_openai_api_key_flag(self, runner, tmp_path):
+        """--openai-api-key should flow through to rendered .env."""
+        out = tmp_path / "okey-test"
+        result = runner.invoke(main, [
+            "okey-test",
+            "--domain", "healthcare",
+            "--framework", "pydanticai",
+            "--openai-api-key", "sk-test-openai",
+            "--output-dir", str(out),
+        ])
+        assert result.exit_code == 0, result.output
+        env_content = (out / ".env").read_text()
+        assert "OPENAI_API_KEY=sk-test-openai" in env_content

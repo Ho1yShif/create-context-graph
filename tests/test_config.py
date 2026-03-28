@@ -72,6 +72,7 @@ class TestProjectConfig:
         assert config.generate_data is False
         assert config.anthropic_api_key is None
         assert config.openai_api_key is None
+        assert config.google_api_key is None
 
     def test_framework_display_name(self):
         config = ProjectConfig(
