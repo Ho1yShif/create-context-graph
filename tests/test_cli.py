@@ -15,8 +15,6 @@
 """Integration tests for the CLI module."""
 
 import json
-import shutil
-from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -41,7 +39,7 @@ class TestListDomains:
         result = runner.invoke(main, ["--list-domains"])
         assert result.exit_code == 0
         # Count non-empty lines that look like domain entries
-        lines = [l for l in result.output.strip().split("\n") if l.strip() and not l.startswith("Available")]
+        lines = [line for line in result.output.strip().split("\n") if line.strip() and not line.startswith("Available")]
         assert len(lines) >= 22
 
 

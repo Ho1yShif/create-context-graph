@@ -21,7 +21,7 @@ import shutil
 from importlib.resources import files
 from pathlib import Path
 
-from jinja2 import Environment, PackageLoader, select_autoescape
+from jinja2 import Environment, PackageLoader
 
 from create_context_graph.config import ProjectConfig
 from create_context_graph.ontology import (

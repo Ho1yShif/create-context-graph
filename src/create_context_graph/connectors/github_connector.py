@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Any
 
 from create_context_graph.connectors import (
@@ -128,7 +127,7 @@ class GitHubConnector(BaseConnector):
                 "issue_number": issue.number,
                 "state": issue.state,
                 "created_at": issue.created_at.isoformat() if issue.created_at else "",
-                "labels": ",".join(l.name for l in issue.labels),
+                "labels": ",".join(label.name for label in issue.labels),
             })
             relationships.append({
                 "type": "OPENED",

@@ -18,7 +18,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from create_context_graph.neo4j_validator import validate_connection
 

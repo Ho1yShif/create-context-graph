@@ -297,19 +297,19 @@ def main(
     except ValueError:
         display_path = out
     console.print(f"  [bold]cd {display_path}[/bold]")
-    console.print(f"  [bold]make install[/bold]       # Install dependencies")
+    console.print("  [bold]make install[/bold]       # Install dependencies")
     if config.neo4j_type == "docker":
-        console.print(f"  [bold]make docker-up[/bold]    # Start Neo4j")
+        console.print("  [bold]make docker-up[/bold]    # Start Neo4j")
     elif config.neo4j_type == "local":
-        console.print(f"  [bold]make neo4j-start[/bold]  # Start Neo4j (requires Node.js)")
+        console.print("  [bold]make neo4j-start[/bold]  # Start Neo4j (requires Node.js)")
     if ingest:
-        console.print(f"  [bold]make seed[/bold]          # Re-seed sample data (already ingested)")
+        console.print("  [bold]make seed[/bold]          # Re-seed sample data (already ingested)")
     else:
-        console.print(f"  [bold]make seed[/bold]          # Seed sample data")
+        console.print("  [bold]make seed[/bold]          # Seed sample data")
     if config.saas_connectors:
-        console.print(f"  [bold]make import[/bold]         # Re-import from connected services")
-    console.print(f"  [bold]make start[/bold]         # Start backend + frontend")
+        console.print("  [bold]make import[/bold]         # Re-import from connected services")
+    console.print("  [bold]make start[/bold]         # Start backend + frontend")
     console.print()
-    console.print(f"  Backend:  http://localhost:8000")
-    console.print(f"  Frontend: http://localhost:3000")
+    console.print("  Backend:  http://localhost:8000")
+    console.print("  Frontend: http://localhost:3000")
     console.print()
