@@ -31,7 +31,10 @@ create-context-graph [PROJECT_NAME] [OPTIONS]
 | `--neo4j-aura-env` | `path` | -- | -- | Path to a Neo4j Aura `.env` file with `NEO4J_URI`, `NEO4J_USERNAME`, and `NEO4J_PASSWORD`. Automatically sets `neo4j_type` to `aura`. |
 | `--neo4j-local` | `flag` | -- | `false` | Use `@johnymontana/neo4j-local` for a lightweight local Neo4j instance (no Docker required, needs Node.js). Sets `neo4j_type` to `local`. |
 | `--anthropic-api-key` | `string` | `ANTHROPIC_API_KEY` | -- | Anthropic API key. Enables LLM-powered data generation (realistic entity names, documents, decision traces) and custom domain generation. |
+| `--openai-api-key` | `string` | `OPENAI_API_KEY` | -- | OpenAI API key. Used by OpenAI Agents and LangGraph frameworks. |
+| `--google-api-key` | `string` | `GOOGLE_API_KEY` | -- | Google/Gemini API key. Required for the `google-adk` framework. A warning is shown during scaffolding if google-adk is selected without this key. |
 | `--output-dir` | `path` | -- | `./<project-slug>` | Directory where the generated project is written. Defaults to a kebab-case slug of the project name in the current working directory. |
+| `--demo` | `flag` | -- | `false` | Convenience shortcut for `--reset-database --demo-data --ingest`. Scaffolds, generates demo data, clears Neo4j, and ingests everything in one step. |
 | `--reset-database` | `flag` | -- | `false` | Clear all existing data from Neo4j before ingesting. Runs `MATCH (n) DETACH DELETE n`. Useful when switching domains on a shared Neo4j instance. |
 | `--dry-run` | `flag` | -- | `false` | Preview what would be generated (project config summary) without creating any files. |
 | `--verbose` | `flag` | -- | `false` | Enable verbose debug logging during generation. Useful for troubleshooting. |
@@ -127,6 +130,16 @@ create-context-graph my-app \
   --neo4j-password my-secret
 ```
 
+### Quick demo (scaffold + seed + ingest in one step)
+
+```bash
+create-context-graph my-app \
+  --domain healthcare \
+  --framework pydanticai \
+  --demo \
+  --neo4j-uri neo4j://localhost:7687
+```
+
 ### Reset Neo4j before ingesting
 
 Clear all existing data from a shared Neo4j instance before loading new domain data:
@@ -183,5 +196,7 @@ The following environment variables are read as defaults for their corresponding
 | `NEO4J_USERNAME` | `--neo4j-username` |
 | `NEO4J_PASSWORD` | `--neo4j-password` |
 | `ANTHROPIC_API_KEY` | `--anthropic-api-key` |
+| `OPENAI_API_KEY` | `--openai-api-key` |
+| `GOOGLE_API_KEY` | `--google-api-key` |
 
 CLI flags always take precedence over environment variables.

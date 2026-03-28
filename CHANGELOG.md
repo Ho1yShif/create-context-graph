@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.6.0 — Comprehensive Testing Feedback (2026-03-28)
+
+### Framework Fixes
+- **CrewAI no longer hangs** — Added explicit `llm="anthropic/claude-sonnet-4-20250514"` to prevent defaulting to OpenAI. Added request-level logging and reduced timeout to 60s.
+- **Strands serialization fix** — Added `_extract_text()` helper that robustly extracts text from agent results, handling `ParsedTextBlock` serialization issues from newer Anthropic SDK versions.
+- **Google ADK API key support** — Added `--google-api-key` CLI flag (`GOOGLE_API_KEY` env), wizard prompt when google-adk is selected, and `GOOGLE_API_KEY` in generated `.env`/`.env.example` templates.
+
+### Document & Trace Ingestion Fix
+- **`--ingest` now creates proper Document and DecisionTrace nodes** — Both ingestion paths now create `:Document` and `:DecisionTrace`/`:TraceStep` nodes using direct Cypher, matching the `generate_data.py` pattern that the frontend expects. Previously, Documents and Decision Traces panels appeared empty after `--ingest`.
+- **Entity MERGE fix** — Direct driver ingestion now uses `MERGE (n:Label {name: $name}) SET ...` instead of `MERGE (n:Label {all_props})`, preventing duplicate nodes.
+
+### Data Quality
+- **Domain-aware base entities** — Person, Organization, Location, Event, and Object entities now use domain-specific names and roles (doctors for healthcare, traders for finance, game designers for gaming, etc.).
+- **Fixed templated property values** — Properties like "Metformin 500mg - Contraindications" now replaced with realistic values. Added pools for contraindications, dosage_form, allergies, sector, lead_reporter, manufacturer, mechanism_of_action, population_trend, and habitat.
+
+### Frontend UI Improvements
+- **Redesigned chat input** — Bordered container with focus highlight and keyboard shortcut hint (Chakra UI Pro inspired).
+- **Suggested questions redesign** — Pill-shaped buttons with full text (no 60-char truncation), "Try these" label with Sparkles icon.
+- **Message avatars** — User and assistant messages now have Circle avatars with User/Bot icons.
+- **Tool progress counter** — Shows "Running tool N of M..." during tool execution.
+
+### CLI
+- **`--demo` convenience flag** — Shortcut for `--reset-database --demo-data --ingest`
+- **`--google-api-key` flag** — New CLI flag with `GOOGLE_API_KEY` env variable support
+
+### Testing
+- 545 passing tests (35 new), up from 510
+
 ## v0.5.2 — Agent Framework Refinements (2026-03-26)
 
 - Improved Anthropic Tools and Claude Agent SDK agent templates

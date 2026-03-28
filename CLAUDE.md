@@ -6,7 +6,7 @@ Interactive CLI scaffolding tool that generates domain-specific context graph ap
 
 Given a domain (e.g., "healthcare", "wildlife-management") and an agent framework (e.g., PydanticAI, Claude Agent SDK), it generates a complete full-stack application: FastAPI backend, Next.js + Chakra UI v3 + NVL frontend, Neo4j schema, synthetic data, and a configured AI agent with domain-specific tools.
 
-**Status:** Phase 11 complete (v0.5.1). 22 domains, 8 agent frameworks, **streaming chat via Server-Sent Events** (token-by-token text in 6 frameworks + real-time tool call visualization with Timeline/Spinner/Collapsible), neo4j-agent-memory integration for multi-turn conversations, interactive NVL graph visualization (schema view, double-click expand, drag/zoom, property panel, agent-driven graph updates — now updated incrementally during streaming), LLM-generated demo data (80-90 entities, 25+ documents, 8-12 decision traces per domain), markdown rendering in chat, document browser with pagination, entity detail panel, 7 SaaS connectors, custom domain generation, Neo4j Aura .env import + neo4j-local support, Docusaurus documentation site, graceful Neo4j degradation with /health endpoint and 503 guards on all endpoints, Cypher injection prevention, enum identifier sanitization, configurable CORS/model/timeouts, --dry-run/--verbose/--reset-database CLI flags, constants module, WCAG accessibility improvements, chat timeout/cancel with AbortController, mobile-responsive layout, .dockerignore for Docker builds, `make test-connection` target, framework-specific README sections, troubleshooting guide, thread-safe async bridging for sync frameworks (CrewAI/Strands), bounded agentic loops (max 15 iterations), domain-specific static name pools (200+ names across 50+ entity labels), tool-use emphasis in all agent system prompts, domain-scoped chat history localStorage keys, SSR hydration fix, retry button on chat errors, PydanticAI tool serialization fix (JSON string return types), Google ADK hyphenated domain name sanitization, Strands max_tokens configuration, domain property on ingested entities for cross-domain isolation, improved static data quality (12+ domain-specific property pools, float value clamping), agent thinking text collapsible filter, Cypher query validation tests across all domains, HuggingFace warning suppression, 510 passing tests.
+**Status:** v0.6.0 complete. 22 domains, 8 agent frameworks (7 working, google-adk needs Gemini key), **streaming chat via Server-Sent Events** (token-by-token text in 6 frameworks + real-time tool call visualization with Timeline/Spinner/Collapsible), neo4j-agent-memory integration for multi-turn conversations, interactive NVL graph visualization (schema view, double-click expand, drag/zoom, property panel, agent-driven graph updates — now updated incrementally during streaming), LLM-generated demo data (80-90 entities, 25+ documents, 8-12 decision traces per domain), markdown rendering in chat with user/assistant avatars, document browser with pagination, entity detail panel, decision trace viewer, 7 SaaS connectors, custom domain generation, Neo4j Aura .env import + neo4j-local support, Docusaurus documentation site, graceful Neo4j degradation with /health endpoint and 503 guards on all endpoints, Cypher injection prevention, enum identifier sanitization, configurable CORS/model/timeouts, --dry-run/--verbose/--reset-database/--demo CLI flags, constants module, WCAG accessibility improvements, chat timeout/cancel with AbortController, mobile-responsive layout, .dockerignore for Docker builds, `make test-connection` target, framework-specific README sections, troubleshooting guide, thread-safe async bridging for sync frameworks (CrewAI/Strands), bounded agentic loops (max 15 iterations), domain-specific static name pools (200+ names across 50+ entity labels) with domain-aware base entities, tool-use emphasis in all agent system prompts, domain-scoped chat history localStorage keys, SSR hydration fix, retry button on chat errors, PydanticAI tool serialization fix (JSON string return types), Google ADK API key support (--google-api-key flag), Strands robust text extraction, CrewAI explicit Anthropic LLM config, domain property on ingested entities for cross-domain isolation, improved static data quality (20+ domain-specific property pools, float value clamping, no more templated property values), agent thinking text collapsible filter, Cypher query validation tests across all domains, proper Document/DecisionTrace node ingestion via --ingest, Chakra UI Pro-inspired chat input redesign, 545 passing tests.
 
 ## Quick Reference
 
@@ -81,7 +81,7 @@ Templates that contain JSX curly braces or Python dict literals must use `{% raw
 - **Data seeding** (`make seed`): Loads all four data types into Neo4j — entities, relationships, documents (as `:Document` nodes with `:MENTIONS` links to entities), and decision traces (as `:DecisionTrace` → `:HAS_STEP` → `:TraceStep` chains).
 
 ### Dual ingestion backends
-`ingest.py` tries `neo4j-agent-memory` MemoryClient first (demonstrating all three memory types), falls back to direct `neo4j` driver if the package isn't installed. Both paths tag all entities with a `domain` property for cross-domain isolation when sharing a Neo4j instance.
+`ingest.py` tries `neo4j-agent-memory` MemoryClient first, falls back to direct `neo4j` driver if the package isn't installed. Both paths create entities via MemoryClient or direct Cypher, plus create `:Document` and `:DecisionTrace`/`:TraceStep` nodes using direct Cypher (matching the `generate_data.py.j2` schema the frontend queries expect). Both paths tag all entities with a `domain` property for cross-domain isolation when sharing a Neo4j instance.
 
 ### Custom domain generation
 `custom_domain.py` generates complete domain ontology YAMLs from natural language descriptions using LLM (Anthropic/OpenAI). Uses `_base.yaml` + 2 reference domain YAMLs as few-shot examples. Validates output against `DomainOntology` Pydantic model with retry loop (up to 3 attempts). Generated domains can be saved to `~/.create-context-graph/custom-domains/` for reuse.
@@ -168,15 +168,15 @@ my-app/
 ### Unit Tests
 
 ```bash
-pytest tests/ -v                    # All 510 tests (708 with slow matrix)
-pytest tests/test_config.py         # Config model + framework alias tests (19)
+pytest tests/ -v                    # All 545 tests (743 with slow matrix)
+pytest tests/test_config.py         # Config model + framework alias + google api key tests (21)
 pytest tests/test_ontology.py       # Ontology loading + all 22 domains validate + enum sanitization + color collision checks + Cypher query validation (128)
 pytest tests/test_renderer.py       # Template rendering + all 8 frameworks + v0.3.0 features (52)
 pytest tests/test_generator.py      # Data generation pipeline (14)
 pytest tests/test_cli.py            # CLI integration + 8 domain/framework combos + neo4j types + validation (20)
 pytest tests/test_custom_domain.py  # Custom domain generation with mocked LLM (17)
 pytest tests/test_connectors.py     # SaaS connectors with mocked APIs (23)
-pytest tests/test_generated_project.py # Deep validation: Python/TS/Cypher syntax, memory, neo4j types, streaming, QA fixes, async bridging, thread safety, tool prompts, v0.5.1 regressions (167)
+pytest tests/test_generated_project.py # Deep validation: Python/TS/Cypher syntax, memory, neo4j types, streaming, QA fixes, async bridging, thread safety, tool prompts, v0.5.1 regressions, v0.6.0 UI/framework/data fixes (187)
 pytest tests/test_performance.py    # Timed generation tests (slow, 22 domains)
 ```
 
@@ -201,8 +201,8 @@ Required env vars: `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, plus `ANTHRO
 
 | Target | Description |
 |--------|-------------|
-| `make test` | Fast unit tests (510 tests, no external deps) |
-| `make test-slow` | Full suite including matrix + perf (708 tests) |
+| `make test` | Fast unit tests (545 tests, no external deps) |
+| `make test-slow` | Full suite including matrix + perf (743 tests) |
 | `make test-matrix` | Domain × framework matrix only (176 combos) |
 | `make test-coverage` | Tests with HTML coverage report |
 | `make smoke-test` | E2E smoke tests for 3 key frameworks (requires Neo4j + API keys) |
@@ -276,7 +276,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on push to `main` and all PRs:
 
 | Job | Trigger | Description |
 |-----|---------|-------------|
-| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 (510 tests) |
+| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 (545 tests) |
 | **lint** | All pushes + PRs | Ruff linter on `src/` and `tests/` |
 | **matrix** | Push to `main` only | All 176 domain × framework scaffold combinations |
 | **smoke-test** | Push to `main` only | E2E: scaffold → install → start → chat for all 8 frameworks |

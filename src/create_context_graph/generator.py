@@ -107,6 +107,7 @@ def _llm_generate_json(client, provider: str, prompt: str, system: str = "") -> 
 def _seed_entities(ontology: DomainOntology, client=None, provider: str | None = None) -> dict[str, list[dict]]:
     """Generate base entities for each type in the ontology."""
     entities: dict[str, list[dict]] = {}
+    domain_id = ontology.domain.id
 
     if client and provider:
         # LLM-powered entity generation
@@ -127,18 +128,18 @@ Return a JSON array of objects. Each object must have a "name" field plus the ot
                 if isinstance(items, list):
                     entities[et.label] = items
                 else:
-                    entities[et.label] = _generate_static_entities(et)
+                    entities[et.label] = _generate_static_entities(et, domain_id=domain_id)
             except Exception:
-                entities[et.label] = _generate_static_entities(et)
+                entities[et.label] = _generate_static_entities(et, domain_id=domain_id)
     else:
         # Static fallback entity generation
         for et in ontology.entity_types:
-            entities[et.label] = _generate_static_entities(et)
+            entities[et.label] = _generate_static_entities(et, domain_id=domain_id)
 
     return entities
 
 
-def _generate_static_entities(et) -> list[dict]:
+def _generate_static_entities(et, *, domain_id: str | None = None) -> list[dict]:
     """Generate realistic static entities when no LLM is available."""
     from create_context_graph.name_pools import (
         generate_property_value,
@@ -146,7 +147,7 @@ def _generate_static_entities(et) -> list[dict]:
     )
 
     count = 5
-    names = get_names_for_label(et.label, et.pole_type, count)
+    names = get_names_for_label(et.label, et.pole_type, count, domain_id=domain_id)
     entities = []
 
     for i in range(count):
@@ -159,7 +160,8 @@ def _generate_static_entities(et) -> list[dict]:
                 entity[prop.name] = prop.enum[i % len(prop.enum)]
             else:
                 entity[prop.name] = generate_property_value(
-                    prop.name, prop.type, entity_name, et.label, i
+                    prop.name, prop.type, entity_name, et.label, i,
+                    domain_id=domain_id,
                 )
         entities.append(entity)
     return entities

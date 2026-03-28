@@ -116,6 +116,38 @@ agent = Agent(
 )
 
 {% raw %}
+
+def _extract_text(result) -> str:
+    """Extract text from a Strands agent result, handling serialization issues.
+
+    Strands may return objects with various shapes depending on the Anthropic SDK
+    version.  This helper tries several extraction strategies to avoid
+    PydanticSerializationUnexpectedValue errors from ParsedTextBlock objects.
+    """
+    # Try direct text attribute (AgentResult)
+    if hasattr(result, "text"):
+        return str(result.text)
+
+    # Try message.content (Anthropic-style)
+    if hasattr(result, "message"):
+        msg = result.message
+        if hasattr(msg, "content"):
+            parts = []
+            for block in (msg.content if isinstance(msg.content, list) else [msg.content]):
+                if hasattr(block, "text"):
+                    parts.append(block.text)
+                elif isinstance(block, str):
+                    parts.append(block)
+            if parts:
+                return "\n".join(parts)
+
+    # Fallback: str() with safety wrapper
+    try:
+        return str(result)
+    except Exception:
+        return "I processed your request but encountered an issue formatting the response."
+
+
 # ---------------------------------------------------------------------------
 # Message handler
 # ---------------------------------------------------------------------------
@@ -148,7 +180,8 @@ async def handle_message(message: str, session_id: str | None = None) -> dict:
             asyncio.to_thread(agent, input_message),
             timeout=90.0,
         )
-        response_text = str(result)
+        # Extract text robustly — handle various result object shapes
+        response_text = _extract_text(result)
     except asyncio.TimeoutError:
         response_text = "The request timed out after 90 seconds. Please try a simpler question or try again."
     except Exception as e:

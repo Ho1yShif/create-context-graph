@@ -51,9 +51,11 @@ console = Console()
 @click.option("--neo4j-local", is_flag=True, help="Use @johnymontana/neo4j-local for local Neo4j (no Docker)")
 @click.option("--anthropic-api-key", envvar="ANTHROPIC_API_KEY", help="Anthropic API key for LLM generation")
 @click.option("--openai-api-key", envvar="OPENAI_API_KEY", help="OpenAI API key for LLM generation")
+@click.option("--google-api-key", envvar="GOOGLE_API_KEY", help="Google/Gemini API key (required for google-adk framework)")
 @click.option("--custom-domain", type=str, help="Natural language description for custom domain generation (requires --anthropic-api-key)")
 @click.option("--connector", multiple=True, help="SaaS connector to enable (github, slack, jira, notion, gmail, gcal, salesforce)")
 @click.option("--output-dir", type=click.Path(), help="Output directory (default: ./<project-name>)")
+@click.option("--demo", is_flag=True, help="Shortcut for --reset-database --demo-data --ingest")
 @click.option("--dry-run", is_flag=True, help="Preview what would be generated without creating files")
 @click.option("--reset-database", is_flag=True, help="Clear all Neo4j data before ingesting")
 @click.option("--verbose", is_flag=True, help="Enable verbose debug output")
@@ -72,9 +74,11 @@ def main(
     neo4j_local: bool,
     anthropic_api_key: str | None,
     openai_api_key: str | None,
+    google_api_key: str | None,
     custom_domain: str | None,
     connector: tuple[str, ...],
     output_dir: str | None,
+    demo: bool,
     dry_run: bool,
     reset_database: bool,
     verbose: bool,
@@ -89,6 +93,12 @@ def main(
     # Verbose logging
     if verbose:
         logging.basicConfig(level=logging.DEBUG, format="%(name)s %(levelname)s: %(message)s")
+
+    # --demo is a shortcut for --reset-database --demo-data --ingest
+    if demo:
+        reset_database = True
+        demo_data = True
+        ingest = True
 
     # List domains mode
     if list_domains:
@@ -160,10 +170,17 @@ def main(
             neo4j_type=neo4j_type_resolved,
             anthropic_api_key=anthropic_api_key,
             openai_api_key=openai_api_key,
+            google_api_key=google_api_key,
             generate_data=demo_data,
             custom_domain_yaml=custom_domain_yaml,
             saas_connectors=list(connector),
         )
+        # Warn if google-adk is selected without a Google API key
+        if config.resolved_framework == "google-adk" and not google_api_key:
+            console.print(
+                "[yellow]Warning:[/yellow] google-adk framework requires a Google/Gemini API key. "
+                "Set GOOGLE_API_KEY in your .env or pass --google-api-key."
+            )
     else:
         # Launch interactive wizard
         from create_context_graph.wizard import run_wizard

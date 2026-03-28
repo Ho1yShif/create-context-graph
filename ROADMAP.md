@@ -624,13 +624,75 @@ Comprehensive end-to-end testing of v0.5.0 across all 9 framework/domain combina
 - `tests/test_ontology.py` — `TestCypherQueryValidation` class (66 tests)
 - `tests/test_generated_project.py` — `TestV051Regressions` class (9 tests)
 
+## Phase 12 — v0.6.0 Comprehensive Testing Feedback Fixes
+
+End-to-end testing of v0.5.3 across 9 framework/domain combinations (6 working, 3 broken) revealed framework bugs, data ingestion issues, data quality gaps, and UI/UX improvements. This phase addresses all P0-P2 findings.
+
+### Critical: Framework Fixes
+
+- **CrewAI hanging fix**: Added explicit `llm="anthropic/claude-sonnet-4-20250514"` to `Agent()` constructor — CrewAI was defaulting to OpenAI and hanging when no `OPENAI_API_KEY` was set. Added `ANTHROPIC_API_KEY` environment setup, request-level logging, and reduced timeout from 90s to 60s.
+- **Strands serialization fix**: Added `_extract_text()` helper that tries `.text`, `.message.content`, and `str()` fallbacks — handles `ParsedTextBlock` serialization issues from newer Anthropic SDK versions.
+- **Google ADK API key support**: Added `google_api_key` field to `ProjectConfig`, `--google-api-key` CLI flag with `GOOGLE_API_KEY` env, wizard prompt when google-adk is selected, and warning when google-adk used without key.
+
+### Critical: Document & Trace Ingestion Fix
+
+The Documents panel and Decision Traces panel appeared empty when using `--ingest` because the two ingestion paths created incompatible node structures:
+
+- **Root cause**: `_ingest_with_memory_client()` stored documents as conversation messages (short-term memory) and traces via the reasoning API, creating different node structures than the `:Document` and `:DecisionTrace`/`:TraceStep` nodes the frontend queries for.
+- **Fix**: Both ingestion paths (`_ingest_with_memory_client` and `_ingest_with_driver`) now create `:Document` and `:DecisionTrace`/`:TraceStep` nodes using direct Cypher, matching the `generate_data.py.j2` pattern.
+- **Entity MERGE fix**: Direct driver path changed from `MERGE (n:Label {all_props})` to `MERGE (n:Label {name: $name}) SET ...` to prevent duplicate nodes from property mismatches.
+
+### Data Quality
+
+- **Domain-aware base entity pools**: Added `DOMAIN_PERSON_NAMES`, `DOMAIN_ORGANIZATION_NAMES`, `DOMAIN_LOCATION_NAMES`, `DOMAIN_EVENT_NAMES`, `DOMAIN_OBJECT_NAMES`, and `DOMAIN_ROLE_POOL` for 6 domains (healthcare, financial-services, gaming, software-engineering, conservation, data-journalism).
+- **Fixed templated property values**: Added property pools for `contraindications`, `dosage_form`, `allergies`, `sector`, `lead_reporter`, `manufacturer`, `mechanism_of_action`, `population_trend`, `habitat` — replacing `"{entity_name} - {PropertyName}"` template pattern.
+- **Domain-aware role generation**: `generate_property_value()` for `role`/`title` now checks `DOMAIN_ROLE_POOL` before falling back to generic roles.
+
+### Frontend UI Improvements
+
+- **Chat input redesign**: Bordered container with focus highlight, keyboard shortcut hint ("Enter to send, Shift+Enter for new line"), compact send button (Chakra UI Pro AI template pattern).
+- **Suggested questions**: Flat wrapped HStack of pill-shaped buttons with full text (no 60-char truncation), "Try these" label with Sparkles icon.
+- **Message avatars**: User/assistant Circle avatars with User/Bot lucide-react icons.
+- **Tool progress counter**: Shows "Running tool N of M..." instead of generic "Generating response..."
+
+### CLI
+
+- **`--demo` convenience flag**: Shortcut for `--reset-database --demo-data --ingest`
+- **`--google-api-key` flag**: New CLI flag with `GOOGLE_API_KEY` env variable support
+
+### Tests added (35 new → 545 total)
+
+- `TestV060GoogleApiKey` — 2 tests: .env and .env.example include GOOGLE_API_KEY
+- `TestV060CrewAIFix` — 2 tests: explicit LLM config, logging
+- `TestV060StrandsFix` — 1 test: _extract_text helper
+- `TestV060DomainAwareNamePools` — 8 tests: healthcare person names, contraindications, dosage_form, allergies, sector, domain roles, population_trend
+- `TestV060ChatInterfaceUI` — 5 tests: avatars, keyboard hints, no truncation, sparkles icon, tool progress
+- `TestGoogleApiKey` in test_config.py — 2 tests
+
+### Files modified
+
+- `src/create_context_graph/config.py` — `google_api_key` field
+- `src/create_context_graph/cli.py` — `--google-api-key`, `--demo` flags, google-adk warning
+- `src/create_context_graph/wizard.py` — Google API key prompt, summary display
+- `src/create_context_graph/renderer.py` — pass `google_api_key` to template context
+- `src/create_context_graph/ingest.py` — direct Cypher for documents/traces in both paths, entity MERGE fix
+- `src/create_context_graph/name_pools.py` — domain-aware base pools, 9 new property pools, domain-aware roles
+- `src/create_context_graph/generator.py` — pass `domain_id` to name pool functions
+- `src/create_context_graph/templates/backend/agents/strands/agent.py.j2` — `_extract_text()` helper
+- `src/create_context_graph/templates/backend/agents/crewai/agent.py.j2` — explicit LLM, env setup, logging
+- `src/create_context_graph/templates/base/dot_env.j2` — `GOOGLE_API_KEY`
+- `src/create_context_graph/templates/base/dot_env_example.j2` — `GOOGLE_API_KEY` with comment
+- `src/create_context_graph/templates/frontend/components/ChatInterface.tsx.j2` — avatars, input redesign, suggested questions, progress counter
+- `tests/test_config.py` — `TestGoogleApiKey`
+- `tests/test_generated_project.py` — 5 new test classes
+
 ---
 
 ## Summary
 
 | Phase | Description | Status | Tests |
 |-------|-------------|--------|-------|
-| 1 | Core CLI & Template Engine | **Complete** | 510 passing |
+| 1 | Core CLI & Template Engine | **Complete** | 545 passing |
 | 2 | Domain Expansion & Data Generation | **Complete** | (included above) |
 | 3 | Framework Templates & Frontend | **Complete** | (included above) |
 | 4 | SaaS Import & Custom Domains | **Complete** | (included above) |
@@ -643,3 +705,4 @@ Comprehensive end-to-end testing of v0.5.0 across all 9 framework/domain combina
 | 9 | QA Hardening & DX Polish | **Complete** | (included above) |
 | 10 | Framework Reliability, Data Quality & UX | **Complete** | (included above) |
 | 11 | v0.5.1 Testing Feedback Fixes | **Complete** | (included above) |
+| 12 | v0.6.0 Comprehensive Testing Feedback | **Complete** | (included above) |

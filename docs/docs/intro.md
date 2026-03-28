@@ -43,6 +43,13 @@ uvx create-context-graph my-app \
   --domain healthcare \
   --framework pydanticai \
   --demo-data
+
+# Or scaffold, seed, and ingest in one step:
+uvx create-context-graph my-app \
+  --domain healthcare \
+  --framework pydanticai \
+  --demo \
+  --neo4j-uri neo4j://localhost:7687
 ```
 
 This creates a `my-app/` directory with a complete healthcare context graph application using PydanticAI as the agent framework, pre-loaded with demo data.

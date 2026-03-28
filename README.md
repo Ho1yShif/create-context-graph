@@ -245,7 +245,10 @@ Options:
   --neo4j-aura-env PATH    Path to Neo4j Aura .env file with credentials
   --neo4j-local             Use @johnymontana/neo4j-local for local Neo4j (no Docker)
   --anthropic-api-key TEXT  Anthropic API key for LLM generation [env: ANTHROPIC_API_KEY]
+  --openai-api-key TEXT    OpenAI API key for LLM generation [env: OPENAI_API_KEY]
+  --google-api-key TEXT    Google/Gemini API key (required for google-adk) [env: GOOGLE_API_KEY]
   --output-dir PATH         Output directory (default: ./<project-name>)
+  --demo                    Shortcut for --reset-database --demo-data --ingest
   --reset-database          Clear all Neo4j data before ingesting
   --dry-run                 Preview what would be generated without creating files
   --verbose                 Enable verbose debug output
@@ -274,8 +277,8 @@ uv venv && uv pip install -e ".[dev]"
 
 # Run tests (no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 510 tests
-pytest tests/ -v --slow        # Full: 708 tests (includes 176-combo domain x framework matrix + 22 perf tests)
+pytest tests/ -v               # Fast: 545 tests
+pytest tests/ -v --slow        # Full: 743 tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
 create-context-graph /tmp/test-app --domain software-engineering --framework pydanticai --demo-data
@@ -285,8 +288,8 @@ create-context-graph /tmp/test-app --domain software-engineering --framework pyd
 
 | Target | Description | Requirements |
 |--------|-------------|--------------|
-| `make test` | Run fast unit tests (510 tests) | None |
-| `make test-slow` | Full suite including matrix + perf (708 tests) | None |
+| `make test` | Run fast unit tests (545 tests) | None |
+| `make test-slow` | Full suite including matrix + perf (743 tests) | None |
 | `make test-matrix` | Domain × framework matrix only (176 combos) | None |
 | `make test-coverage` | Tests with HTML coverage report | None |
 | `make smoke-test` | E2E smoke tests for 3 key frameworks | Neo4j + LLM API keys |

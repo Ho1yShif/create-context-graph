@@ -455,6 +455,192 @@ _SPECIALTY_POOL = [
     "Radiology", "Dermatology", "Psychiatry",
 ]
 
+# ---------------------------------------------------------------------------
+# Additional property value pools to replace templated "{name} - {prop}" pattern
+# ---------------------------------------------------------------------------
+
+_CONTRAINDICATION_POOL = [
+    "Renal impairment (GFR < 30 mL/min)", "Hepatic dysfunction",
+    "Pregnancy Category D", "Known hypersensitivity", "Active GI bleeding",
+    "Severe bradycardia", "Concurrent MAO inhibitor use",
+    "Uncontrolled diabetes", "History of angioedema", "Acute heart failure",
+]
+
+_DOSAGE_FORM_POOL = [
+    "Tablet", "Capsule", "Injectable", "Oral Solution", "Topical Cream",
+    "Inhaler", "Transdermal Patch", "Suppository", "Sublingual Tablet",
+    "Extended-Release Tablet", "Chewable Tablet", "Nasal Spray",
+]
+
+_ALLERGY_POOL = [
+    "Penicillin", "Sulfa drugs", "Latex", "Shellfish", "Aspirin",
+    "Iodine contrast dye", "Codeine", "Tetracycline", "Egg proteins",
+    "No known allergies", "NSAID sensitivity", "Peanuts",
+]
+
+_SECTOR_POOL = [
+    "Technology", "Healthcare", "Financial Services", "Energy",
+    "Consumer Discretionary", "Industrials", "Real Estate",
+    "Utilities", "Materials", "Communications", "Consumer Staples",
+]
+
+_REPORTER_POOL = [
+    "Alex Rivera", "Jordan Lee", "Casey Morgan", "Sam Patterson",
+    "Taylor Singh", "Morgan Chen", "Dakota Williams", "Avery Johnson",
+    "Quinn Martinez", "Riley Thompson", "Cameron Davis", "Drew Wilson",
+]
+
+# Domain-aware base entity pools — override generic POLE+O names when domain is known
+DOMAIN_PERSON_NAMES: dict[str, list[str]] = {
+    "healthcare": [
+        "Dr. Sarah Chen", "Nurse James Morrison", "Dr. Maria Rodriguez",
+        "Dr. David Park", "Nurse Elena Volkov", "Dr. Michael O'Brien",
+        "Pharmacist Aisha Patel", "Dr. Robert Kim", "Nurse Lisa Nakamura",
+        "Dr. Carlos Gutierrez", "Nurse Fatima Al-Hassan", "Dr. Thomas Weber",
+    ],
+    "financial-services": [
+        "Portfolio Manager Sarah Chen", "Risk Analyst James Morrison",
+        "Wealth Advisor Maria Rodriguez", "Compliance Officer David Park",
+        "Trading Desk Lead Elena Volkov", "Senior Banker Michael O'Brien",
+        "Financial Planner Aisha Patel", "Credit Analyst Robert Kim",
+    ],
+    "gaming": [
+        "Game Designer Sarah C.", "Community Manager James M.",
+        "QA Lead Maria R.", "Server Admin David P.",
+        "Esports Coordinator Elena V.", "LiveOps Manager Michael O.",
+    ],
+    "software-engineering": [
+        "Staff Engineer Sarah Chen", "SRE Lead James Morrison",
+        "Principal Engineer Maria Rodriguez", "DevOps Manager David Park",
+        "Security Engineer Elena Volkov", "Platform Lead Michael O'Brien",
+    ],
+    "conservation": [
+        "Field Researcher Sarah Chen", "Park Ranger James Morrison",
+        "Conservation Biologist Maria Rodriguez", "Wildlife Vet David Park",
+        "GIS Analyst Elena Volkov", "Ecologist Michael O'Brien",
+    ],
+    "data-journalism": [
+        "Senior Reporter Sarah Chen", "Investigative Journalist James Morrison",
+        "Data Editor Maria Rodriguez", "FOIA Specialist David Park",
+        "Graphics Editor Elena Volkov", "Fact-Checker Michael O'Brien",
+    ],
+}
+
+DOMAIN_ORGANIZATION_NAMES: dict[str, list[str]] = {
+    "healthcare": [
+        "Metropolitan General Hospital", "Sunrise Medical Center",
+        "Valley Health Network", "Pacific Medical Group",
+        "Community Care Alliance", "University Hospital System",
+    ],
+    "financial-services": [
+        "Global Capital Partners", "Pacific Ridge Investments",
+        "Sterling Wealth Management", "Apex Securities Group",
+        "First National Trust", "Harbor Point Capital",
+    ],
+    "gaming": [
+        "Nexus Games Studio", "Titan Interactive",
+        "Pixel Forge Entertainment", "Storm Cloud Games",
+        "Digital Horizons Ltd", "Obsidian Play",
+    ],
+    "software-engineering": [
+        "TechStream Inc", "CloudScale Systems",
+        "DataPipe Solutions", "Nexus Platform Corp",
+        "OpenGrid Technologies", "Quantum Cloud Inc",
+    ],
+}
+
+DOMAIN_LOCATION_NAMES: dict[str, list[str]] = {
+    "healthcare": [
+        "Main Hospital Campus", "East Wing ICU", "Outpatient Clinic B",
+        "Emergency Department", "Radiology Suite", "Pharmacy Building",
+    ],
+    "financial-services": [
+        "Wall Street Trading Floor", "Midtown Advisory Office",
+        "Downtown Branch", "Corporate Headquarters", "Data Center East",
+    ],
+    "gaming": [
+        "NA-East Server Cluster", "EU-West Game Farm",
+        "Asia-Pacific Data Center", "QA Testing Lab",
+    ],
+    "software-engineering": [
+        "Production Datacenter", "Staging Environment",
+        "CI/CD Build Farm", "Disaster Recovery Site",
+    ],
+}
+
+DOMAIN_EVENT_NAMES: dict[str, list[str]] = {
+    "healthcare": [
+        "Grand Rounds Lecture", "Emergency Code Blue Drill",
+        "Pharmacy & Therapeutics Committee", "Infection Control Audit",
+        "Morbidity & Mortality Conference", "Nursing Education Seminar",
+    ],
+    "financial-services": [
+        "Quarterly Earnings Call", "Fed Rate Decision Brief",
+        "Risk Committee Meeting", "Portfolio Rebalancing Review",
+        "Compliance Training Session", "Investor Conference",
+    ],
+    "gaming": [
+        "Season 5 Launch Event", "Server Maintenance Window",
+        "Community Tournament", "Patch Notes Livestream",
+        "Beta Testing Phase", "Holiday In-Game Event",
+    ],
+    "software-engineering": [
+        "Sprint Retrospective", "Incident Post-Mortem",
+        "Architecture Review Board", "On-Call Handoff",
+        "Production Deploy Window", "Chaos Engineering Day",
+    ],
+}
+
+DOMAIN_OBJECT_NAMES: dict[str, list[str]] = {
+    "healthcare": [
+        "Patient Care Protocol", "Clinical Trial Report",
+        "Medication Reconciliation Form", "Discharge Planning Checklist",
+        "Lab Results Summary", "Radiology Findings Report",
+    ],
+    "financial-services": [
+        "Risk Assessment Report", "Portfolio Performance Summary",
+        "Compliance Filing", "Due Diligence Memo",
+        "Quarterly Market Analysis", "Client Onboarding Package",
+    ],
+    "gaming": [
+        "Game Design Document", "Balance Patch Notes",
+        "Player Behavior Report", "Economy Audit Spreadsheet",
+        "Server Performance Log", "Community Feedback Summary",
+    ],
+    "software-engineering": [
+        "Architecture Decision Record", "Incident Report",
+        "Runbook for Database Failover", "API Specification",
+        "Load Test Results", "Security Audit Findings",
+    ],
+}
+
+DOMAIN_ROLE_POOL: dict[str, list[str]] = {
+    "healthcare": [
+        "Attending Physician", "Charge Nurse", "Resident", "Pharmacist",
+        "Lab Technician", "Radiologist", "Physical Therapist", "Surgeon",
+    ],
+    "financial-services": [
+        "Portfolio Manager", "Risk Analyst", "Compliance Officer", "Trader",
+        "Wealth Advisor", "Credit Analyst", "Quantitative Analyst", "Auditor",
+    ],
+    "gaming": [
+        "Game Designer", "Community Manager", "QA Tester", "Server Admin",
+        "LiveOps Engineer", "Esports Coordinator", "Balance Designer", "Producer",
+    ],
+    "software-engineering": [
+        "Staff Engineer", "SRE", "DevOps Engineer", "Security Engineer",
+        "Platform Engineer", "Tech Lead", "Engineering Manager", "Principal Architect",
+    ],
+    "conservation": [
+        "Field Researcher", "Park Ranger", "Wildlife Veterinarian", "GIS Analyst",
+        "Conservation Officer", "Marine Biologist", "Ecologist", "Policy Advisor",
+    ],
+    "data-journalism": [
+        "Senior Reporter", "Data Editor", "Investigative Journalist", "Fact-Checker",
+        "Graphics Editor", "FOIA Specialist", "Copy Editor", "Bureau Chief",
+    ],
+}
+
 
 # ---------------------------------------------------------------------------
 # Value generators
@@ -532,15 +718,36 @@ def generate_longitude() -> float:
 # ---------------------------------------------------------------------------
 
 
-def get_names_for_pole_type(pole_type: str, count: int) -> list[str]:
-    """Get realistic names appropriate for the given POLE+O type."""
-    pool = {
-        "PERSON": PERSON_NAMES,
-        "ORGANIZATION": ORGANIZATION_NAMES,
-        "LOCATION": LOCATION_NAMES,
-        "EVENT": EVENT_NAMES,
-        "OBJECT": OBJECT_NAMES,
-    }.get(pole_type.upper(), OBJECT_NAMES)
+def get_names_for_pole_type(
+    pole_type: str, count: int, *, domain_id: str | None = None,
+) -> list[str]:
+    """Get realistic names appropriate for the given POLE+O type.
+
+    If *domain_id* is provided, domain-specific pools are checked first so that
+    base entities use contextually appropriate names (e.g. doctors for healthcare).
+    """
+    # Try domain-specific base pools first
+    domain_pools: dict[str, dict[str, list[str]]] = {
+        "PERSON": DOMAIN_PERSON_NAMES,
+        "ORGANIZATION": DOMAIN_ORGANIZATION_NAMES,
+        "LOCATION": DOMAIN_LOCATION_NAMES,
+        "EVENT": DOMAIN_EVENT_NAMES,
+        "OBJECT": DOMAIN_OBJECT_NAMES,
+    }
+    pool = None
+    if domain_id:
+        dp = domain_pools.get(pole_type.upper())
+        if dp and domain_id in dp:
+            pool = dp[domain_id]
+
+    if pool is None:
+        pool = {
+            "PERSON": PERSON_NAMES,
+            "ORGANIZATION": ORGANIZATION_NAMES,
+            "LOCATION": LOCATION_NAMES,
+            "EVENT": EVENT_NAMES,
+            "OBJECT": OBJECT_NAMES,
+        }.get(pole_type.upper(), OBJECT_NAMES)
 
     # Extend pool if more names needed than available
     names = list(pool)
@@ -549,7 +756,9 @@ def get_names_for_pole_type(pole_type: str, count: int) -> list[str]:
     return names[:count]
 
 
-def get_names_for_label(label: str, pole_type: str, count: int) -> list[str]:
+def get_names_for_label(
+    label: str, pole_type: str, count: int, *, domain_id: str | None = None,
+) -> list[str]:
     """Get names appropriate for a specific entity label.
 
     Checks the domain-specific ``LABEL_NAMES`` pool first, then falls back to
@@ -564,7 +773,7 @@ def get_names_for_label(label: str, pole_type: str, count: int) -> list[str]:
             suffix += 1
             names.extend(f"{n} {suffix}" for n in pool)
         return names[:count]
-    return get_names_for_pole_type(pole_type, count)
+    return get_names_for_pole_type(pole_type, count, domain_id=domain_id)
 
 
 def generate_property_value(
@@ -573,6 +782,8 @@ def generate_property_value(
     entity_name: str,
     label: str,
     index: int,
+    *,
+    domain_id: str | None = None,
 ) -> str | int | float | bool | None:
     """Generate a contextually appropriate property value based on name and type."""
     name_lower = prop_name.lower()
@@ -587,7 +798,9 @@ def generate_property_value(
     if name_lower in _ADDRESS_PROPERTIES:
         return generate_address()
     if name_lower == "role" or name_lower == "title":
-        return _ROLE_POOL[index % len(_ROLE_POOL)]
+        # Use domain-specific roles if available
+        pool = DOMAIN_ROLE_POOL.get(domain_id, _ROLE_POOL) if domain_id else _ROLE_POOL
+        return pool[index % len(pool)]
     if name_lower == "industry":
         return _INDUSTRY_POOL[index % len(_INDUSTRY_POOL)]
     if name_lower == "latitude" or name_lower == "lat":
@@ -620,6 +833,33 @@ def generate_property_value(
         return _DISPOSITION_POOL[index % len(_DISPOSITION_POOL)]
     if name_lower in ("specialty", "specialization"):
         return _SPECIALTY_POOL[index % len(_SPECIALTY_POOL)]
+    if name_lower in ("contraindications", "contraindication"):
+        return _CONTRAINDICATION_POOL[index % len(_CONTRAINDICATION_POOL)]
+    if name_lower in ("dosage_form", "form", "formulation"):
+        return _DOSAGE_FORM_POOL[index % len(_DOSAGE_FORM_POOL)]
+    if name_lower in ("allergies", "allergy", "known_allergies"):
+        return _ALLERGY_POOL[index % len(_ALLERGY_POOL)]
+    if name_lower in ("sector", "market_sector", "industry_sector"):
+        return _SECTOR_POOL[index % len(_SECTOR_POOL)]
+    if name_lower in ("lead_reporter", "lead_journalist", "reporter", "journalist", "author"):
+        return _REPORTER_POOL[index % len(_REPORTER_POOL)]
+    if name_lower in ("manufacturer", "supplier", "vendor"):
+        return ORGANIZATION_NAMES[index % len(ORGANIZATION_NAMES)]
+    if name_lower in ("mechanism_of_action", "mechanism"):
+        mechanisms = [
+            "Inhibits HMG-CoA reductase", "Blocks angiotensin II receptors",
+            "Selective serotonin reuptake inhibition", "Beta-adrenergic blockade",
+            "Reduces hepatic glucose production", "Calcium channel blockade",
+        ]
+        return mechanisms[index % len(mechanisms)]
+    if name_lower in ("population_trend",):
+        return random.choice(["increasing", "stable", "decreasing", "unknown"])
+    if name_lower in ("habitat", "primary_habitat"):
+        habitats = [
+            "Tropical rainforest", "Savanna grassland", "Temperate deciduous forest",
+            "Coral reef", "Arctic tundra", "Mangrove wetland",
+        ]
+        return habitats[index % len(habitats)]
 
     # Handle by type
     if prop_type in ("string", "str"):
