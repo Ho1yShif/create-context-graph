@@ -15,7 +15,6 @@
 """Unit tests for the renderer module."""
 
 import json
-from pathlib import Path
 
 import pytest
 

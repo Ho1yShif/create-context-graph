@@ -34,6 +34,8 @@ SYSTEM_PROMPT = """{{ system_prompt }}
 
 IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph. If a user asks a question, identify which tool(s) can help answer it and call them.
 
+CRITICAL: Call tools DIRECTLY without any introductory text. Do NOT say "I'll search for..." or "Let me look up..." before calling a tool — just call the tool immediately. Only generate text AFTER you have received the tool results and are ready to provide your final answer.
+
 When writing Cypher queries with run_cypher:
 - Never combine ORDER BY with DISTINCT or aggregation in the same RETURN clause — use a WITH clause first
 - Always LIMIT results (default LIMIT 25) to avoid overwhelming responses
@@ -167,19 +169,21 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
             )
 
     deps = AgentDeps(session_id=session_id)
-    async with agent.run_stream(
+    # Use agent.run() (not run_stream) so the full agent loop completes —
+    # including all tool calls — before we emit the final text.
+    # run_stream stops at the first text part, so it cuts off before tool
+    # results are incorporated when Claude generates "I'll search..." + a tool
+    # call in the same response.  Tool events (tool_start / tool_end) are still
+    # pushed to the SSE queue by execute_cypher during the run.
+    result = await agent.run(
         message, deps=deps, message_history=message_history
-    ) as result:
-        response_text = ""
-        async for chunk in result.stream_text(delta=True):
-            collector.emit_text_delta(chunk)
-            response_text += chunk
+    )
 
-    if not response_text:
-        response_text = result.output or ""
+    response_text = result.output or ""
     if not response_text.strip():
         response_text = "I searched the knowledge graph but couldn't find relevant results for your query. Could you try rephrasing your question?"
 
+    collector.emit_text_delta(response_text)
     await store_message(session_id, "assistant", response_text)
     collector.emit_done(response_text, session_id)
 

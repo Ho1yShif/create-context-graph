@@ -192,7 +192,6 @@ def _interpolate_template_vars(text: str, entities: dict[str, list[dict]]) -> st
 def generate_traces(client: anthropic.Anthropic, ontology, entities: dict) -> list[dict]:
     """Generate complete decision traces with realistic observations and outcomes."""
     traces = []
-    import random
 
     for trace_def in ontology.decision_traces:
         # Interpolate entity references into task
@@ -350,13 +349,13 @@ def regenerate_domain(client: anthropic.Anthropic, domain_id: str) -> dict | Non
             entity_count = sum(len(v) for v in entities.values())
             print(f"  Generated {entity_count} entities across {len(entities)} types")
 
-            print(f"  Weaving relationships...")
+            print("  Weaving relationships...")
             relationships = weave_relationships(ontology, entities)
 
-            print(f"  Generating documents...")
+            print("  Generating documents...")
             documents = generate_documents(client, ontology, entities)
 
-            print(f"  Generating decision traces...")
+            print("  Generating decision traces...")
             traces = generate_traces(client, ontology, entities)
 
             data = {
@@ -372,7 +371,7 @@ def regenerate_domain(client: anthropic.Anthropic, domain_id: str) -> dict | Non
             if errors:
                 print(f"  Validation errors: {errors[:3]}")
                 if attempt < MAX_RETRIES - 1:
-                    print(f"  Retrying...")
+                    print("  Retrying...")
                     continue
                 else:
                     print(f"  WARNING: Proceeding with {len(errors)} validation errors")
@@ -386,7 +385,7 @@ def regenerate_domain(client: anthropic.Anthropic, domain_id: str) -> dict | Non
             print(f"  Error: {e}")
             traceback.print_exc()
             if attempt < MAX_RETRIES - 1:
-                print(f"  Retrying in 5s...")
+                print("  Retrying in 5s...")
                 time.sleep(5)
             else:
                 print(f"  FAILED after {MAX_RETRIES} attempts")
@@ -427,7 +426,7 @@ def main():
             success += 1
         else:
             failed.append(domain_id)
-            print(f"  FAILED\n")
+            print("  FAILED\n")
 
     print(f"\nDone: {success}/{len(domains)} succeeded")
     if failed:

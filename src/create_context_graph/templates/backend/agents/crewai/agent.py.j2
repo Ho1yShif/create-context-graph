@@ -42,7 +42,9 @@ def _run_sync(coro):
 
 SYSTEM_PROMPT = """{{ system_prompt }}
 
-IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph."""
+IMPORTANT: You MUST use the available tools to query the knowledge graph before answering any question about the data. Never guess or make up information — always use tools to look up actual data from the graph.
+
+CRITICAL: Call tools DIRECTLY without any introductory text. Do NOT say "I'll search for..." or "Let me look up..." before calling a tool — just call the tool immediately. Only generate text AFTER you have received the tool results and are ready to provide your final answer."""
 
 # ---------------------------------------------------------------------------
 # Agent tools — domain-specific for {{ domain.name }}

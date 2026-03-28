@@ -314,9 +314,9 @@ def _generate_static_observation(action: str, domain_name: str) -> str:
     if "check" in action_lower or "verify" in action_lower or "validate" in action_lower:
         return f"Validation completed successfully. All checked parameters are within acceptable thresholds for {domain_name.lower()} standards."
     if "calculate" in action_lower or "compute" in action_lower or "analyze" in action_lower:
-        return f"Analysis complete. Key metrics computed and compared against historical baselines. Results indicate normal operational parameters."
+        return "Analysis complete. Key metrics computed and compared against historical baselines. Results indicate normal operational parameters."
     if "review" in action_lower:
-        return f"Review of available records completed. Identified 3 key factors relevant to the current decision context."
+        return "Review of available records completed. Identified 3 key factors relevant to the current decision context."
     return f"Action completed. Results consistent with expected {domain_name.lower()} domain patterns and prior observations."
 
 

@@ -16,8 +16,6 @@
 
 from __future__ import annotations
 
-import base64
-import json
 from typing import Any
 
 from create_context_graph.connectors import (
@@ -69,7 +67,6 @@ class GmailConnector(BaseConnector):
 
         # Fall back to Python Google API
         try:
-            from google_auth_oauthlib.flow import InstalledAppFlow
             from googleapiclient.discovery import build
         except ImportError:
             raise ImportError(

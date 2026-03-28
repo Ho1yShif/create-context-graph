@@ -220,7 +220,7 @@ def generate_custom_domain(
     client, resolved_provider = _get_llm_client(api_key, provider)
     if client is None:
         raise ValueError(
-            f"Could not initialize LLM client. Install 'anthropic' or 'openai' package."
+            "Could not initialize LLM client. Install 'anthropic' or 'openai' package."
         )
 
     base_yaml, examples = _load_example_yamls()

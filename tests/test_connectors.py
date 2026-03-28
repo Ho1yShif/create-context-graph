@@ -20,7 +20,6 @@ import pytest
 
 from create_context_graph.connectors import (
     CONNECTOR_REGISTRY,
-    BaseConnector,
     NormalizedData,
     get_connector,
     list_connectors,

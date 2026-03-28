@@ -20,9 +20,6 @@ import pytest
 
 from create_context_graph.ontology import (
     DomainOntology,
-    EntityTypeDef,
-    PropertyDef,
-    RelationshipDef,
     _sanitize_enum_name,
     generate_cypher_schema,
     generate_pydantic_models,
