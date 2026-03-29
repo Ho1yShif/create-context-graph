@@ -169,16 +169,18 @@ Select your preferred agent framework at project creation time:
 
 | Framework | Description |
 |-----------|-------------|
-| **PydanticAI** | Structured tool definitions with Pydantic models and `RunContext` | Full streaming |
-| **Claude Agent SDK** | Anthropic tool-use with agentic loop | Full streaming |
-| **OpenAI Agents SDK** | `@function_tool` decorators with `Runner.run()` | Full streaming |
-| **LangGraph** | Stateful graph-based agent workflow with `create_react_agent()` | Full streaming |
-| **CrewAI** | Multi-agent crew with role-based tools | Tool streaming |
-| **Strands** | Tool-use agents with Anthropic model | Tool streaming |
-| **Google ADK** | Gemini agents with `FunctionTool` calling | Full streaming |
-| **Anthropic Tools** | Modular tool registry with Anthropic API agentic loop | Full streaming |
+| **PydanticAI** | Structured tool definitions with Pydantic models and `RunContext` | Full streaming | `ANTHROPIC_API_KEY` |
+| **Claude Agent SDK** | Anthropic tool-use with agentic loop | Full streaming | `ANTHROPIC_API_KEY` |
+| **OpenAI Agents SDK** | `@function_tool` decorators with `Runner.run()` | Full streaming | `OPENAI_API_KEY` |
+| **LangGraph** | Stateful graph-based agent workflow with `create_react_agent()` | Full streaming | `ANTHROPIC_API_KEY` |
+| **CrewAI** | Multi-agent crew with role-based tools | Tool streaming | `ANTHROPIC_API_KEY` |
+| **Strands** | Tool-use agents with Anthropic model | Tool streaming | `ANTHROPIC_API_KEY` |
+| **Google ADK** | Gemini agents with `FunctionTool` calling | Full streaming | `GOOGLE_API_KEY` |
+| **Anthropic Tools** | Modular tool registry with Anthropic API agentic loop | Full streaming | `ANTHROPIC_API_KEY` |
 
 All frameworks share the same FastAPI HTTP layer, Neo4j client, and frontend. Only the agent implementation differs. "Full streaming" means token-by-token text + real-time tool calls. "Tool streaming" means real-time tool calls with text delivered at the end.
+
+> **Note:** Conversation memory uses local sentence-transformers embeddings by default — no `OPENAI_API_KEY` required. If you set `OPENAI_API_KEY` in your `.env`, it will automatically upgrade to OpenAI embeddings.
 
 ## Generated Project Structure
 
@@ -277,8 +279,8 @@ uv venv && uv pip install -e ".[dev]"
 
 # Run tests (no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 602 tests
-pytest tests/ -v --slow        # Full: 800 tests (includes 176-combo domain x framework matrix + 22 perf tests)
+pytest tests/ -v               # Fast: 691 tests
+pytest tests/ -v --slow        # Full: 900+ tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
 create-context-graph /tmp/test-app --domain software-engineering --framework pydanticai --demo-data
@@ -288,8 +290,8 @@ create-context-graph /tmp/test-app --domain software-engineering --framework pyd
 
 | Target | Description | Requirements |
 |--------|-------------|--------------|
-| `make test` | Run fast unit tests (602 tests) | None |
-| `make test-slow` | Full suite including matrix + perf (800 tests) | None |
+| `make test` | Run fast unit tests (691 tests) | None |
+| `make test-slow` | Full suite including matrix + perf (900+ tests) | None |
 | `make test-matrix` | Domain × framework matrix only (176 combos) | None |
 | `make test-coverage` | Tests with HTML coverage report | None |
 | `make smoke-test` | E2E smoke tests for 3 key frameworks | Neo4j + LLM API keys |
@@ -330,9 +332,9 @@ GitHub Actions (`.github/workflows/ci.yml`) runs automatically:
 
 | Job | Trigger | Description |
 |-----|---------|-------------|
-| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 (602 tests) |
+| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 (691 tests) |
 | **lint** | All pushes + PRs | Ruff linter on `src/` and `tests/` |
-| **matrix** | Push to `main` only | Full suite + 176 domain × framework matrix + 22 perf tests (800 tests) |
+| **matrix** | Push to `main` only | Full suite + 176 domain × framework matrix + 22 perf tests (900+ tests) |
 | **smoke-test** | Push to `main` only | E2E tests for all 8 frameworks (scaffold → install → start → chat) |
 
 The smoke-test CI job is gated behind a `SMOKE_TESTS_ENABLED` repository variable. To enable it:

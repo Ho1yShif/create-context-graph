@@ -1,6 +1,7 @@
 ---
 sidebar_position: 3
 title: Switch Agent Frameworks
+slug: switch-frameworks
 ---
 
 # Switch Agent Frameworks

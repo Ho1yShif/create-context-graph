@@ -637,10 +637,13 @@ export function ContextGraphView({ externalGraphData, onAskAbout }: ContextGraph
             onCanvasClick={handleCanvasClick}
           />
         ) : (
-          <Flex h="100%" align="center" justify="center" direction="column" gap={2}>
-            <Text color="gray.500">No graph data to display.</Text>
-            <Text color="gray.400" fontSize="sm">
-              Use the AI assistant to query data or double-click a schema label.
+          <Flex h="100%" align="center" justify="center" direction="column" gap={4} p={8}>
+            <Box color="gray.400" fontSize="4xl">🔗</Box>
+            <Text color="gray.400" fontWeight="medium" fontSize="lg">
+              Your knowledge graph will appear here
+            </Text>
+            <Text color="gray.500" fontSize="sm" textAlign="center" maxW="300px">
+              Ask a question in the chat to query entities, or double-click a node in the schema view to explore data.
             </Text>
           </Flex>
         )}

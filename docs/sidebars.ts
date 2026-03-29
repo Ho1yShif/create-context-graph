@@ -3,6 +3,7 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   docs: [
     'intro',
+    'quick-start',
     {
       type: 'category',
       label: 'Tutorials',
@@ -19,6 +20,7 @@ const sidebars: SidebarsConfig = {
         'how-to/add-custom-domain',
         'how-to/switch-agent-frameworks',
         'how-to/use-neo4j-aura',
+        'how-to/use-neo4j-local',
         'how-to/use-docker',
       ],
     },
@@ -30,6 +32,7 @@ const sidebars: SidebarsConfig = {
         'reference/ontology-yaml-schema',
         'reference/generated-project-structure',
         'reference/framework-comparison',
+        'reference/domain-catalog',
       ],
     },
     {

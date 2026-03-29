@@ -257,7 +257,7 @@ async def _ingest_with_driver(
                 for item in items:
                     enriched = {**item, "domain": ontology.domain.id}
                     set_clauses = ", ".join(f"n.{k} = ${k}" for k in enriched.keys())
-                    cypher = f"MERGE (n:{label} {{name: $name}}) SET {set_clauses}"
+                    cypher = f"MERGE (n:{label} {{name: $name, domain: $domain}}) SET {set_clauses}"
                     try:
                         await session.run(cypher, enriched)
                         entity_count += 1

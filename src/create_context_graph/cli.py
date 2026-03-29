@@ -199,6 +199,12 @@ def main(
                 "[yellow]Warning:[/yellow] google-adk framework requires a Google/Gemini API key. "
                 "Set GOOGLE_API_KEY in your .env or pass --google-api-key."
             )
+        # Warn if openai-agents is selected without an OpenAI API key
+        if config.resolved_framework == "openai-agents" and not openai_api_key:
+            console.print(
+                "[yellow]Warning:[/yellow] openai-agents framework requires an OpenAI API key. "
+                "Set OPENAI_API_KEY in your .env or pass --openai-api-key."
+            )
     else:
         # Launch interactive wizard
         from create_context_graph.wizard import run_wizard

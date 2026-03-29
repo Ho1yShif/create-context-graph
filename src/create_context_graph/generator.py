@@ -136,7 +136,75 @@ Return a JSON array of objects. Each object must have a "name" field plus the ot
         for et in ontology.entity_types:
             entities[et.label] = _generate_static_entities(et, domain_id=domain_id)
 
+    # Post-process: clamp unrealistic values
+    _validate_and_clamp(entities)
+
     return entities
+
+
+# Domain-appropriate value ranges for common property names
+_PROPERTY_CLAMP_RANGES: dict[str, tuple[float, float]] = {
+    "price_per_night": (30.0, 2000.0),
+    "daily_cost": (20.0, 3000.0),
+    "duration_hours": (0.25, 24.0),
+    "duration_minutes": (5.0, 480.0),
+    "cost": (1.0, 100000.0),
+    "price": (0.50, 50000.0),
+    "budget": (100.0, 10000000.0),
+    "rating": (1.0, 5.0),
+    "confidence": (0.0, 1.0),
+    "accuracy": (0.0, 100.0),
+    "efficiency": (0.0, 100.0),
+    "score": (0.0, 100.0),
+    "population_estimate": (1.0, 10000000000.0),
+    "capacity": (1.0, 1000000.0),
+    "capacity_per_hour": (1.0, 100000.0),
+    "weight": (0.001, 1000000.0),
+    "temperature": (-100.0, 1000.0),
+    "pressure": (0.0, 100000.0),
+    "latitude": (-90.0, 90.0),
+    "longitude": (-180.0, 180.0),
+    "elevation": (-500.0, 9000.0),
+    "area": (0.01, 100000000.0),
+    "length": (0.001, 100000.0),
+    "depth": (0.0, 12000.0),
+    "age": (0.0, 200.0),
+    "percentage": (0.0, 100.0),
+    "rate": (0.0, 100.0),
+}
+
+# Known taxonomy class -> valid values
+_TAXONOMY_CLASS_MAP: dict[str, str] = {
+    "bengal tiger": "mammalia", "african elephant": "mammalia",
+    "snow leopard": "mammalia", "gray wolf": "mammalia",
+    "mountain gorilla": "mammalia", "giant panda": "mammalia",
+    "polar bear": "mammalia", "blue whale": "mammalia",
+    "rhinoceros": "mammalia", "orangutan": "mammalia",
+    "sea turtle": "reptilia", "komodo dragon": "reptilia",
+    "bald eagle": "aves", "california condor": "aves",
+    "penguin": "aves", "flamingo": "aves",
+    "coral": "anthozoa", "frog": "amphibia", "salamander": "amphibia",
+}
+
+
+def _validate_and_clamp(entities: dict[str, list[dict]]) -> None:
+    """Post-process entities to clamp unrealistic numeric values and fix taxonomy."""
+    for label, items in entities.items():
+        for entity in items:
+            for key, value in entity.items():
+                # Clamp numeric values
+                if isinstance(value, (int, float)) and key in _PROPERTY_CLAMP_RANGES:
+                    lo, hi = _PROPERTY_CLAMP_RANGES[key]
+                    clamped = max(lo, min(hi, float(value)))
+                    entity[key] = int(clamped) if isinstance(value, int) else round(clamped, 2)
+
+                # Fix taxonomy class based on entity name
+                if key == "taxonomy_class" and isinstance(value, str):
+                    name_lower = entity.get("name", "").lower()
+                    for species_key, correct_class in _TAXONOMY_CLASS_MAP.items():
+                        if species_key in name_lower:
+                            entity[key] = correct_class
+                            break
 
 
 def _generate_static_entities(et, *, domain_id: str | None = None) -> list[dict]:

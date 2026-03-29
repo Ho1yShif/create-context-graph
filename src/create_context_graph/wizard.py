@@ -313,10 +313,18 @@ def run_wizard() -> ProjectConfig:
         ).ask()
     # anthropic_api_key already set from custom domain flow otherwise
 
-    openai_api_key = questionary.password(
-        "OpenAI API key (for embeddings, or Enter to skip):",
-        default="",
-    ).ask()
+    if framework == "openai-agents":
+        openai_api_key = questionary.password(
+            "OpenAI API key (required for OpenAI Agents SDK):",
+            default="",
+        ).ask()
+        if not openai_api_key:
+            console.print("[yellow]Warning:[/yellow] OpenAI Agents SDK requires OPENAI_API_KEY. Set it in your .env file.")
+    else:
+        openai_api_key = questionary.password(
+            "OpenAI API key (optional — for OpenAI embeddings, or Enter to skip):",
+            default="",
+        ).ask()
 
     google_api_key = None
     if framework == "google-adk":
