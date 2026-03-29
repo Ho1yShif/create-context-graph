@@ -1,6 +1,7 @@
 .section {
   padding: 5rem 0;
   overflow: hidden;
+  background: var(--ifm-background-color);
 }
 
 .header {
@@ -31,6 +32,29 @@
 
 .track:active {
   cursor: grabbing;
+}
+
+.trackContainer {
+  position: relative;
+}
+
+.trackFade {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 1rem;
+  width: 80px;
+  background: linear-gradient(90deg, transparent, var(--ifm-background-color));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dragHint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-500);
+  margin-top: 0.75rem;
+  padding: 0 2rem;
 }
 
 .cardWrapper {
@@ -170,5 +194,21 @@
 
   .card {
     width: 260px;
+  }
+
+  .trackFade {
+    width: 40px;
+  }
+
+  .dragHint {
+    font-size: 0.75rem;
+  }
+
+  .section {
+    padding: 3rem 0;
+  }
+
+  .title {
+    font-size: 1.5rem;
   }
 }

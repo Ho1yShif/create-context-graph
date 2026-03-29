@@ -3,8 +3,10 @@ import {
   motion,
   useScroll,
   useTransform,
+  useMotionValueEvent,
   useReducedMotion,
 } from "framer-motion";
+import { useState } from "react";
 import {
   HOW_IT_WORKS_STEPS,
   SECTION_COPY,
@@ -22,10 +24,17 @@ export function HowItWorks() {
   // Progress line fills as the section scrolls into view
   const lineScale = useTransform(scrollYProgress, [0.1, 0.6], [0, 1]);
 
-  // Each step activates at a different scroll point
-  const stepThresholds = HOW_IT_WORKS_STEPS.map((_, i) =>
-    0.15 + (i / HOW_IT_WORKS_STEPS.length) * 0.5
-  );
+  // Track which steps are active based on scroll
+  const [activeStep, setActiveStep] = useState(reducedMotion ? 3 : -1);
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (reducedMotion) return;
+    if (latest > 0.5) setActiveStep(3);
+    else if (latest > 0.4) setActiveStep(2);
+    else if (latest > 0.3) setActiveStep(1);
+    else if (latest > 0.2) setActiveStep(0);
+    else setActiveStep(-1);
+  });
 
   return (
     <section ref={sectionRef} className={styles.section}>
@@ -57,65 +66,27 @@ export function HowItWorks() {
           </div>
 
           {HOW_IT_WORKS_STEPS.map((step, i) => (
-            <StepItem
+            <motion.div
               key={step.title}
-              step={step}
-              index={i}
-              scrollYProgress={scrollYProgress}
-              threshold={stepThresholds[i]}
-              reducedMotion={reducedMotion || false}
-            />
+              className={styles.step}
+              initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.1 }}
+            >
+              <div
+                className={`${styles.stepNumber} ${
+                  activeStep >= i ? styles.stepNumberActive : ""
+                }`}
+              >
+                {i + 1}
+              </div>
+              <div className={styles.stepTitle}>{step.title}</div>
+              <div className={styles.stepTerminal}>$ {step.command}</div>
+            </motion.div>
           ))}
         </div>
       </div>
     </section>
-  );
-}
-
-function StepItem({
-  step,
-  index,
-  scrollYProgress,
-  threshold,
-  reducedMotion,
-}: {
-  step: { title: string; command: string };
-  index: number;
-  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
-  threshold: number;
-  reducedMotion: boolean;
-}) {
-  // Determine if step is "active" based on scroll progress
-  const opacity = useTransform(
-    scrollYProgress,
-    [threshold - 0.05, threshold],
-    [0.4, 1]
-  );
-
-  return (
-    <motion.div
-      className={styles.step}
-      initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-    >
-      <motion.div
-        className={`${styles.stepNumber} ${
-          reducedMotion ? styles.stepNumberActive : ""
-        }`}
-        style={
-          reducedMotion
-            ? undefined
-            : {
-                opacity,
-              }
-        }
-      >
-        {index + 1}
-      </motion.div>
-      <div className={styles.stepTitle}>{step.title}</div>
-      <div className={styles.stepTerminal}>$ {step.command}</div>
-    </motion.div>
   );
 }

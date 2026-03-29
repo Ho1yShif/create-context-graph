@@ -1,5 +1,6 @@
 .section {
   padding: 5rem 2rem;
+  background: var(--ifm-background-surface-color);
 }
 
 .inner {

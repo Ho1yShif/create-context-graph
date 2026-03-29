@@ -1,6 +1,7 @@
 .section {
   padding: 5rem 2rem;
   overflow: hidden;
+  background: var(--ifm-background-color);
 }
 
 .inner {
@@ -142,5 +143,14 @@
   .stepTerminal {
     white-space: pre-wrap;
     word-break: break-all;
+    font-size: 9px;
+  }
+
+  .section {
+    padding: 3rem 1.25rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
   }
 }

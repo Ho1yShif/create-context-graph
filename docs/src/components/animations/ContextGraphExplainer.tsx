@@ -5,7 +5,7 @@ import {
   useTransform,
   useReducedMotion,
 } from "framer-motion";
-import { COLORS } from "@site/src/data/animation-config";
+import { COLORS, SECTION_COPY } from "@site/src/data/animation-config";
 import styles from "./ContextGraphExplainer.module.css";
 
 // --- Graph data for the three memory layers ---
@@ -176,6 +176,10 @@ export function ContextGraphExplainer() {
 
   return (
     <div ref={containerRef} className={styles.scrollContainer}>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>{SECTION_COPY.contextGraph}</h2>
+        <p className={styles.sectionSubtitle}>Scroll to explore each memory layer</p>
+      </div>
       <div className={styles.sticky}>
         <div className={styles.content}>
           {/* Graph visualization */}

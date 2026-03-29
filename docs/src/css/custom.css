@@ -63,7 +63,52 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Navbar transparency on landing page */
+/* Navbar — transparent glassmorphism over dark hero */
 .navbar--fixed-top {
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Dark mode navbar: transparent bg so hero gradient shows through */
+[data-theme="dark"] .navbar {
+  background: rgba(10, 10, 26, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .navbar__title {
+  color: white;
+}
+
+[data-theme="dark"] .navbar__link {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .navbar__link:hover {
+  color: white;
+}
+
+/* Mobile sidebar (hamburger menu) */
+[data-theme="dark"] .navbar-sidebar {
+  background: #0d1117;
+}
+
+[data-theme="dark"] .navbar-sidebar__brand {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .navbar-sidebar .menu__link {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .navbar-sidebar .menu__link:hover,
+[data-theme="dark"] .navbar-sidebar .menu__link--active {
+  color: white;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+/* Light mode navbar adjustments */
+[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }

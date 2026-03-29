@@ -1,9 +1,8 @@
-import { useEffect, useRef, Fragment } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import {
-  motion,
   useInView,
   useMotionValue,
-  useTransform,
+  useMotionValueEvent,
   animate,
   useReducedMotion,
 } from "framer-motion";
@@ -30,7 +29,11 @@ function CountUpStat({ label, target }: { label: string; target: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const motionVal = useMotionValue(reducedMotion ? target : 0);
-  const rounded = useTransform(motionVal, (v) => Math.round(v));
+  const [displayValue, setDisplayValue] = useState(reducedMotion ? target : 0);
+
+  useMotionValueEvent(motionVal, "change", (latest) => {
+    setDisplayValue(Math.round(latest));
+  });
 
   useEffect(() => {
     if (isInView && !reducedMotion) {
@@ -40,9 +43,9 @@ function CountUpStat({ label, target }: { label: string; target: number }) {
 
   return (
     <div ref={ref} className={styles.stat}>
-      <motion.span className={styles.statValue} aria-live="polite">
-        {rounded}
-      </motion.span>
+      <span className={styles.statValue} aria-live="polite">
+        {displayValue}
+      </span>
       <span className={styles.statLabel}>{label}</span>
     </div>
   );

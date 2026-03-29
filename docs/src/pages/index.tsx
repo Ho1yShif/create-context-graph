@@ -151,7 +151,7 @@ function BottomCTA(): ReactNode {
         </motion.h2>
 
         <Terminal
-          title="terminal"
+          title="create-context-graph"
           maxWidth={560}
           copyCommand="uvx create-context-graph"
         >
