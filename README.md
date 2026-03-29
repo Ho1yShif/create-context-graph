@@ -14,8 +14,8 @@ uvx create-context-graph
 # Node.js
 npx create-context-graph
 
-# Non-interactive
-uvx create-context-graph my-app --domain healthcare --framework pydanticai --demo-data
+# Non-interactive (PROJECT_NAME is optional — auto-generates slug from domain+framework)
+uvx create-context-graph --domain healthcare --framework pydanticai --demo-data
 ```
 
 ## What It Does
@@ -230,7 +230,7 @@ my-app/
 create-context-graph [PROJECT_NAME] [OPTIONS]
 
 Arguments:
-  PROJECT_NAME              Project name (optional, prompted if missing)
+  PROJECT_NAME              Project name (optional — auto-generated from domain+framework if omitted)
 
 Options:
   --domain TEXT             Domain ID (e.g., healthcare, gaming)
@@ -277,7 +277,7 @@ uv venv && uv pip install -e ".[dev]"
 
 # Run tests (no Neo4j or API keys required)
 source .venv/bin/activate
-pytest tests/ -v               # Fast: 545 tests
+pytest tests/ -v               # Fast: 560 tests
 pytest tests/ -v --slow        # Full: 743 tests (includes 176-combo domain x framework matrix + 22 perf tests)
 
 # Test a specific scaffold
@@ -288,7 +288,7 @@ create-context-graph /tmp/test-app --domain software-engineering --framework pyd
 
 | Target | Description | Requirements |
 |--------|-------------|--------------|
-| `make test` | Run fast unit tests (545 tests) | None |
+| `make test` | Run fast unit tests (560 tests) | None |
 | `make test-slow` | Full suite including matrix + perf (743 tests) | None |
 | `make test-matrix` | Domain × framework matrix only (176 combos) | None |
 | `make test-coverage` | Tests with HTML coverage report | None |
@@ -330,7 +330,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs automatically:
 
 | Job | Trigger | Description |
 |-----|---------|-------------|
-| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 |
+| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 (560 tests) |
 | **lint** | All pushes + PRs | Ruff linter on `src/` and `tests/` |
 | **matrix** | Push to `main` only | All 176 domain × framework scaffold combinations |
 | **smoke-test** | Push to `main` only | E2E tests for all 8 frameworks (scaffold → install → start → chat) |
