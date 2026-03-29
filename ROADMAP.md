@@ -749,11 +749,79 @@ Comprehensive v0.6.0 testing revealed dependency issues, data quality gaps, miss
 
 ---
 
+## Phase 14 — v0.7.1 Testing Feedback: Embedding Regression, Data Quality & Docs
+
+Comprehensive v0.7.0 testing revealed 2 critical regressions, data quality gaps, missing documentation, and UX improvements. This phase addresses all findings.
+
+### Critical Fixes (P0)
+
+- **neo4j-agent-memory embedding regression**: Removed `[openai]` extra from generated `pyproject.toml`, added `sentence-transformers>=2.0` dependency. `MemorySettings` now auto-detects: uses local `sentence_transformers`/`all-MiniLM-L6-v2` (384 dims) by default, upgrades to OpenAI `text-embedding-3-small` (1536 dims) if `OPENAI_API_KEY` is set. Conversation memory works out of the box with no API key.
+- **openai-agents API key warning**: CLI now warns when `--framework openai-agents` is used without `--openai-api-key`. Wizard prompt text updated to indicate "required" for this framework.
+
+### Data Quality (P1)
+
+- **67 missing LABEL_NAMES**: Added name pools for all 67 entity labels that were falling back to generic "Label 1" names. `LABEL_NAMES` now has 118 entries (up from 51) covering every entity type across all 22 domain YAMLs.
+- **Post-generation value clamping**: Added `_validate_and_clamp()` in `generator.py` with 28 property range rules (price_per_night: $30-$2000, duration_hours: 0.25-24, etc.) and taxonomy class correction (species → correct class mapping).
+- **POLE-type entity descriptions**: Added `_LOCATION_LABELS`, `_EVENT_LABELS`, `_OBJECT_LABELS` sets (parallel to existing Person/Organization) plus 7 label-specific description overrides (Medication, Permit, Sensor, Equipment, Paper, Model, Species).
+- **digital-twin fixture fix**: Fixed label casing (UPPERCASE → PascalCase) to match YAML schema.
+- **Domain-scoped MERGE keys**: Changed entity MERGE from `{name: $name}` to `{name: $name, domain: $domain}` in both `generate_data.py.j2` and `ingest.py` to prevent constraint violations when sharing a Neo4j instance across domains.
+
+### google-adk Error Guard (P2)
+
+- Added `try/except AttributeError` around `runner.run_async()` in both `handle_message` and `handle_message_stream` to handle SDK cleanup errors when `_async_httpx_client` was never initialized.
+
+### Documentation
+
+- **Quick-Start page** (`docs/docs/quick-start.md`): 5-step guide with sidebar link.
+- **use-neo4j-local guide** (`docs/docs/how-to/use-neo4j-local.md`): 3 setup options (npx, Desktop, Docker).
+- **switch-frameworks slug fix**: Added `slug: switch-frameworks` to fix 404.
+- **Domain catalog** (`docs/docs/reference/domain-catalog.md`): Auto-generated table of all 22 domains with entity types, tool counts, sample questions.
+- **Architecture diagram**: Mermaid flowchart added to `docs/docs/intro.md`.
+- **Updated sidebars.ts**: Added quick-start, use-neo4j-local, domain-catalog to navigation.
+
+### Frontend UX
+
+- **Status indicator**: Enlarged from 8px to 12px, added text label ("Connected"/"Degraded"/"Offline").
+- **Health check retry**: Initial load retries 3 times with exponential backoff (1s/2s/4s) to prevent "Internal Server Error" on first page load.
+- **Empty graph state**: Larger icon, descriptive heading ("Your knowledge graph will appear here"), actionable guidance text.
+
+### Tests added (89 new → 691 total)
+
+- `tests/test_fixtures.py` (88 tests): Fixture schema alignment (required properties, agent tool property references, label coverage), data quality validation (numeric ranges)
+- `test_pyproject_has_sentence_transformers` — verifies no `[openai]` extra
+- `test_context_graph_client_has_embedding_config` — verifies embedding provider selection logic
+
+### Files modified
+
+- `src/create_context_graph/templates/backend/shared/pyproject.toml.j2` — removed `[openai]` extra, added sentence-transformers
+- `src/create_context_graph/templates/backend/shared/context_graph_client.py.j2` — embedding provider auto-detection
+- `src/create_context_graph/templates/base/dot_env_example.j2` — clarified OPENAI_API_KEY is optional
+- `src/create_context_graph/cli.py` — openai-agents warning
+- `src/create_context_graph/wizard.py` — framework-specific OpenAI key prompt
+- `src/create_context_graph/name_pools.py` — 67 new LABEL_NAMES, 3 new label sets, 7 description overrides
+- `src/create_context_graph/generator.py` — `_validate_and_clamp()`, `_PROPERTY_CLAMP_RANGES`, `_TAXONOMY_CLASS_MAP`
+- `src/create_context_graph/ingest.py` — domain-scoped MERGE keys
+- `src/create_context_graph/templates/backend/shared/generate_data.py.j2` — domain-scoped MERGE keys
+- `src/create_context_graph/templates/backend/agents/google_adk/agent.py.j2` — AttributeError guard
+- `src/create_context_graph/templates/frontend/app/page.tsx.j2` — health retry, larger status dot
+- `src/create_context_graph/templates/frontend/components/ContextGraphView.tsx.j2` — improved empty state
+- `src/create_context_graph/fixtures/digital-twin.json` — fixed label casing
+- `tests/test_generated_project.py` — updated embedding tests
+- `tests/test_fixtures.py` — new cross-validation test suite
+- `docs/docs/quick-start.md` — new
+- `docs/docs/how-to/use-neo4j-local.md` — new
+- `docs/docs/reference/domain-catalog.md` — new
+- `docs/docs/how-to/switch-agent-frameworks.md` — slug fix
+- `docs/docs/intro.md` — architecture diagram, updated links
+- `docs/sidebars.ts` — 3 new pages
+
+---
+
 ## Summary
 
 | Phase | Description | Status | Tests |
 |-------|-------------|--------|-------|
-| 1 | Core CLI & Template Engine | **Complete** | 602 passing |
+| 1 | Core CLI & Template Engine | **Complete** | 691 passing |
 | 2 | Domain Expansion & Data Generation | **Complete** | (included above) |
 | 3 | Framework Templates & Frontend | **Complete** | (included above) |
 | 4 | SaaS Import & Custom Domains | **Complete** | (included above) |
@@ -768,3 +836,4 @@ Comprehensive v0.6.0 testing revealed dependency issues, data quality gaps, miss
 | 11 | v0.5.1 Testing Feedback Fixes | **Complete** | (included above) |
 | 12 | v0.6.0 Comprehensive Testing Feedback | **Complete** | (included above) |
 | 13 | v0.6.1 Stability, Data Quality & Tools | **Complete** | (included above) |
+| 14 | v0.7.1 Embedding Regression, Data Quality & Docs | **Complete** | (included above) |
