@@ -171,15 +171,33 @@ async def connect_neo4j() -> None:
 
     # Initialize neo4j-agent-memory MemoryClient for conversation persistence
     try:
+        import os
         from pydantic import SecretStr
         from neo4j_agent_memory import MemoryClient, MemorySettings
+
+        # Use OpenAI embeddings if API key is available, otherwise local sentence-transformers
+        if os.getenv("OPENAI_API_KEY"):
+            embedding_config = {
+                "provider": "openai",
+                "model": "text-embedding-3-small",
+                "dimensions": 1536,
+            }
+        else:
+            embedding_config = {
+                "provider": "sentence_transformers",
+                "model": "all-MiniLM-L6-v2",
+                "dimensions": 384,
+                "device": "cpu",
+            }
+            logger.info("Using local sentence-transformers embeddings (set OPENAI_API_KEY for OpenAI embeddings)")
 
         memory_settings = MemorySettings(
             neo4j={
                 "uri": settings.neo4j_uri,
                 "username": settings.neo4j_username,
                 "password": SecretStr(settings.neo4j_password),
-            }
+            },
+            embedding=embedding_config,
         )
         _memory_client = MemoryClient(memory_settings)
         await _memory_client.__aenter__()

@@ -1,7 +1,7 @@
 {
   "domain": "digital-twin",
   "entities": {
-    "PERSON": [
+    "Person": [
       {
         "name": "Maria Rodriguez",
         "email": "maria.rodriguez@industrialtech.com",
@@ -33,7 +33,7 @@
         "description": "Lead architect for digital twin implementations across heavy industry and process manufacturing"
       }
     ],
-    "ORGANIZATION": [
+    "Organization": [
       {
         "name": "Apex Industrial Solutions",
         "description": "Leading provider of industrial automation and IoT monitoring systems for manufacturing facilities",
@@ -60,7 +60,7 @@
         "industry": "Technology Consulting"
       }
     ],
-    "LOCATION": [
+    "Location": [
       {
         "name": "Wolfsburg Manufacturing Plant",
         "address": "Heinrich-Nordhoff-Stra\u00dfe 1, 38440 Wolfsburg, Germany",
@@ -92,7 +92,7 @@
         "longitude": 72.9342
       }
     ],
-    "EVENT": [
+    "Event": [
       {
         "name": "Quarterly Maintenance Review",
         "date": "2024-01-15T09:00:00Z",
@@ -119,7 +119,7 @@
         "description": "Training session for operations staff on interpreting predictive maintenance recommendations"
       }
     ],
-    "OBJECT": [
+    "Object": [
       {
         "name": "Industrial Control Cabinet",
         "description": "Main electrical control panel housing PLCs, relays, and monitoring equipment for production line automation"
@@ -141,7 +141,7 @@
         "description": "Redundant safety system with multiple sensors ensuring safe operation of hazardous equipment"
       }
     ],
-    "ASSET": [
+    "Asset": [
       {
         "asset_id": "TBN-001-WF23",
         "name": "West Wind Turbine Alpha",
@@ -233,7 +233,7 @@
         "status": "operational"
       }
     ],
-    "SENSOR": [
+    "Sensor": [
       {
         "sensor_id": "TEMP-TBN001-001",
         "name": "Gearbox Temperature Sensor",
@@ -325,7 +325,7 @@
         "status": "active"
       }
     ],
-    "READING": [
+    "Reading": [
       {
         "reading_id": "RD-20240129-001",
         "value": 67.3,
@@ -383,7 +383,7 @@
         "name": "READING 8"
       }
     ],
-    "ALERT": [
+    "Alert": [
       {
         "alert_id": "ALT-2024-001523",
         "severity": "warning",
@@ -465,7 +465,7 @@
         "name": "ALERT 8"
       }
     ],
-    "MAINTENANCERECORD": [
+    "MaintenanceRecord": [
       {
         "record_id": "MR-2024-00789",
         "maintenance_type": "preventive",
@@ -547,7 +547,7 @@
         "name": "MAINTENANCERECORD 8"
       }
     ],
-    "SYSTEM": [
+    "System": [
       {
         "system_id": "SYS-COOL-WF23-01",
         "name": "Wind Farm Cooling System",

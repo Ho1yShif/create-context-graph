@@ -60,7 +60,33 @@ This creates a `my-app/` directory with a complete healthcare context graph appl
 uvx create-context-graph --list-domains
 ```
 
+## Architecture
+
+```mermaid
+graph TB
+    CLI["create-context-graph CLI"] --> |"domain YAML + framework"| Engine["Jinja2 Template Engine"]
+    Engine --> Backend["FastAPI Backend"]
+    Engine --> Frontend["Next.js + Chakra UI Frontend"]
+    Engine --> Data["Fixture Data + Cypher Schema"]
+
+    Backend --> Agent["AI Agent<br/>(8 frameworks)"]
+    Backend --> Client["Neo4j Client<br/>+ MemoryClient"]
+    Agent --> |"tool calls"| Client
+    Client --> |"Cypher queries"| Neo4j["Neo4j<br/>Knowledge Graph"]
+
+    Frontend --> Chat["Chat Interface<br/>(SSE streaming)"]
+    Frontend --> Graph["NVL Graph<br/>Visualization"]
+    Frontend --> Panels["Documents &<br/>Decision Traces"]
+
+    Chat --> |"POST /chat/stream"| Backend
+    Graph --> |"GET /expand"| Backend
+```
+
+The CLI reads a domain ontology YAML and renders Jinja2 templates into a complete project. The generated backend runs an AI agent with domain-specific Cypher tools. The frontend streams responses via SSE, updating the graph visualization as each tool completes.
+
 ## What's Next
 
+- **[Quick Start](./quick-start)** -- get a running app in under 5 minutes.
 - **[Your First Context Graph App](./tutorials/first-context-graph-app)** -- step-by-step tutorial to create, run, and explore a generated application.
 - **[Customizing Your Domain Ontology](./tutorials/customizing-domain-ontology)** -- learn how to modify entity types, relationships, and agent tools in your domain YAML.
+- **[Domain Catalog](./reference/domain-catalog)** -- browse all 22 built-in domains with entity types and sample questions.

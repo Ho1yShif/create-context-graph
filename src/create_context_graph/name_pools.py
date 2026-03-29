@@ -354,6 +354,413 @@ LABEL_NAMES: dict[str, list[str]] = {
         "INV-2025-01 Shell Company Network", "INV-2025-02 Procurement Fraud Pattern",
         "INV-2025-03 Environmental Violations", "INV-2025-04 Campaign Finance Links",
     ],
+    # --- Agent Memory ---
+    "Conversation": [
+        "Customer Onboarding Chat", "Technical Support Session", "Product Discovery Thread",
+        "Bug Report Discussion", "Weekly Standup Recap", "Architecture Design Review",
+        "Sales Pipeline Review", "Security Incident Response",
+    ],
+    "Memory": [
+        "User Preference: Dark Mode", "Context: Previous Order History",
+        "Learned: Communication Style", "Fact: Team Size is 12",
+        "User Goal: Reduce Response Time", "Insight: Peak Usage at 2PM",
+        "Rule: Confirm Before Delete", "Pattern: Monday Morning Queries",
+    ],
+    "Session": [
+        "Morning Briefing 2025-01-15", "API Debug Session", "Data Migration Planning",
+        "Customer Demo Walkthrough", "Incident Triage #847", "Code Review Sprint-42",
+        "Quarterly Planning Q1", "Integration Testing Run",
+    ],
+    "ToolCall": [
+        "search_knowledge_base(auth)", "create_ticket(high priority)",
+        "fetch_metrics(api service)", "run_query(MATCH nodes)",
+        "send_notification(ops channel)", "analyze_logs(last hour)",
+        "update_config(timeout)", "generate_report(weekly)",
+    ],
+    "Entity": [
+        "Acme Corporation", "Project Phoenix", "Q1 Revenue Target",
+        "Customer Segment Alpha", "Production Database", "Main API Gateway",
+        "Marketing Campaign Q2", "Security Audit 2025",
+    ],
+    # --- Digital Twin ---
+    "Alert": [
+        "Temperature Threshold Exceeded", "Vibration Anomaly Detected",
+        "Pressure Drop Warning", "Communication Timeout",
+        "Calibration Drift Alert", "Power Fluctuation Warning",
+        "Humidity Out of Range", "Flow Rate Deviation",
+    ],
+    "Asset": [
+        "Industrial Compressor C-401", "Cooling Tower CT-3", "Boiler Unit B-102",
+        "Generator Set GS-7", "HVAC System Zone 5", "Pump Station PS-12",
+        "Conveyor Belt CB-8", "Transformer T-220", "Reactor Vessel RV-3",
+    ],
+    "MaintenanceRecord": [
+        "Quarterly Calibration MR-101", "Bearing Replacement MR-102",
+        "Firmware Update v2.4 MR-103", "Emergency Valve Repair MR-104",
+        "Scheduled Lubrication MR-105", "Sensor Swap-Out MR-106",
+        "Filter Replacement MR-107", "Wiring Inspection MR-108",
+    ],
+    "Reading": [
+        "Temp 72.4F Boiler #3", "Pressure 14.7 PSI Valve 12",
+        "Vibration 0.05mm/s Motor A", "Flow 120 GPM Pipeline North",
+        "Humidity 65% Warehouse B", "Voltage 480V Panel C",
+        "RPM 1750 Pump Station", "pH 7.2 Treatment Plant",
+    ],
+    "Sensor": [
+        "Thermocouple TC-201", "Pressure Transducer PT-105",
+        "Accelerometer ACC-308", "Flow Meter FM-042",
+        "Humidity Probe HP-156", "Voltage Monitor VM-089",
+        "Tachometer TAC-220", "pH Sensor PH-015",
+    ],
+    "System": [
+        "Building Management System", "Process Control Network",
+        "Energy Management Platform", "Predictive Maintenance Hub",
+        "Environmental Monitoring Array", "Safety Interlock System",
+        "Quality Assurance Network", "Asset Tracking Platform",
+    ],
+    # --- Golf Sports ---
+    "Round": [
+        "Championship Final Round", "Saturday Morning 18",
+        "Pro-Am Charity Round", "Qualifying Round 1",
+        "Club Championship Semifinal", "Twilight 9-Hole",
+        "Winter League Round 8", "Member-Guest Best Ball",
+    ],
+    "Handicap": [
+        "Active HCP 12.4", "Active HCP 5.8", "Active HCP 18.2",
+        "Active HCP 24.1", "Active HCP 8.6", "Active HCP 15.3",
+        "Active HCP 2.1", "Active HCP 30.5",
+    ],
+    "Hole": [
+        "The Island Green (Par 3)", "Amen Corner (Par 4)",
+        "Devil's Elbow (Par 5)", "Lighthouse View (Par 3)",
+        "The Narrows (Par 4)", "Eagle's Nest (Par 5)",
+        "Bunker Hill (Par 4)", "The Pond Hole (Par 3)",
+    ],
+    "Course": [
+        "Augusta National Golf Club", "Pebble Beach Golf Links",
+        "St Andrews Old Course", "Pine Valley Golf Club",
+        "Cypress Point Club", "Royal Melbourne Golf Club",
+        "Shinnecock Hills Golf Club", "Muirfield Golf Links",
+    ],
+    "Tournament": [
+        "The Masters 2025", "US Open Championship",
+        "The Open Championship", "PGA Championship",
+        "Ryder Cup 2025", "Presidents Cup",
+        "Players Championship", "FedEx Cup Playoffs",
+    ],
+    # --- Hospitality ---
+    "Room": [
+        "Oceanview Suite 801", "Standard King 412", "Deluxe Double 305",
+        "Presidential Suite 1201", "Garden View Twin 218",
+        "Executive Corner 610", "Accessible King 102",
+        "Penthouse Suite 1501", "Economy Single 203", "Family Room 507",
+    ],
+    "Reservation": [
+        "RES-4821 Johnson 3 nights", "RES-7293 Park Weekend",
+        "RES-5618 Garcia Corporate", "RES-3047 Smith Anniversary",
+        "RES-8156 Lee Group Block", "RES-2394 Brown Extended Stay",
+        "RES-1756 Wilson Last-Minute", "RES-9203 Chen Holiday",
+    ],
+    "Guest": [
+        "Margaret Chen", "David Okonkwo", "Sofia Petrov", "James Nakamura",
+        "Amira Hassan", "Robert Lindqvist", "Isabella Rossi", "Thomas Adebayo",
+        "Yuki Tanaka", "Priya Kapoor",
+    ],
+    "Staff": [
+        "Concierge Maria Santos", "Manager Robert Kim", "Chef Antoine Blanc",
+        "Housekeeping Lead Aisha Patel", "Front Desk Agent Tom Walsh",
+        "Spa Director Lucia Fernandez", "Valet Captain James Osei",
+        "Events Coordinator Sarah Blake",
+    ],
+    # --- Oil & Gas ---
+    "Permit": [
+        "DRL-0142 Drilling Permit", "ENV-0287 Environmental Clearance",
+        "FLR-0351 Flaring Permit", "WDL-0419 Water Disposal License",
+        "PLN-0508 Pipeline Right-of-Way", "OPS-0623 Operations Permit",
+        "SEI-0912 Seismic Survey Permit", "PRD-1003 Production License",
+    ],
+    "Well": [
+        "Permian Basin Well #47", "Eagle Ford Shale W-12",
+        "Bakken Formation Well #103", "Marcellus Shale W-28",
+        "Gulf Deepwater Well DW-6", "Prudhoe Bay Well PB-19",
+        "Delaware Basin Well #82", "Haynesville Shale W-55",
+    ],
+    "Equipment": [
+        "Drilling Rig DR-15", "Mud Pump MP-7", "BOP Stack BOP-42",
+        "Christmas Tree CT-18", "Separator Unit SEP-9", "Compressor CS-23",
+        "Pipeline Pig Launcher PL-3", "Flare Stack FS-11",
+    ],
+    "Reservoir": [
+        "Ghawar Field Reservoir", "Permian Basin Formation A",
+        "North Sea Brent Reservoir", "Kashagan Field Layer 3",
+        "Marcellus Shale Zone B", "Eagle Ford Sweet Spot",
+        "Bakken Middle Formation", "Wolfcamp A Bench",
+    ],
+    "Formation": [
+        "Wolfcamp Shale", "Spraberry Formation", "Bone Spring Limestone",
+        "Delaware Mountain Group", "Austin Chalk", "Niobrara Formation",
+        "Woodford Shale", "Tuscaloosa Marine Shale",
+    ],
+    # --- Personal Knowledge ---
+    "JournalEntry": [
+        "Reflections on Q1 Goals", "Book Notes: Thinking Fast and Slow",
+        "Meeting Takeaways Board Review", "Travel Journal Kyoto Day 3",
+        "Weekly Review: Productivity Wins", "Ideas for Side Project",
+        "Gratitude Log March 2025", "Learning Notes: Rust Ownership",
+    ],
+    "Note": [
+        "API Design Best Practices", "Conference Talk Ideas",
+        "Recipe: Homemade Ramen", "Workout Routine Week 12",
+        "Investment Research Notes", "Reading List Q2 2025",
+        "Home Renovation Plans", "Garden Planting Schedule",
+    ],
+    "Bookmark": [
+        "Hacker News: Distributed Systems", "ArXiv: Attention Is All You Need",
+        "MDN Web Docs: Fetch API", "Neo4j Graph Academy",
+        "Rust Book Chapter 10", "AWS Well-Architected Guide",
+        "Martin Fowler: Refactoring Catalog", "OWASP Top 10",
+    ],
+    "Contact": [
+        "Dr. Sarah Mitchell (Mentor)", "Alex Rivera (Collaborator)",
+        "Prof. James Wu (Advisor)", "Lisa Park (Editor)",
+        "David Okafor (CTO)", "Maria Santos (Designer)",
+        "Tom Chen (Investor)", "Aisha Patel (Legal Counsel)",
+    ],
+    "Topic": [
+        "Machine Learning Fundamentals", "Graph Database Design",
+        "Personal Finance Strategy", "Creative Writing Techniques",
+        "Home Automation Setup", "Fitness and Nutrition",
+        "Travel Photography Tips", "Sustainable Living",
+    ],
+    "Project": [
+        "Personal Knowledge Graph", "Open Source CLI Tool",
+        "Home Automation Dashboard", "Photography Portfolio",
+        "Language Learning App", "Community Garden Website",
+        "Podcast Production Setup", "Family Recipe Archive",
+    ],
+    # --- Retail E-commerce ---
+    "Order": [
+        "ORD-4821 Electronics Bundle", "ORD-7293 Seasonal Sale",
+        "ORD-5618 Subscription Renewal", "ORD-3047 Gift Registry",
+        "ORD-8156 Bulk Office Supplies", "ORD-2394 Returns Exchange",
+        "ORD-1756 Express Delivery", "ORD-9203 Wholesale Order",
+    ],
+    "Product": [
+        "Wireless Noise-Cancelling Headphones", "Organic Cotton T-Shirt",
+        "Smart Home Hub Pro", "Stainless Steel Water Bottle",
+        "Ergonomic Office Chair", "Portable Bluetooth Speaker",
+        "Premium Running Shoes", "Bamboo Cutting Board Set",
+    ],
+    "Customer": [
+        "Sarah Chen (Premium)", "Marcus Johnson (Standard)",
+        "Elena Volkov (VIP)", "James Obi (New Customer)",
+        "Priya Sharma (Loyalty Gold)", "Robert Kim (Business)",
+        "Isabella Rossi (Returning)", "David Tanaka (Wholesale)",
+    ],
+    "Campaign": [
+        "Summer Sale 2025", "Black Friday Deals", "New Customer Welcome",
+        "Loyalty Program Launch", "Flash Sale: Electronics",
+        "Holiday Gift Guide", "Back to School", "Spring Clearance",
+    ],
+    "Category": [
+        "Electronics & Gadgets", "Clothing & Apparel", "Home & Garden",
+        "Sports & Outdoors", "Books & Media", "Health & Beauty",
+        "Toys & Games", "Food & Beverages",
+    ],
+    # --- Vacation Industry ---
+    "Booking": [
+        "Caribbean Cruise BK-4821", "Ski Resort Package BK-7293",
+        "Safari Adventure BK-5618", "Island Getaway BK-3047",
+        "European Tour BK-8156", "Honeymoon Suite BK-2394",
+        "Family Beach Vacation BK-1756", "Wellness Retreat BK-9203",
+    ],
+    "Package": [
+        "All-Inclusive Paradise", "Adventure Explorer",
+        "Luxury Spa Retreat", "Family Fun Bundle",
+        "Romantic Getaway", "Backpacker Special",
+        "Cultural Immersion Tour", "Eco-Lodge Experience",
+    ],
+    "Resort": [
+        "Four Seasons Bora Bora", "Sandals Royal Barbados",
+        "Aman Tokyo", "Six Senses Zighy Bay",
+        "One&Only Reethi Rah", "Banyan Tree Phuket",
+        "Rosewood Mayakoba", "Belmond Cap Juluca",
+    ],
+    "Season": [
+        "Peak Summer 2025", "Holiday Season 2025",
+        "Spring Break 2025", "Shoulder Season Fall",
+        "Winter Ski Season", "Monsoon Off-Peak",
+        "Cherry Blossom Season", "Whale Watching Season",
+    ],
+    # --- Wildlife Management ---
+    "Sighting": [
+        "Bengal Tiger at Watering Hole", "Elephant Herd Migration Path",
+        "Snow Leopard Ridge Camera #7", "Wolf Pack at Elk Crossing",
+        "Rhino Mother-Calf Pair Zone B", "Gorilla Troop Bamboo Forest",
+        "Sea Turtle Nesting Event", "Condor Thermal Soaring Peak 4",
+    ],
+    "Camera": [
+        "Trail Cam TC-201 North Ridge", "Waterhole Station WH-105",
+        "Canopy Cam CC-308 Sector 7", "Road Crossing Monitor RC-042",
+        "Nest Box Cam NB-156", "Underwater Sensor UW-089",
+        "Thermal Imaging Unit TI-220", "Night Vision Station NV-312",
+    ],
+    "Habitat": [
+        "Tropical Rainforest Canopy", "African Savanna Grassland",
+        "Arctic Tundra Zone", "Coral Reef Shelf",
+        "Mangrove Estuary Delta", "Temperate Deciduous Forest",
+        "Alpine Meadow Corridor", "Deep Ocean Vent Community",
+    ],
+    "Individual": [
+        "Bengal Tiger Raja (#BT-047)", "African Elephant Tembo (#AE-112)",
+        "Snow Leopard Ghost (#SL-008)", "Gray Wolf Alpha (#GW-031)",
+        "Mountain Gorilla Bwindi (#MG-019)", "Sea Turtle Kai (#ST-203)",
+        "Giant Panda Ming (#GP-055)", "Polar Bear Nanuk (#PB-014)",
+    ],
+    "Threat": [
+        "Poaching Ring Eastern Sector", "Habitat Fragmentation Highway Expansion",
+        "Climate Change: Glacial Retreat", "Invasive Species: Water Hyacinth",
+        "Pollution: River Mercury Contamination", "Human-Wildlife Conflict Zone C",
+        "Disease: Avian Influenza Outbreak", "Illegal Logging Western Reserve",
+    ],
+    # --- Data Journalism ---
+    "Correction": [
+        "Revenue Figure Correction Q3", "Date Error in Timeline",
+        "Misattributed Quote Fix", "Statistical Methodology Update",
+        "Source Name Correction", "Geographic Data Fix",
+        "Inflation-Adjusted Figures", "Updated Election Results",
+    ],
+    # --- Conservation (additional) ---
+    "Stakeholder": [
+        "World Wildlife Fund", "Ministry of Environment",
+        "Local Indigenous Council", "International Conservation Alliance",
+        "Regional Wildlife Authority", "Eco-Tourism Cooperative",
+        "University Research Partnership", "Corporate Sustainability Sponsor",
+    ],
+    # --- GIS Cartography ---
+    "Boundary": [
+        "National Park Perimeter", "Municipal District Line",
+        "Protected Wetland Zone", "Agricultural Land Boundary",
+        "Coastal Erosion Zone", "Forest Reserve Boundary",
+        "Indigenous Territory Limit", "Flood Plain Demarcation",
+    ],
+    "Coordinate": [
+        "Summit Peak A (47.3N, 11.1E)", "River Confluence Point",
+        "Survey Marker SM-442", "GPS Station CORS-017",
+        "Tidal Gauge Station TG-5", "Weather Station WX-28",
+        "Seismic Monitor SM-103", "Benchmark BM-7721",
+    ],
+    "Feature": [
+        "Mountain Ridge Alpine A", "Lake Victoria Shoreline",
+        "Highway I-95 Corridor", "River Delta Formation",
+        "Volcanic Crater Zone", "Karst Cave System",
+        "Barrier Island Chain", "Glacial Moraine Field",
+    ],
+    "Layer": [
+        "Topographic Contours 10m", "Land Use Classification",
+        "Hydrological Network", "Soil Type Distribution",
+        "Vegetation Cover Index", "Transportation Network",
+        "Population Density Heat Map", "Geological Formation Map",
+    ],
+    "MapProject": [
+        "City Master Plan 2030", "Flood Risk Assessment",
+        "Conservation Corridor Map", "Urban Heat Island Study",
+        "Archaeological Survey Grid", "Wildfire Risk Zones",
+        "Transit Network Expansion", "Coastal Resilience Atlas",
+    ],
+    "Survey": [
+        "Cadastral Survey District 7", "Topographic Survey Block A",
+        "Environmental Impact Survey", "Archaeological Field Survey",
+        "Geodetic Control Survey", "Bathymetric Survey Sector 3",
+        "LiDAR Aerial Survey Run 12", "Ground-Penetrating Radar Survey",
+    ],
+    # --- GenAI LLM Ops ---
+    "Model": [
+        "GPT-4o Production", "Claude Sonnet Fine-tuned",
+        "Llama 3 70B Local", "Mistral 7B Instruct",
+        "Gemini Pro 1.5", "DBRX Base",
+        "Phi-3 Mini Quantized", "Command R+ RAG",
+    ],
+    "Prompt": [
+        "System Prompt: Customer Support Agent", "Few-Shot: Code Review",
+        "Chain-of-Thought: Math Reasoning", "RAG: Document QA",
+        "Tool Use: API Integration", "Structured Output: JSON Schema",
+        "Multi-turn: Dialogue Management", "Safety: Content Filter",
+    ],
+    "Evaluation": [
+        "MMLU Benchmark Run", "HumanEval Code Gen",
+        "TruthfulQA Assessment", "GSM8K Math Eval",
+        "MT-Bench Conversation", "Safety Red Team Eval",
+        "Latency Benchmark P99", "Cost Efficiency Analysis",
+    ],
+    "Experiment": [
+        "Fine-tuning Run FT-042", "RAG Pipeline Comparison",
+        "Prompt Engineering A/B Test", "Temperature Sweep Study",
+        "Context Window Scaling", "Few-Shot vs Zero-Shot",
+        "Model Distillation Trial", "Embedding Model Benchmark",
+    ],
+    # --- Product Management ---
+    "Epic": [
+        "User Onboarding Redesign", "Payment System Migration",
+        "Mobile App v3.0", "API Platform Launch",
+        "Analytics Dashboard Overhaul", "Accessibility Compliance",
+        "Performance Optimization Sprint", "Multi-Language Support",
+    ],
+    "Metric": [
+        "Monthly Active Users (MAU)", "Net Promoter Score (NPS)",
+        "Customer Acquisition Cost (CAC)", "Monthly Recurring Revenue (MRR)",
+        "Churn Rate", "Time to First Value (TTFV)",
+        "Feature Adoption Rate", "Customer Lifetime Value (CLV)",
+    ],
+    "Objective": [
+        "Increase user retention by 15%", "Reduce onboarding time to 3 min",
+        "Launch enterprise tier Q2", "Achieve SOC 2 compliance",
+        "Scale to 100K concurrent users", "Reduce support tickets by 30%",
+        "Improve NPS to 60+", "Zero-downtime deployments",
+    ],
+    "Release": [
+        "v2.5.0 Performance Release", "v3.0.0 Major Redesign",
+        "v2.6.1 Hotfix: Auth Bug", "v2.7.0 API v2 Launch",
+        "v3.1.0 Mobile Parity", "v2.8.0 Analytics Suite",
+        "v3.0.1 Security Patch", "v2.9.0 Internationalization",
+    ],
+    "Feedback": [
+        "User Interview: Enterprise Buyer", "NPS Survey Response Batch 47",
+        "Beta Tester: Performance Issues", "Support Ticket Trend Analysis",
+        "Usability Test: Checkout Flow", "App Store Review Summary",
+        "Customer Advisory Board Q1", "Churn Exit Interview Insights",
+    ],
+    "UserPersona": [
+        "Sarah the Startup Founder", "David the Enterprise Admin",
+        "Priya the Power User", "James the Casual Browser",
+        "Elena the Technical Lead", "Marcus the New Employee",
+        "Yuki the Small Business Owner", "Robert the Compliance Officer",
+    ],
+    # --- Scientific Research ---
+    "Paper": [
+        "Graph Neural Networks for Drug Discovery", "Quantum Error Correction at Scale",
+        "mRNA Vaccine Stability Optimization", "Dark Matter Detection via Gravitational Lensing",
+        "CRISPR Off-Target Effects Meta-Analysis", "Exoplanet Atmospheric Spectroscopy",
+        "Neuroplasticity in Adult Learning", "Carbon Capture Efficiency Benchmarks",
+    ],
+    "Researcher": [
+        "Dr. Sarah Chen (Genomics)", "Prof. James Okafor (Physics)",
+        "Dr. Elena Volkov (Neuroscience)", "Prof. Raj Patel (Materials Science)",
+        "Dr. Maria Santos (Epidemiology)", "Prof. David Kim (Computer Science)",
+        "Dr. Aisha Hassan (Climate)", "Prof. Thomas Mueller (Chemistry)",
+    ],
+    "Grant": [
+        "NIH R01 Grant #GM-123456", "NSF CAREER Award #2025-789",
+        "ERC Starting Grant #101034", "DARPA Contract #HR0011-25",
+        "DOE ARPA-E Award #DE-0042", "Wellcome Trust Grant #225801",
+        "Gates Foundation Grant #INV-047", "HHMI Investigator Award",
+    ],
+    "Institution": [
+        "MIT Lincoln Laboratory", "Stanford Bio-X Institute",
+        "CERN European Particle Physics", "Max Planck Institute",
+        "Oxford Nanopore Research", "Broad Institute of MIT and Harvard",
+        "Caltech Jet Propulsion Lab", "Salk Institute for Biological Studies",
+    ],
 }
 
 # Mapping of entity labels to preferred ID prefixes
@@ -880,6 +1287,69 @@ _ORGANIZATION_LABELS = {
     "Agency", "Department", "School", "University", "Institute", "Clinic",
     "Studio", "Team", "Corporation", "Foundation", "Association", "Lab",
     "Bureau", "Firm", "Outlet", "Network", "Platform", "Exchange",
+    "Institution", "Resort",
+}
+
+_LOCATION_LABELS = {
+    "Location", "Site", "Address", "Region", "Warehouse", "Store", "Airport",
+    "Port", "Field", "Venue", "Neighborhood", "Boundary", "Coordinate",
+    "Destination", "Course", "Habitat", "Room", "Well", "Formation",
+}
+
+_EVENT_LABELS = {
+    "Event", "Incident", "Inspection", "Appointment", "Transaction", "Sprint",
+    "Deployment", "Match", "Session", "Round", "Tournament", "Sighting",
+    "Encounter", "Experiment", "Evaluation", "Survey", "Booking", "Reservation",
+    "Conversation", "Alert", "Correction",
+}
+
+_OBJECT_LABELS = {
+    "Object", "Medication", "Asset", "Product", "Contract", "Report", "Order",
+    "Document", "Claim", "Policy", "Equipment", "Sensor", "Camera", "System",
+    "Model", "Prompt", "Paper", "Grant", "Permit", "Package", "Layer",
+    "MapProject", "Feature", "Note", "Bookmark", "JournalEntry", "Topic",
+    "Project", "Campaign", "Category", "Epic", "Metric", "Objective",
+    "Release", "Feedback", "Reading", "MaintenanceRecord", "ToolCall",
+    "Memory", "Entity", "Handicap", "Hole", "Threat",
+}
+
+# Label-specific description overrides for more natural descriptions
+_LABEL_DESCRIPTION_OVERRIDES: dict[str, list[str]] = {
+    "Medication": [
+        "Prescribed medication {name} used in clinical treatment protocols.",
+        "{name}, a pharmaceutical agent administered under clinical supervision.",
+        "Medication {name} — part of the treatment regimen for patient care.",
+    ],
+    "Permit": [
+        "Regulatory permit {name} issued for authorized operations.",
+        "{name}, a compliance document authorizing specific field activities.",
+        "Permit {name} — required authorization for operational activities.",
+    ],
+    "Sensor": [
+        "{name}, an instrumentation device capturing real-time measurements.",
+        "Monitoring sensor {name} providing continuous operational data.",
+        "{name} — deployed sensor feeding data to the monitoring network.",
+    ],
+    "Equipment": [
+        "{name}, industrial equipment maintained per operational schedules.",
+        "Field equipment {name} essential for daily operations.",
+        "{name} — key piece of operational machinery under active maintenance.",
+    ],
+    "Paper": [
+        "Research publication: {name}.",
+        "{name} — peer-reviewed study contributing to the field.",
+        "Academic paper: {name}, published in a leading journal.",
+    ],
+    "Model": [
+        "{name}, a machine learning model deployed for inference workloads.",
+        "AI model {name} — trained and evaluated for production use.",
+        "{name} — language model serving requests in the inference pipeline.",
+    ],
+    "Species": [
+        "{name}, a species tracked across habitats and conservation zones.",
+        "Monitored species: {name}, part of ongoing conservation programs.",
+        "{name} — tracked species with population assessments and field observations.",
+    ],
 }
 
 
@@ -909,11 +1379,40 @@ def _generate_description(
         ]
         return templates[index % len(templates)]
 
-    # Default for events, objects, and domain-specific labels
+    # Check label-specific overrides first
+    if label in _LABEL_DESCRIPTION_OVERRIDES:
+        templates = _LABEL_DESCRIPTION_OVERRIDES[label]
+        return templates[index % len(templates)].format(name=entity_name)
+
+    if label in _LOCATION_LABELS:
+        templates = [
+            f"{entity_name}, a {label.lower()} in the {domain_display} region.",
+            f"{label} {entity_name} — a key site for {domain_display} activities.",
+            f"{entity_name} serves as an important {label.lower()} within {domain_display} operations.",
+        ]
+        return templates[index % len(templates)]
+
+    if label in _EVENT_LABELS:
+        templates = [
+            f"{entity_name}, a {label.lower()} event recorded in the {domain_display} timeline.",
+            f"{label} {entity_name} — occurred as part of {domain_display} activities.",
+            f"Recorded {label.lower()}: {entity_name}, relevant to {domain_display} workflows.",
+        ]
+        return templates[index % len(templates)]
+
+    if label in _OBJECT_LABELS:
+        templates = [
+            f"{entity_name}, a {label.lower()} used in {domain_display} workflows.",
+            f"{label} {entity_name} — cataloged for {domain_display} operations.",
+            f"{entity_name} is a {label.lower()} supporting {domain_display} processes.",
+        ]
+        return templates[index % len(templates)]
+
+    # Fallback for any remaining labels
     templates = [
-        f"{entity_name} — {label.lower()} record tracked in the {domain_display} knowledge graph.",
-        f"{label} entity: {entity_name}, relevant to ongoing {domain_display} operations.",
-        f"Record for {entity_name}, a {label.lower()} in the {domain_display} domain.",
+        f"{entity_name}, a {label.lower()} relevant to {domain_display} operations.",
+        f"{label} {entity_name} — part of the {domain_display} knowledge graph.",
+        f"{entity_name} is a {label.lower()} tracked within the {domain_display} domain.",
     ]
     return templates[index % len(templates)]
 

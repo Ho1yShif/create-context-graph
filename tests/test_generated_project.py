@@ -1092,13 +1092,21 @@ class TestHydrationFix:
 
 
 class TestNeo4jAgentMemoryDeps:
-    """Verify neo4j-agent-memory includes openai extra."""
+    """Verify neo4j-agent-memory uses local embeddings by default."""
 
-    def test_pyproject_has_openai_extra(self, generated_project):
+    def test_pyproject_has_sentence_transformers(self, generated_project):
         out, _ = generated_project
         pyproject = (out / "backend" / "pyproject.toml").read_text()
-        assert "openai" in pyproject
         assert "neo4j-agent-memory" in pyproject
+        assert "sentence-transformers" in pyproject
+        # Should NOT have openai extra — local embeddings by default
+        assert "openai" not in pyproject.split("neo4j-agent-memory")[1].split('"')[0]
+
+    def test_context_graph_client_has_embedding_config(self, generated_project):
+        out, _ = generated_project
+        client = (out / "backend" / "app" / "context_graph_client.py").read_text()
+        assert "sentence_transformers" in client
+        assert "OPENAI_API_KEY" in client
 
 
 class TestStreamingEndpointTimeout:

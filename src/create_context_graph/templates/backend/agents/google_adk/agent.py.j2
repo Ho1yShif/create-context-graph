@@ -176,11 +176,16 @@ async def handle_message(message: str, session_id: str | None = None) -> dict:
     )
 
     response_text = ""
-    async for event in runner.run_async(
-        user_id=session_id, session_id=adk_session_id, new_message=content
-    ):
-        if hasattr(event, "text") and event.text:
-            response_text += event.text
+    try:
+        async for event in runner.run_async(
+            user_id=session_id, session_id=adk_session_id, new_message=content
+        ):
+            if hasattr(event, "text") and event.text:
+                response_text += event.text
+    except AttributeError:
+        # google-genai SDK may raise AttributeError during async cleanup
+        # when _async_httpx_client was never initialized
+        pass
 
     response_text = response_text or "No response generated."
     await store_message(session_id, "assistant", response_text)
@@ -230,12 +235,16 @@ async def handle_message_stream(message: str, session_id: str | None = None) -> 
     )
 
     response_text = ""
-    async for event in runner.run_async(
-        user_id=session_id, session_id=adk_session_id, new_message=content
-    ):
-        if hasattr(event, "text") and event.text:
-            collector.emit_text_delta(event.text)
-            response_text += event.text
+    try:
+        async for event in runner.run_async(
+            user_id=session_id, session_id=adk_session_id, new_message=content
+        ):
+            if hasattr(event, "text") and event.text:
+                collector.emit_text_delta(event.text)
+                response_text += event.text
+    except AttributeError:
+        # google-genai SDK may raise AttributeError during async cleanup
+        pass
 
     response_text = response_text or "No response generated."
     await store_message(session_id, "assistant", response_text)
