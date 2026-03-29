@@ -10,6 +10,7 @@ interface TerminalProps {
   maxWidth?: number;
   copyCommand?: string;
   className?: string;
+  fixedHeight?: boolean;
 }
 
 export function Terminal({
@@ -19,6 +20,7 @@ export function Terminal({
   maxWidth = 720,
   copyCommand,
   className,
+  fixedHeight = false,
 }: TerminalProps) {
   const [copied, setCopied] = useState(false);
 
@@ -60,7 +62,7 @@ export function Terminal({
           </button>
         )}
       </div>
-      <div className={styles.body}>{children}</div>
+      <div className={`${styles.body} ${fixedHeight ? styles.bodyFixedHeight : ""}`}>{children}</div>
     </Component>
   );
 }

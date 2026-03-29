@@ -84,6 +84,11 @@
   overflow-x: auto;
 }
 
+.bodyFixedHeight {
+  height: 340px;
+  overflow-y: hidden;
+}
+
 /* Light mode adjustments */
 [data-theme="light"] .terminal {
   background: #F5F5F5;

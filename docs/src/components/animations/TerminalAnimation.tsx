@@ -180,6 +180,7 @@ export function TerminalAnimation({
     <div className={styles.wrapper} style={{ position: "relative" }}>
       <Terminal
         title="create-context-graph"
+        fixedHeight
         aria-label="Animated terminal simulation showing the create-context-graph CLI wizard scaffolding a healthcare app with the PydanticAI framework"
       >
         <div style={{ position: "relative" }}>
@@ -203,12 +204,8 @@ export function TerminalAnimation({
                 transition={{ duration: 0.3 }}
               >
                 <div className={styles.banner}>
-                  Create Context Graph
+                  Create Context Graph <span className={styles.version}>v0.6.0</span>
                 </div>
-                <div className={styles.version}>
-                  v0.6.0 — Graph Memory for AI Agents
-                </div>
-                <br />
                 <WizardContent
                   step={wizardStep}
                   phase={phase}
