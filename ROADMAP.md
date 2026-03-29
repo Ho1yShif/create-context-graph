@@ -724,7 +724,7 @@ Comprehensive v0.6.0 testing revealed dependency issues, data quality gaps, miss
 - **4 new docs pages**: `use-neo4j-aura.md`, `use-docker.md`, `why-context-graphs.md`, `framework-comparison.md`
 - **Updated sidebars.ts**: All new pages added to Docusaurus navigation.
 
-### Tests added (15 new → 560 total)
+### Tests added (57 new → 602 total)
 
 - `test_crewai_includes_anthropic_extra` — verifies crewai dependency has anthropic extra
 - `test_no_project_name_auto_generates_slug` — verifies CLI auto-slug generation
@@ -753,7 +753,7 @@ Comprehensive v0.6.0 testing revealed dependency issues, data quality gaps, miss
 
 | Phase | Description | Status | Tests |
 |-------|-------------|--------|-------|
-| 1 | Core CLI & Template Engine | **Complete** | 560 passing |
+| 1 | Core CLI & Template Engine | **Complete** | 602 passing |
 | 2 | Domain Expansion & Data Generation | **Complete** | (included above) |
 | 3 | Framework Templates & Frontend | **Complete** | (included above) |
 | 4 | SaaS Import & Custom Domains | **Complete** | (included above) |

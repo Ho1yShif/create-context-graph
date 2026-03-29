@@ -168,7 +168,7 @@ my-app/
 ### Unit Tests
 
 ```bash
-pytest tests/ -v                    # All 560 tests (758 with slow matrix)
+pytest tests/ -v                    # All 602 tests (800 with slow matrix)
 pytest tests/test_config.py         # Config model + framework alias + google api key + crewai anthropic extra tests (22)
 pytest tests/test_ontology.py       # Ontology loading + all 22 domains validate + enum sanitization + color collision checks + Cypher query validation (128)
 pytest tests/test_renderer.py       # Template rendering + all 8 frameworks + v0.3.0 features (52)
@@ -201,7 +201,7 @@ Required env vars: `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, plus `ANTHRO
 
 | Target | Description |
 |--------|-------------|
-| `make test` | Fast unit tests (560 tests, no external deps) |
+| `make test` | Fast unit tests (602 tests, no external deps) |
 | `make test-slow` | Full suite including matrix + perf (743 tests) |
 | `make test-matrix` | Domain × framework matrix only (176 combos) |
 | `make test-coverage` | Tests with HTML coverage report |
@@ -276,7 +276,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on push to `main` and all PRs:
 
 | Job | Trigger | Description |
 |-----|---------|-------------|
-| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 (560 tests) |
+| **test** | All pushes + PRs | Unit tests on Python 3.11 and 3.12 (602 tests) |
 | **lint** | All pushes + PRs | Ruff linter on `src/` and `tests/` |
 | **matrix** | Push to `main` only | All 176 domain × framework scaffold combinations |
 | **smoke-test** | Push to `main` only | E2E: scaffold → install → start → chat for all 8 frameworks |

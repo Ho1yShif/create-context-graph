@@ -33,7 +33,7 @@
 - **Updated sidebars** — All new pages added to Docusaurus navigation
 
 ### Testing
-- 560 passing tests (15 new), up from 545
+- 602 passing tests (57 new), up from 545
 
 ## v0.6.0 — Comprehensive Testing Feedback (2026-03-28)
 
