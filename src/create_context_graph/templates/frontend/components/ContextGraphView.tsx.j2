@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useMemo, useState, useRef } from "react";
 import {
   Box,
+  Button,
   Text,
   Flex,
   Badge,
@@ -451,7 +452,6 @@ export function ContextGraphView({ externalGraphData, onAskAbout }: ContextGraph
         maxH="180px"
         overflowY="auto"
         css={{ "&::-webkit-scrollbar": { width: "4px" }, "&::-webkit-scrollbar-thumb": { background: "#CBD5E0", borderRadius: "4px" } }}
-        overflowY="auto"
         boxShadow="sm"
         borderWidth="1px"
         borderColor="gray.200"
