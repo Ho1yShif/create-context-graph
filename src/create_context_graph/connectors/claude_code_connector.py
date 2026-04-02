@@ -494,9 +494,23 @@ class ClaudeCodeConnector(BaseConnector):
 def _tool_call_name(tc: dict[str, Any]) -> str:
     """Generate a unique name for a tool call entity."""
     summary = tc.get("input_summary", "")[:60]
-    return f"{tc['tool_name']}: {summary}" if summary else tc["tool_name"]
+    tool_name = tc["tool_name"]
 
+    unique_id = tc.get("tool_use_id")
+    if not unique_id:
+        unique_id = (
+            tc.get("timestamp")
+            or tc.get("created_at")
+            or tc.get("time")
+        )
+    if not unique_id:
+        unique_id = _short_hash(repr(sorted(tc.items())))
 
+    return (
+        f"{tool_name}[{unique_id}]: {summary}"
+        if summary
+        else f"{tool_name}[{unique_id}]"
+    )
 def _short_hash(text: str) -> str:
     """Generate a short hash for deduplication."""
     return hashlib.sha256(text.encode()).hexdigest()[:10]
