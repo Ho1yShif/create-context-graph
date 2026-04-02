@@ -1766,7 +1766,7 @@ class TestGoogleWorkspaceConnector:
         assert conn._include_calendar is True
 
     def test_authenticate_parses_flags(self):
-        conn = self._make_connector_with_token()
+        self._make_connector_with_token()
         # Simulate flag parsing directly
         from create_context_graph.connectors.google_workspace_connector import (
             GoogleWorkspaceConnector,

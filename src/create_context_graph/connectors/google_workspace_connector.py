@@ -337,7 +337,7 @@ class GoogleWorkspaceConnector(BaseConnector):
         if self._include_comments:
             for doc in entities["Document"]:
                 if doc.get("mimeType", "") in COMMENTABLE_MIMES:
-                    comment_data = self._fetch_comments(
+                    self._fetch_comments(
                         doc["driveId"], doc["name"],
                         _add_person, entities, relationships, traces,
                     )
@@ -923,7 +923,6 @@ class GoogleWorkspaceConnector(BaseConnector):
         """Process a single Drive Activity item."""
         timestamp = activity.get("timestamp", "")
         if not timestamp:
-            primary_action = activity.get("primaryActionDetail", {})
             time_range = activity.get("timeRange", {})
             timestamp = time_range.get("endTime", time_range.get("startTime", ""))
 
@@ -943,8 +942,6 @@ class GoogleWorkspaceConnector(BaseConnector):
         for actor in actors:
             user = actor.get("user", {}).get("knownUser", {})
             if user:
-                # Drive Activity API uses personName format
-                person_name = user.get("personName", "")
                 # Try to extract email from other fields
                 actor_email = user.get("emailAddress", "")
                 if actor_email:
