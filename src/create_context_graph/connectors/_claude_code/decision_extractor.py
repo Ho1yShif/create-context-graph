@@ -106,13 +106,22 @@ def extract_decisions(parsed_session: dict[str, Any]) -> dict[str, Any]:
         tc["tool_use_id"]: tc for tc in tool_calls
     }
 
-    # Session name (for relationships).
-    first_prompt = ""
-    for m in messages:
-        if m["role"] == "user" and m.get("full_content", m.get("content", "")):
-            first_prompt = m.get("full_content", m.get("content", ""))[:80]
-            break
-    session_name = first_prompt or f"Session {session_id[:8]}"
+    # Session name (for relationships). Prefer the canonical name supplied by
+    # the caller/connector so relationship endpoints stay aligned with the
+    # Session entity name used during ingestion. Fall back to the previous
+    # first-user-prompt heuristic for backwards compatibility.
+    session_name = (
+        parsed_session.get("session_name")
+        or parsed_session.get("name")
+        or ""
+    )
+    if not session_name:
+        first_prompt = ""
+        for m in messages:
+            if m["role"] == "user" and m.get("full_content", m.get("content", "")):
+                first_prompt = m.get("full_content", m.get("content", ""))[:80]
+                break
+        session_name = first_prompt or f"Session {session_id[:8]}"
 
     # --- 1. User correction decisions ---
     _detect_corrections(
