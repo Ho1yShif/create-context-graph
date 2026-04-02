@@ -116,6 +116,7 @@ class LinearConnector(BaseConnector):
                 "name": "team_key",
                 "prompt": "Linear team key (optional, leave blank for all teams):",
                 "secret": False,
+                "optional": True,
                 "description": "Team URL key (e.g., ENG) to filter import to a specific team",
             },
         ]
