@@ -1074,7 +1074,7 @@ Schema introspection of Linear's GraphQL API (494 types) revealed significant ad
 - Tools use Cypher queries traversing DecisionThread, Reply, Revision, Activity, Meeting, EmailThread nodes
 
 #### Generated project integration
-- Scaffold template: `google_workspace_connector.py.j2` with inline OAuth via google-auth-oauthlib
+- Scaffold template: `google_workspace_connector.py.j2` with full parity — all 7 stages (Files, Comments/Decision Traces, Revisions, Activity, Calendar, Gmail, Cross-references) using OAuth2 only (no gws CLI fallback)
 - `import_data.py.j2` updated with google-workspace dispatch case
 - `.env` and `.env.example` templates add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GWS_FOLDER_ID`
 - Renderer `connector_templates` mapping updated
@@ -1106,7 +1106,7 @@ Schema introspection of Linear's GraphQL API (494 types) revealed significant ad
 - Dry run output, generated files, .env vars, .env.example, import script, template compilation, all flags accepted, combined with Linear
 
 ### Files created
-- `src/create_context_graph/connectors/google_workspace_connector.py` — core connector (~850 lines)
+- `src/create_context_graph/connectors/google_workspace_connector.py` — core connector (~1,400 lines)
 - `src/create_context_graph/templates/backend/connectors/google_workspace_connector.py.j2` — scaffold template
 - `docs/docs/tutorials/google-workspace-decisions.md` — tutorial
 - `docs/docs/explanation/how-decision-traces-work.md` — conceptual explainer
