@@ -114,7 +114,7 @@ _GWS_AGENT_TOOLS: list[dict] = [
     {
         "name": "stale_documents",
         "description": "Find documents that haven't been updated recently but have open comment threads or are referenced by active issues.",
-        "cypher": "MATCH (doc:Document) WHERE doc.modifiedTime < datetime() - duration({days: $days_threshold}) AND EXISTS { MATCH (doc)-[:HAS_COMMENT_THREAD]->(:DecisionThread {resolved: false}) } RETURN doc.name AS document, doc.modifiedTime AS last_modified, doc.webViewLink AS link ORDER BY doc.modifiedTime ASC LIMIT 15",
+        "cypher": "MATCH (doc:Document) WHERE doc.modifiedTime IS NOT NULL AND doc.modifiedTime <> '' AND datetime(doc.modifiedTime) < datetime() - duration({days: $days_threshold}) AND EXISTS { MATCH (doc)-[:HAS_COMMENT_THREAD]->(:DecisionThread {resolved: false}) } RETURN doc.name AS document, doc.modifiedTime AS last_modified, doc.webViewLink AS link ORDER BY datetime(doc.modifiedTime) ASC LIMIT 15",
         "parameters": [{"name": "days_threshold", "type": "integer", "required": False, "default": 30}],
     },
     {
