@@ -78,10 +78,10 @@ class TestNormalizedData:
 
 class TestConnectorRegistry:
     def test_all_registered(self):
-        assert len(CONNECTOR_REGISTRY) == 10
+        assert len(CONNECTOR_REGISTRY) == 12
 
     def test_expected_connectors(self):
-        expected = {"github", "notion", "jira", "slack", "gmail", "gcal", "salesforce", "linear", "google-workspace", "claude-code"}
+        expected = {"github", "notion", "jira", "slack", "gmail", "gcal", "salesforce", "linear", "google-workspace", "claude-code", "claude-ai", "chatgpt"}
         assert set(CONNECTOR_REGISTRY.keys()) == expected
 
     def test_get_connector(self):
@@ -94,7 +94,7 @@ class TestConnectorRegistry:
 
     def test_list_connectors(self):
         result = list_connectors()
-        assert len(result) == 10
+        assert len(result) == 12
         ids = {c["id"] for c in result}
         assert "github" in ids
 
