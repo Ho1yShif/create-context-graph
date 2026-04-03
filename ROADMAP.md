@@ -1209,6 +1209,115 @@ Schema introspection of Linear's GraphQL API (494 types) revealed significant ad
 - `README.md` — connector table, CLI reference, Claude Code description
 - `CLAUDE.md` — connector count, test counts, connector table, description
 
+## Phase 18 — Chat History Import: Claude AI & ChatGPT (v0.10.0)
+
+### What was built
+
+#### Claude AI connector (`claude-ai`)
+- New connector importing conversations from Claude AI data exports (Settings > Account > Export Data)
+- Parses `conversations.jsonl` from `.zip` or raw `.jsonl` file — **streaming line-by-line for memory efficiency on large exports (1GB+)**
+- Extracts content from structured content blocks: `text`, `tool_use`, `tool_result`, `thinking`
+- Normalizes sender values (`human` → `user`, `assistant` → `assistant`)
+- Creates **Conversation** entities with title, UUID, timestamps, message count
+- Creates **Message** entities with role, content (truncated to 2000 chars), timestamps, tool call metadata
+- Generates **Document** per conversation with full concatenated text for search/RAG
+- Deep mode extracts **DecisionTrace** nodes from tool call sequences
+- All processing is local — no API keys required, no data sent externally
+
+#### ChatGPT connector (`chatgpt`)
+- New connector importing conversations from ChatGPT data exports (Settings > Data Controls > Export Data)
+- Parses `conversations.json` from `.zip` or raw `.json` file — handles the **tree-structured `mapping` field**
+- **Tree walking algorithm**: finds root nodes, traverses depth-first following last child at branch points to reconstruct linear conversation path
+- Filters out `system` role messages and messages with `is_visually_hidden_from_conversation: true`
+- Converts Unix float timestamps to ISO 8601
+- Handles `content_type` variants: `text`, `code`, `execution_output`, `multimodal_text`
+- Tool-role messages (`author.role = "tool"`) captured with `execution_output` content as tool results
+- Same entity schema as Claude AI: Conversation, Message, Document, DecisionTrace (deep mode)
+
+#### Shared infrastructure (`_chat_import/`)
+- `models.py` — `ParsedConversation` and `ParsedMessage` dataclasses shared by both parsers
+- `zip_reader.py` — Zip extraction, format auto-detection (looks for `conversations.jsonl` vs `conversations.json`), streaming JSONL reader, JSON array reader, malformed line handling
+- All stdlib — no new dependencies (`json`, `zipfile`, `io`, `re`)
+
+#### CLI integration
+- 7 new `--import-*` CLI flags: `--import-type` (claude-ai/chatgpt), `--import-file`, `--import-depth` (fast/deep), `--import-filter-after`, `--import-filter-before`, `--import-filter-title`, `--import-max-conversations`
+- Validation: `--import-type` and `--import-file` must be provided together
+- Auto-adds import type to `config.saas_connectors` — flows through existing connector pipeline
+- Credential wiring: file path + filter options passed via `config.saas_credentials[import_type]`
+
+#### Documentation (2 new pages, 4 updated)
+- **Tutorial**: "Import Your AI Chat History into a Context Graph" — step-by-step: how to export from Claude AI and ChatGPT, scaffold with import flags, customize with filters, explore in frontend and Neo4j Browser, example Cypher queries, privacy notes, combining with other connectors
+- **Reference**: "Chat Import Schema" — complete entity types, relationships, platform differences, example Cypher queries
+- Updated: `import-saas-data.md` (how-to), `cli-options.md` (reference), `sidebars.ts` (navigation)
+
+### Tests added (78 new → 1033 passing, 1243 collected)
+
+#### `tests/test_chat_import.py` (78 tests)
+- **Zip reader** (13): format auto-detection for zip/jsonl/json, unknown extensions, missing known files, JSONL streaming from zip and raw files, malformed line skipping, empty line handling, JSON reading from zip and raw files, non-array JSON rejection
+- **Claude AI parser** (15): single/multi conversation, zip support, message parsing, sender normalization, content block extraction (text/tool_use/tool_result/thinking), timestamp parsing, date filtering (after/before), title filtering (regex), max conversations limit, malformed conversation skip, empty conversations, text fallback, metadata
+- **ChatGPT parser** (14): single conversation, zip support, system message filtering, message content, Unix timestamp conversion, branching (follows last child), hidden message filtering, tool-role messages, date filtering, title filtering, max conversations, null message nodes, empty mapping, model slug metadata, malformed skip
+- **Claude AI connector** (15): registration, service name, credential prompts, authenticate with file path, file not found, wrong extension, fetch returns NormalizedData, entity properties, relationships (HAS_MESSAGE/NEXT), documents, empty file, multiple conversations, filters, deep mode traces, fast mode no traces
+- **ChatGPT connector** (15): registration, service name, credential prompts, authenticate with file path, file not found, wrong extension, fetch returns NormalizedData, entity properties, relationships, documents, empty file, branching conversation, hidden messages excluded, tool messages, filters, deep mode traces, fast mode no traces
+- **CLI** (3): import-type without file fails, import-file without type fails, dry-run with import flags
+
+### Files created
+- `src/create_context_graph/connectors/_chat_import/__init__.py` — shared package init
+- `src/create_context_graph/connectors/_chat_import/models.py` — ParsedConversation, ParsedMessage dataclasses
+- `src/create_context_graph/connectors/_chat_import/zip_reader.py` — zip extraction, format detection, streaming JSONL (~130 lines)
+- `src/create_context_graph/connectors/_claude_ai/__init__.py` — parser package init
+- `src/create_context_graph/connectors/_claude_ai/parser.py` — JSONL streaming parser with content block extraction (~180 lines)
+- `src/create_context_graph/connectors/_chatgpt/__init__.py` — parser package init
+- `src/create_context_graph/connectors/_chatgpt/parser.py` — JSON tree-walker parser (~200 lines)
+- `src/create_context_graph/connectors/claude_ai_connector.py` — Claude AI connector (~220 lines)
+- `src/create_context_graph/connectors/chatgpt_connector.py` — ChatGPT connector (~220 lines)
+- `tests/test_chat_import.py` — 78 tests (~650 lines)
+- `docs/docs/tutorials/import-chat-history.md` — tutorial
+- `docs/docs/reference/chat-import-schema.md` — schema reference
+
+### Files modified
+- `src/create_context_graph/connectors/__init__.py` — register ClaudeAIConnector, ChatGPTConnector (12 connectors total)
+- `src/create_context_graph/cli.py` — 7 new `--import-*` flags, validation, credential wiring
+- `tests/test_connectors.py` — registry count updated to 12, expected connectors set expanded
+- `docs/sidebars.ts` — 2 new pages in navigation
+- `docs/docs/how-to/import-saas-data.md` — Claude AI and ChatGPT connector sections, credential setup
+- `docs/docs/reference/cli-options.md` — 8 new `--import-*` flags documented, chat import example
+
+### Suggested improvements (future phases)
+
+#### Phase 18b — Standard-depth entity extraction
+- LLM-powered entity extraction from conversation text (people, organizations, technologies, topics)
+- Batched extraction with configurable concurrency and rate limiting
+- Cross-conversation entity resolution (same entity mentioned in multiple conversations merged)
+- `--import-depth standard` level between `fast` and `deep`
+- ImportBatch provenance nodes tracking import source, timestamp, conversation count
+- Progress bar with Rich showing conversations parsed, entities extracted, ETA
+
+#### Phase 18c — Standalone `import` subcommand
+- Convert CLI from `@click.command()` to `@click.group()` with backward-compatible default
+- `create-context-graph import claude-ai ~/Downloads/export.zip --neo4j-uri bolt://localhost:7687` — import directly into existing Neo4j without scaffolding a project
+- `--dry-run` on the import subcommand to preview what would be imported
+- Incremental re-import: skip unchanged conversations, update modified, add new (via `originalPlatformId` matching)
+
+#### Phase 18d — Generated project templates & agent tools
+- `claude_ai_connector.py.j2` and `chatgpt_connector.py.j2` scaffold templates
+- `import_data.py.j2` updated with claude-ai and chatgpt dispatch cases
+- 6-8 agent tools for querying imported chat history: `search_conversations`, `conversation_timeline`, `entity_mentions`, `topic_trends`, `tool_usage_history`, `conversation_summary`
+- System prompt augmented with chat history context
+
+#### Phase 18e — Cross-platform entity resolution
+- When importing from both Claude AI and ChatGPT, entities mentioned across platforms are merged
+- Fuzzy name matching with configurable threshold (default 0.85 similarity)
+- Property overlap detection (same email, URL, employer → merge)
+- `MERGED_FROM` relationship tracking provenance
+
+#### Additional future improvements
+- **Conversation branch import** (ChatGPT): option to import all branches as separate conversation variants instead of just the main path
+- **Thinking block storage**: Claude AI thinking blocks stored as reasoning memory nodes (configurable: raw vs. summarized)
+- **Privacy-preserving import**: local entity extraction via spaCy/GLiNER instead of LLM, matching existing `neo4j-agent-memory[spacy,gliner]` extras
+- **MCP server surface**: expose import capability through neo4j-agent-memory MCP server as an import tool
+- **Additional platforms**: Google Gemini, Perplexity AI, GitHub Copilot Chat export import
+- **Import visualization**: real-time graph building during import, before/after comparison, entity timeline view
+
 ## Summary
 
 | Phase | Description | Status | Tests |
@@ -1234,3 +1343,4 @@ Schema introspection of Linear's GraphQL API (494 types) revealed significant ad
 | 16 | Linear Connector Hardening & Test Suite Expansion | **Complete** | 874 passing (1,084 collected) |
 | 16b | Google Workspace Connector: Decision Trace Extraction | **Complete** | 874+ passing |
 | 17 | Claude Code Session History Connector | **Complete** | 955 passing (1,165 collected) |
+| 18 | Chat History Import: Claude AI & ChatGPT | **Complete** | 1,033 passing (1,243 collected) |

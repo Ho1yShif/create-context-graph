@@ -21,6 +21,8 @@ Create Context Graph can pull data from SaaS services and map it into your Neo4j
 | **Linear** | Issues, projects, cycles, teams, users, labels, comments, milestones, initiatives, attachments + decision traces | Personal API key |
 | **Google Workspace** | Drive files, comment threads (as decision traces), revisions, Drive Activity, Calendar events, Gmail metadata | Google OAuth 2.0 |
 | **Claude Code** | Session history, messages, tool calls, files, decisions, preferences, errors | None (local files) |
+| **Claude AI** | Conversations, messages, tool calls, thinking traces from Claude AI web/app export | None (local file) |
+| **ChatGPT** | Conversations, messages, tool results from ChatGPT data export | None (local file) |
 
 ## Selecting Connectors in the Interactive Wizard
 
@@ -108,6 +110,48 @@ create-context-graph my-dev-graph \
 ```
 
 No API key or credentials are needed -- the connector reads local JSONL files from `~/.claude/projects/`.
+
+### Claude AI chat history example
+
+Import your Claude AI conversation export into a context graph:
+
+```bash
+create-context-graph my-chat-graph \
+  --domain personal-knowledge \
+  --framework pydanticai \
+  --import-type claude-ai \
+  --import-file ~/Downloads/claude-export.zip
+```
+
+Filter by date or title:
+
+```bash
+create-context-graph my-chat-graph \
+  --domain personal-knowledge \
+  --framework pydanticai \
+  --import-type claude-ai \
+  --import-file ~/Downloads/claude-export.zip \
+  --import-filter-after 2025-10-01 \
+  --import-filter-title "python|neo4j"
+```
+
+No API key or credentials are needed -- the connector reads the local export file you downloaded from Claude AI settings.
+
+### ChatGPT chat history example
+
+Import your ChatGPT conversation export:
+
+```bash
+create-context-graph my-chat-graph \
+  --domain personal-knowledge \
+  --framework pydanticai \
+  --import-type chatgpt \
+  --import-file ~/Downloads/chatgpt-export.zip
+```
+
+The ChatGPT parser handles the tree-structured message format automatically, following the main conversation path at branch points.
+
+See the [Import Your AI Chat History](/docs/tutorials/import-chat-history) tutorial for a complete walkthrough including how to export from each platform.
 
 ### Combining connectors
 
@@ -236,3 +280,27 @@ The connector:
 No external Python packages are required -- the connector uses only Python's standard library.
 
 See the [Build a Developer Knowledge Graph from Claude Code Sessions](/docs/tutorials/claude-code-sessions) tutorial for a complete walkthrough.
+
+### Claude AI (Chat History)
+
+No setup required. Export your data from Claude AI:
+
+1. Open [claude.ai](https://claude.ai) and go to **Settings > Account > Export Data**.
+2. Confirm the export. You'll receive an email with a download link.
+3. Download the `.zip` file and pass it to the CLI with `--import-type claude-ai --import-file <path>`.
+
+The connector reads `conversations.jsonl` from the zip and extracts Conversation, Message, and Document entities. No external packages required.
+
+See the [Import Your AI Chat History](/docs/tutorials/import-chat-history) tutorial for a complete walkthrough.
+
+### ChatGPT (Chat History)
+
+No setup required. Export your data from ChatGPT:
+
+1. Open [chatgpt.com](https://chatgpt.com) and go to **Settings > Data Controls > Export data**.
+2. Confirm the export. You'll receive an email with a download link.
+3. Download the `.zip` file and pass it to the CLI with `--import-type chatgpt --import-file <path>`.
+
+The connector reads `conversations.json` from the zip, walks the tree-structured message mapping, and extracts Conversation, Message, and Document entities. No external packages required.
+
+See the [Import Your AI Chat History](/docs/tutorials/import-chat-history) tutorial for a complete walkthrough.
