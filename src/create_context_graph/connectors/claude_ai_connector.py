@@ -41,6 +41,8 @@ logger = logging.getLogger(__name__)
 
 # Maximum characters to store per message entity.
 MAX_CONTENT_LEN = 2000
+# Maximum characters to store in a conversation document (for search/RAG).
+MAX_DOC_LEN = 10_000
 
 
 @register_connector("claude-ai")
@@ -131,10 +133,11 @@ class ClaudeAIConnector(BaseConnector):
         message_entities: list[dict[str, Any]] = []
 
         for conv in conversations:
-            conv_name = conv.title or f"conv-{conv.conversation_id[:12]}"
+            conv_name = f"conv-{conv.conversation_id}"
 
             conversation_entities.append({
                 "name": conv_name,
+                "title": conv.title,
                 "conversation_id": conv.conversation_id,
                 "source": "claude-ai",
                 "created_at": conv.created_at.isoformat(),
@@ -146,8 +149,11 @@ class ClaudeAIConnector(BaseConnector):
             doc_parts: list[str] = []
             prev_msg_name: str | None = None
 
-            for msg in conv.messages:
-                msg_name = f"msg-{msg.message_id[:12]}" if msg.message_id else f"msg-{id(msg)}"
+            for i, msg in enumerate(conv.messages):
+                if msg.message_id:
+                    msg_name = f"{conv.conversation_id[:12]}-{msg.message_id[:12]}"
+                else:
+                    msg_name = f"{conv.conversation_id[:12]}-msg-{i}"
                 content = msg.content or ""
 
                 # Truncate message content for entity storage
@@ -188,9 +194,10 @@ class ClaudeAIConnector(BaseConnector):
 
             # Create a searchable document per conversation
             if doc_parts:
+                doc_content = "\n\n".join(doc_parts)
                 documents.append({
-                    "title": f"Claude AI: {conv.title}",
-                    "content": "\n\n".join(doc_parts),
+                    "title": f"Claude AI: {conv.title} [{conv.conversation_id[:8]}]",
+                    "content": doc_content[:MAX_DOC_LEN],
                     "template_id": "chat-import",
                     "template_name": "Claude AI Conversation",
                     "conversation_id": conv.conversation_id,

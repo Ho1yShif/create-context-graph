@@ -86,7 +86,14 @@ def stream_jsonl(path: str | Path) -> Iterator[dict[str, Any]]:
 
     if path.suffix == ".zip":
         with zipfile.ZipFile(path, "r") as zf:
-            with zf.open(CLAUDE_AI_FILENAME) as f:
+            try:
+                f_entry = zf.open(CLAUDE_AI_FILENAME)
+            except KeyError:
+                raise ValueError(
+                    f"Zip archive does not contain '{CLAUDE_AI_FILENAME}'. "
+                    f"Found: {zf.namelist()[:10]}"
+                )
+            with f_entry as f:
                 reader = io.TextIOWrapper(f, encoding="utf-8")
                 yield from _iter_jsonl_lines(reader)
     else:
@@ -112,7 +119,14 @@ def read_json(path: str | Path) -> list[dict[str, Any]]:
 
     if path.suffix == ".zip":
         with zipfile.ZipFile(path, "r") as zf:
-            with zf.open(CHATGPT_FILENAME) as f:
+            try:
+                f_entry = zf.open(CHATGPT_FILENAME)
+            except KeyError:
+                raise ValueError(
+                    f"Zip archive does not contain '{CHATGPT_FILENAME}'. "
+                    f"Found: {zf.namelist()[:10]}"
+                )
+            with f_entry as f:
                 data = json.load(f)
     else:
         with open(path, encoding="utf-8") as f:

@@ -471,6 +471,20 @@ class TestZipReader:
         with pytest.raises(ValueError, match="Expected a JSON array"):
             read_json(path)
 
+    def test_stream_jsonl_missing_file_in_zip(self, tmp_path):
+        path = tmp_path / "no-jsonl.zip"
+        with zipfile.ZipFile(path, "w") as zf:
+            zf.writestr("other.txt", "hello")
+        with pytest.raises(ValueError, match="conversations.jsonl"):
+            list(stream_jsonl(path))
+
+    def test_read_json_missing_file_in_zip(self, tmp_path):
+        path = tmp_path / "no-json.zip"
+        with zipfile.ZipFile(path, "w") as zf:
+            zf.writestr("other.txt", "hello")
+        with pytest.raises(ValueError, match="conversations.json"):
+            read_json(path)
+
 
 # ---------------------------------------------------------------------------
 # Claude AI parser tests
@@ -788,7 +802,8 @@ class TestClaudeAIConnector:
         conn.authenticate({"file_path": str(path)})
         data = conn.fetch()
         conv = data.entities["Conversation"][0]
-        assert conv["name"] == "Help with Python decorators"
+        assert conv["name"] == "conv-conv-001-claude-ai-test"
+        assert conv["title"] == "Help with Python decorators"
         assert conv["source"] == "claude-ai"
         assert conv["message_count"] == 2
 
@@ -908,7 +923,8 @@ class TestChatGPTConnector:
         conn.authenticate({"file_path": str(path)})
         data = conn.fetch()
         conv = data.entities["Conversation"][0]
-        assert conv["name"] == "JavaScript async/await"
+        assert conv["name"] == "conv-conv-001-chatgpt-test"
+        assert conv["title"] == "JavaScript async/await"
         assert conv["source"] == "chatgpt"
         assert conv["model_slug"] == "gpt-4o"
 
