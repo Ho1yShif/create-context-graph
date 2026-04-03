@@ -13,6 +13,7 @@ const sidebars: SidebarsConfig = {
         'tutorials/linear-context-graph',
         'tutorials/google-workspace-decisions',
         'tutorials/claude-code-sessions',
+        'tutorials/import-chat-history',
       ],
     },
     {
@@ -38,6 +39,7 @@ const sidebars: SidebarsConfig = {
         'reference/domain-catalog',
         'reference/google-workspace-schema',
         'reference/claude-code-schema',
+        'reference/chat-import-schema',
       ],
     },
     {

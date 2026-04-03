@@ -23,7 +23,14 @@ create-context-graph [PROJECT_NAME] [OPTIONS]
 | `--framework` | `choice` | -- | *(wizard prompt)* | Agent framework to use. One of: `pydanticai`, `claude-agent-sdk`, `strands`, `google-adk`, `openai-agents`, `langgraph`, `crewai`, `anthropic-tools`. |
 | `--demo-data` | `flag` | -- | `false` | Generate synthetic demo data and write it to `data/fixtures.json` in the output project. Uses static placeholder data by default; pass `--anthropic-api-key` for LLM-generated realistic data. |
 | `--custom-domain` | `string` | -- | -- | Natural language description of a custom domain (e.g., `"veterinary clinic management"`). Requires `--anthropic-api-key`. Generates a full ontology YAML from the description. |
-| `--connector` | `string` (repeatable) | -- | -- | SaaS connector to enable. Can be specified multiple times. Supported values: `github`, `slack`, `jira`, `notion`, `gmail`, `gcal`, `salesforce`, `linear`, `google-workspace`, `claude-code`. |
+| `--connector` | `string` (repeatable) | -- | -- | SaaS connector to enable. Can be specified multiple times. Supported values: `github`, `slack`, `jira`, `notion`, `gmail`, `gcal`, `salesforce`, `linear`, `google-workspace`, `claude-code`, `claude-ai`, `chatgpt`. |
+| `--import-type` | `choice` | -- | -- | Chat history import type: `claude-ai` or `chatgpt`. Must be used with `--import-file`. |
+| `--import-file` | `path` | -- | -- | Path to chat export file (`.zip`, `.json`, or `.jsonl`). Must be used with `--import-type`. |
+| `--import-depth` | `choice` | -- | `fast` | Import extraction depth: `fast` (messages only) or `deep` (messages + tool call traces). |
+| `--import-filter-after` | `string` | -- | -- | Only import conversations created after this date (ISO 8601). |
+| `--import-filter-before` | `string` | -- | -- | Only import conversations created before this date (ISO 8601). |
+| `--import-filter-title` | `string` | -- | -- | Only import conversations matching this title pattern (regex). |
+| `--import-max-conversations` | `int` | -- | `0` (all) | Maximum conversations to import. `0` means no limit. |
 | `--linear-api-key` | `string` | `LINEAR_API_KEY` | -- | Linear personal API key. Required when using `--connector linear`. |
 | `--linear-team` | `string` | `LINEAR_TEAM` | -- | Linear team URL key (e.g., `ENG`). Filters the import to a single team. If omitted, all teams are imported. |
 | `--gws-folder-id` | `string` | `GWS_FOLDER_ID` | -- | Google Drive folder ID to scope the import. Recommended to keep the graph focused. |
@@ -130,6 +137,18 @@ create-context-graph dev-team-graph \
   --framework langgraph \
   --connector github \
   --connector slack
+```
+
+### Import chat history from Claude AI or ChatGPT
+
+```bash
+create-context-graph my-chat-graph \
+  --domain personal-knowledge \
+  --framework pydanticai \
+  --import-type claude-ai \
+  --import-file ~/Downloads/claude-export.zip \
+  --import-depth deep \
+  --import-filter-after 2025-06-01
 ```
 
 ### Import Linear workspace data

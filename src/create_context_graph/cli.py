@@ -53,7 +53,7 @@ console = Console()
 @click.option("--openai-api-key", envvar="OPENAI_API_KEY", help="OpenAI API key for LLM generation")
 @click.option("--google-api-key", envvar="GOOGLE_API_KEY", help="Google/Gemini API key (required for google-adk framework)")
 @click.option("--custom-domain", type=str, help="Natural language description for custom domain generation (requires --anthropic-api-key)")
-@click.option("--connector", multiple=True, help="SaaS connector to enable (github, slack, jira, notion, gmail, gcal, salesforce, linear, google-workspace, claude-code)")
+@click.option("--connector", multiple=True, help="SaaS connector to enable (github, slack, jira, notion, gmail, gcal, salesforce, linear, google-workspace, claude-code, claude-ai, chatgpt)")
 @click.option("--linear-api-key", envvar="LINEAR_API_KEY", help="Linear API key (required for --connector linear)")
 @click.option("--linear-team", envvar="LINEAR_TEAM", help="Linear team key to filter import (e.g., ENG)")
 @click.option("--claude-code-scope", type=click.Choice(["current", "all"]), default="current", help="Import sessions from current project (default) or all projects")
@@ -70,6 +70,13 @@ console = Console()
 @click.option("--gws-since", help="Import data since date (ISO format, default 90 days ago)")
 @click.option("--gws-mime-types", default="docs,sheets,slides", help="Comma-separated MIME types (docs,sheets,slides,pdf,all)")
 @click.option("--gws-max-files", type=int, default=500, help="Maximum files to import (safety limit)")
+@click.option("--import-type", "import_type", type=click.Choice(["claude-ai", "chatgpt"]), help="Chat history import type (claude-ai or chatgpt)")
+@click.option("--import-file", type=click.Path(), help="Path to chat export file (.zip, .json, .jsonl)")
+@click.option("--import-depth", type=click.Choice(["fast", "deep"]), default="fast", help="Import extraction depth (fast=messages only, deep=full)")
+@click.option("--import-filter-after", type=str, help="Only import conversations after this date (ISO 8601)")
+@click.option("--import-filter-before", type=str, help="Only import conversations before this date (ISO 8601)")
+@click.option("--import-filter-title", type=str, help="Only import conversations matching this title pattern (regex)")
+@click.option("--import-max-conversations", type=int, default=0, help="Maximum conversations to import (0=all)")
 @click.option("--output-dir", type=click.Path(), help="Output directory (default: ./<project-name>)")
 @click.option("--demo", is_flag=True, help="Shortcut for --reset-database --demo-data --ingest")
 @click.option("--dry-run", is_flag=True, help="Preview what would be generated without creating files")
@@ -109,6 +116,13 @@ def main(
     claude_code_since: str | None,
     claude_code_max_sessions: int,
     claude_code_content: str,
+    import_type: str | None,
+    import_file: str | None,
+    import_depth: str,
+    import_filter_after: str | None,
+    import_filter_before: str | None,
+    import_filter_title: str | None,
+    import_max_conversations: int,
     output_dir: str | None,
     demo: bool,
     dry_run: bool,
@@ -131,6 +145,18 @@ def main(
         reset_database = True
         demo_data = True
         ingest = True
+
+    # Validate --import-type / --import-file co-dependency
+    if import_type and not import_file:
+        console.print("[red]Error:[/red] --import-file is required when --import-type is specified.")
+        raise SystemExit(1)
+    if import_file and not import_type:
+        console.print("[red]Error:[/red] --import-type is required when --import-file is specified.")
+        raise SystemExit(1)
+
+    # Auto-add chat import connector when --import-type is provided
+    if import_type:
+        connector = tuple(list(connector) + [import_type])
 
     # List domains mode
     if list_domains:
@@ -260,6 +286,16 @@ def main(
                 "content_mode": claude_code_content,
             }
             config.saas_credentials["claude-code"] = creds
+        if import_type and import_file:
+            creds = {
+                "file_path": str(Path(import_file).resolve()),
+                "depth": import_depth,
+                "filter_after": import_filter_after or "",
+                "filter_before": import_filter_before or "",
+                "filter_title": import_filter_title or "",
+                "max_conversations": str(import_max_conversations),
+            }
+            config.saas_credentials[import_type] = creds
         # Warn if google-adk is selected without a Google API key
         if config.resolved_framework == "google-adk" and not google_api_key:
             console.print(

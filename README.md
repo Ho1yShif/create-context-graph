@@ -157,10 +157,14 @@ Import real data from your existing tools instead of (or in addition to) synthet
 | **Linear** | Issues, projects, cycles, teams, users, labels, comments, milestones, initiatives, attachments + decision traces from history | Personal API key |
 | **Google Workspace** | Drive files, comment threads (as decision traces), revisions, Drive Activity, Calendar events, Gmail metadata | Google OAuth 2.0 |
 | **Claude Code** | Session history, messages, tool calls, files, decisions, preferences, errors | None (local files) |
+| **Claude AI** | Conversations, messages, tool calls, thinking traces from Claude AI web/app export | None (local file) |
+| **ChatGPT** | Conversations, messages, tool results from ChatGPT data export | None (local file) |
 
 The **Google Workspace connector** extracts resolved comment threads from Google Docs as first-class decision traces — capturing the question, deliberation, resolution, and participants. Combined with Linear, it provides the full decision lifecycle: from meeting discussion to code execution.
 
 The **Claude Code connector** reads your local session history from `~/.claude/projects/` — no API keys needed. It extracts decision traces from user corrections and error-resolution cycles, identifies developer preferences from explicit statements and behavioral patterns, and automatically redacts secrets before storage.
+
+The **Claude AI** and **ChatGPT** connectors import your conversation exports directly from the official data export features. Export your data from Settings, pass the `.zip` file to the CLI with `--import-type claude-ai` or `--import-type chatgpt`, and get a fully populated context graph from your real conversations — no API keys needed.
 
 Connectors run at scaffold time to populate initial data. They're also generated into your project so you can re-import with `make import`:
 
@@ -246,7 +250,14 @@ Options:
   --framework TEXT          Agent framework (pydanticai, claude-agent-sdk, openai-agents, langgraph, crewai, strands, google-adk, anthropic-tools)
   --demo-data               Generate synthetic demo data
   --custom-domain TEXT      Generate custom domain from description (requires --anthropic-api-key)
-  --connector TEXT          SaaS connector to enable; repeatable (github, slack, jira, notion, gmail, gcal, salesforce, linear, google-workspace, claude-code)
+  --connector TEXT          SaaS connector to enable; repeatable (github, slack, jira, notion, gmail, gcal, salesforce, linear, google-workspace, claude-code, claude-ai, chatgpt)
+  --import-type TEXT        Chat history import: claude-ai or chatgpt (requires --import-file)
+  --import-file PATH        Path to chat export file (.zip, .json, .jsonl)
+  --import-depth TEXT       Import extraction depth: fast (default) or deep
+  --import-filter-after TEXT Only import conversations after this date (ISO 8601)
+  --import-filter-before TEXT Only import conversations before this date (ISO 8601)
+  --import-filter-title TEXT Only import conversations matching title pattern (regex)
+  --import-max-conversations INT Max conversations to import, 0=all (default: 0)
   --linear-api-key TEXT    Linear API key (required for --connector linear) [env: LINEAR_API_KEY]
   --linear-team TEXT       Linear team key to filter import (e.g., ENG) [env: LINEAR_TEAM]
   --gws-folder-id TEXT     Google Drive folder ID to scope import [env: GWS_FOLDER_ID]
