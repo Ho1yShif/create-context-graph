@@ -5,6 +5,10 @@ title: "Your First Context Graph App"
 
 # Your First Context Graph App
 
+:::info Estimated time: 15-20 minutes
+This includes project creation, Neo4j setup, data seeding, and exploration.
+:::
+
 This tutorial walks you through creating a context graph application from scratch, starting it up, and exploring its features. By the end, you will have a running app with a Neo4j knowledge graph, a FastAPI backend with an AI agent, and a Next.js frontend with graph visualization.
 
 ## Prerequisites
@@ -30,11 +34,7 @@ The wizard walks you through seven steps:
 2. **Data source** -- generate demo data or connect SaaS integrations
 3. **Domain** -- select from 22 built-in domains (e.g., Healthcare)
 4. **Agent framework** -- choose your preferred framework (e.g., PydanticAI)
-5. **Neo4j connection** -- choose from:
-   - **Neo4j Aura** (cloud) -- free tier, import your `.env` file from [console.neo4j.io](https://console.neo4j.io)
-   - **neo4j-local** -- lightweight local Neo4j, no Docker required
-   - **Docker** -- full Neo4j via Docker Compose
-   - **Existing** -- connect to any running instance
+5. **Neo4j connection** -- for this tutorial, choose **Docker** (easiest if you have Docker installed) or **Neo4j Aura** (free cloud, no install). See the [Neo4j setup guides](/docs/how-to/use-docker) for all options.
 6. **API keys** -- provide keys for your chosen agent framework
 7. **Confirmation** -- review and confirm
 

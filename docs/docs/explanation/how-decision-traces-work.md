@@ -1,11 +1,33 @@
 ---
 sidebar_position: 4
-title: How Decision Traces Are Extracted
+title: How Decision Traces Work
 ---
 
-# How Decision Traces Are Extracted
+# How Decision Traces Work
 
 Decision traces capture the *why* behind choices -- not just what was decided, but who was involved, what alternatives were considered, and how the decision was reached. Different connectors extract decision traces from different signal sources. This page explains how two key connectors -- Google Workspace and Claude Code -- detect and extract decisions into graph-connected traces.
+
+```mermaid
+graph TB
+    subgraph Sources ["Signal Sources"]
+        GWS["Google Workspace<br/>(comments, meetings, email)"]
+        CC["Claude Code<br/>(corrections, errors, deliberation)"]
+        Fixture["Demo Fixtures<br/>(pre-generated traces)"]
+    end
+    subgraph Extraction ["Decision Extraction"]
+        GWSConn["GWS Connector<br/>(resolved thread → trace)"]
+        CCConn["Claude Code Connector<br/>(heuristic detection)"]
+        Gen["Data Generator<br/>(LLM-generated)"]
+    end
+    subgraph Graph ["Neo4j Graph"]
+        DT["DecisionTrace"] -->|HAS_STEP| S1["TraceStep 1"]
+        S1 --> S2["TraceStep 2"]
+        S2 --> S3["TraceStep 3"]
+    end
+    GWS --> GWSConn --> DT
+    CC --> CCConn --> DT
+    Fixture --> Gen --> DT
+```
 
 ## Google Workspace
 
