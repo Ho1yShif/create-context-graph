@@ -6,6 +6,10 @@ sidebar_position: 4
 
 `create-context-graph` supports 8 agent frameworks. Each generates a different `agent.py` implementation with the same tool interface. This guide helps you choose the right one.
 
+:::tip New to Create Context Graph?
+Start with **PydanticAI** -- it offers the best combination of type safety, full streaming, and documentation. If you prefer working directly with the Anthropic API, **Claude Agent SDK** is the lightest-weight option.
+:::
+
 ## Comparison Table
 
 | Framework | LLM Provider | Streaming | Async | Performance Notes |

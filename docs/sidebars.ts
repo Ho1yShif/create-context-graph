@@ -4,6 +4,7 @@ const sidebars: SidebarsConfig = {
   docs: [
     'intro',
     'quick-start',
+    'whats-new',
     {
       type: 'category',
       label: 'Tutorials',

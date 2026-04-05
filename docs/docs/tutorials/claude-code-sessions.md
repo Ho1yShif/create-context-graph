@@ -584,3 +584,7 @@ lsof -ti:3000 | xargs kill
 - **Customize agent tools** -- Edit the generated `agent.py` to add project-specific Cypher queries
 - **Explore the [How Decision Traces Work](/docs/explanation/how-decision-traces-work) explainer** for the conceptual model behind decision extraction across connectors
 - **Check the [Claude Code Session Schema](/docs/reference/claude-code-schema) reference** for the complete list of entity types, relationships, and properties
+
+:::info Suggested next tutorial
+Ready for more? Continue with **[Building Your First Linear Context Graph](./linear-context-graph)** to learn how to import real project data from Linear.
+:::

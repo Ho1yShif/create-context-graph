@@ -104,6 +104,15 @@ npx @modelcontextprotocol/inspector uv run --directory ./backend \
 
 ## Dual-Interface Architecture
 
+```mermaid
+graph LR
+    Browser["Browser\nlocalhost:3000"] --> NextJS["Next.js\nFrontend"]
+    NextJS --> FastAPI["FastAPI\nBackend"]
+    FastAPI --> Neo4j[("Neo4j\nKnowledge Graph")]
+    Claude["Claude Desktop"] --> MCP["MCP Server\n(neo4j-agent-memory)"]
+    MCP --> Neo4j
+```
+
 With MCP enabled, your project has two interfaces to one knowledge graph:
 
 1. **Web app** (http://localhost:3000) — interactive chat with streaming, graph visualization, document browser

@@ -26,7 +26,7 @@ A full-stack application that:
 
 ### Agent tools
 
-The generated agent includes these domain tools for querying the knowledge graph:
+The generated agent includes the **software-engineering** domain tools for querying your Linear data in the knowledge graph. The Linear connector imports your workspace data; the domain ontology provides the agent tools that query it.
 
 | Tool | Description |
 |------|-------------|
@@ -37,6 +37,10 @@ The generated agent includes these domain tools for querying the knowledge graph
 | `get_pr_impact` | Trace the impact of a pull request through deployments and incidents |
 | `list_repositories` | List Repository records with optional limit |
 | `get_repository_by_name` | Get a specific Repository by name with all connections |
+
+:::tip
+These tools work with your imported Linear data because Linear entities (Issues, Projects, Cycles, etc.) are mapped to the software-engineering domain's POLE+O entity model. The agent uses Cypher queries to traverse the graph, so questions like "What's blocking ENG-101?" traverse the `BLOCKS` relationships imported from Linear.
+:::
 
 ## Prerequisites
 
@@ -593,3 +597,7 @@ lsof -ti:3000 | xargs kill
 - **Build custom agent tools** -- Add Cypher-powered tools to the agent for your specific workflow patterns
 - **Set up periodic sync** -- Run `make import-and-seed` on a schedule to keep the graph fresh
 - **Enable debug logging** -- Set `LOG_LEVEL=DEBUG` to see detailed import progress including entity counts, pagination, and rate limit status
+
+:::info Suggested next tutorial
+Ready for more? Continue with **[Decision Traces from Google Workspace](./google-workspace-decisions)** to learn how to extract decisions from Google Docs comment threads.
+:::

@@ -7,6 +7,15 @@ title: "Chat Import Schema"
 
 Reference for the graph schema produced by the Claude AI and ChatGPT chat history import connectors.
 
+```mermaid
+graph LR
+    Conv["Conversation"] -->|HAS_MESSAGE| Msg1["Message"]
+    Msg1 -->|NEXT| Msg2["Message"]
+    Conv -.->|deep mode| DT["DecisionTrace"]
+    DT -->|HAS_STEP| TS1["TraceStep"]
+    TS1 -->|NEXT| TS2["TraceStep"]
+```
+
 ## Entity Types
 
 ### Conversation

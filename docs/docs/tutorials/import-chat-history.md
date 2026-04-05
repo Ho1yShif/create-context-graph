@@ -174,20 +174,26 @@ uvx create-context-graph my-chat-graph \
 
 ```bash
 cd my-chat-graph
-
-# Start the backend
-cd backend
-uv venv && uv pip install -e ".[dev]"
-source .venv/bin/activate
-uvicorn app.main:app --reload --port 8000
-
-# In another terminal, start the frontend
-cd frontend
-npm install
-npm run dev
+make install   # Install backend + frontend dependencies
+make start     # Start both backend and frontend
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+<details>
+<summary>Alternative: manual startup (useful for debugging)</summary>
+
+```bash
+# Terminal 1: Backend
+cd backend && uv venv && uv pip install -e ".[dev]"
+source .venv/bin/activate
+uvicorn app.main:app --reload --port 8000
+
+# Terminal 2: Frontend
+cd frontend && npm install && npm run dev
+```
+
+</details>
 
 ## Step 5: Explore your chat history
 
@@ -332,3 +338,7 @@ This creates a unified graph where your Claude AI web conversations and Claude C
 - **Switch frameworks:** Use `--framework claude-agent-sdk` or `--framework langgraph` for different agent capabilities. See [Switch Agent Frameworks](/docs/how-to/switch-frameworks)
 - **Add more data sources:** Connect GitHub, Linear, or Slack data alongside your chat history. See [Import Data from SaaS Services](/docs/how-to/import-saas-data)
 - **Use Neo4j Aura:** Deploy your graph to the cloud with [Neo4j Aura](/docs/how-to/use-neo4j-aura)
+
+:::info Completed all tutorials?
+Explore the [How-To Guides](/docs/how-to/import-saas-data) for specific tasks, or dive into the [Explanation](/docs/explanation/why-context-graphs) section to understand the concepts behind context graphs.
+:::

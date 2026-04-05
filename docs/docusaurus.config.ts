@@ -24,6 +24,20 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
 
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {from: '/docs', to: '/docs/intro'},
+          {from: '/docs/how-to/add-data-source', to: '/docs/how-to/import-saas-data'},
+          {from: '/docs/how-to/customize-domain', to: '/docs/how-to/add-custom-domain'},
+          {from: '/docs/how-to/query-context-graph', to: '/docs/intro'},
+        ],
+      },
+    ],
+  ],
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
