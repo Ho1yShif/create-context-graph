@@ -11,6 +11,9 @@ This includes project creation, Neo4j setup, data seeding, and exploration.
 
 This tutorial walks you through creating a context graph application from scratch, starting it up, and exploring its features. By the end, you will have a running app with a Neo4j knowledge graph, a FastAPI backend with an AI agent, and a Next.js frontend with graph visualization.
 
+{/* TODO: Replace with actual screenshot of the running app */}
+![The completed application showing chat, graph visualization, and document panel](/img/app-three-panel.png)
+
 ## Prerequisites
 
 Before you begin, make sure you have:
@@ -98,6 +101,9 @@ make start
 With everything running, you have three interfaces to explore:
 
 ### Frontend -- http://localhost:3000
+
+{/* TODO: Replace with actual screenshot of the running frontend */}
+![Frontend three-panel layout with chat, graph, and documents](/img/screenshot-frontend.png)
 
 The Next.js frontend provides a three-panel layout:
 

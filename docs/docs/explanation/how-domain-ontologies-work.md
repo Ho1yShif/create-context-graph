@@ -103,6 +103,9 @@ agent_tools:
 
 This single YAML drives the entire generated application -- schema, models, agent tools, and visualization. See the [Ontology YAML Schema](/docs/reference/ontology-yaml-schema) for the complete specification.
 
+{/* TODO: Export from ontology-pipeline.excalidraw and replace placeholder */}
+![How a domain YAML flows through Jinja2 templates to produce generated code](/img/ontology-pipeline.png)
+
 ## How the Ontology Drives Code Generation
 
 ```mermaid
