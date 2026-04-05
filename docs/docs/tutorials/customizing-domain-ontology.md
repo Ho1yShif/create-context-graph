@@ -7,6 +7,10 @@ title: "Customizing Your Domain Ontology"
 
 Every context graph application is driven by a domain ontology -- a YAML file that defines the entity types, relationships, agent tools, and visualization settings for your knowledge graph. This tutorial explains how to modify an existing ontology or create one from scratch.
 
+:::tip
+For the complete YAML specification with all fields, property types, and validation rules, see the [Ontology YAML Schema](/docs/reference/ontology-yaml-schema) reference.
+:::
+
 ## What Is a Domain Ontology?
 
 The ontology is the blueprint for your entire application. It determines:
@@ -281,3 +285,7 @@ make seed
 ```
 
 If you do not have an API key, `make seed` uses the static fallback data with domain-specific name pools.
+
+:::info Suggested next tutorial
+Ready for more? Continue with **[Build a Developer Knowledge Graph from Claude Code Sessions](./claude-code-sessions)** to learn how to import your coding sessions into a context graph.
+:::

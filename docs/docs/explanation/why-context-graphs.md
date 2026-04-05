@@ -13,17 +13,19 @@ AI agents need memory to be useful. But not all memory is created equal. This pa
 graph TB
     subgraph flat ["Flat Memory (Chat + Vectors)"]
         direction LR
-        Chat["Chat Log<br/>msg1 → msg2 → msg3"] ~~~ Vec["Vector Store<br/>chunk1, chunk2, ..."]
+        Chat["Chat Log\nmsg1 → msg2 → msg3"]
+        Vec["Vector Store\nchunk1, chunk2, ..."]
+        Chat --- Vec
     end
     subgraph graph ["Context Graph (Three Memory Types)"]
         direction LR
         P1["Person"] -->|WORKS_FOR| O1["Organization"]
         P1 -->|DIAGNOSED_WITH| D1["Diagnosis"]
         O1 -->|LOCATED_AT| L1["Location"]
-        P1 -.->|"conversation"| Msg["Messages"]
-        D1 -.->|"reasoning"| Trace["Decision Trace"]
+        P1 -.->|conversation| Msg["Messages"]
+        D1 -.->|reasoning| Trace["Decision Trace"]
     end
-    flat -->|"upgrade to"| graph
+    flat -->|upgrade to| graph
 ```
 
 ## The Problem with Flat Memory

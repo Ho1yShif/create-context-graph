@@ -12,27 +12,27 @@ create-context-graph ships with **22 built-in domains**. Each domain includes a 
 | Domain | Name | Entity Types | Agent Tools |
 |--------|------|-------------|-------------|
 | `agent-memory` | 🧠 Agent Memory | 11 | 7 |
-| `conservation` | 🌿 Conservation | 11 | 7 |
-| `data-journalism` | 📰 Data Journalism | 11 | 7 |
-| `digital-twin` | 🏭 Digital Twin | 11 | 7 |
+| `conservation` | 🌿 Conservation | 11 | 8 |
+| `data-journalism` | 📰 Data Journalism | 11 | 8 |
+| `digital-twin` | 🏭 Digital Twin | 11 | 8 |
 | `financial-services` | 💰 Financial Services | 10 | 7 |
-| `gaming` | 🎮 Gaming | 11 | 8 |
-| `genai-llm-ops` | 🤖 GenAI & LLM Ops | 11 | 7 |
-| `gis-cartography` | 🗺 GIS & Cartography | 11 | 7 |
-| `golf-sports` | ⛳ Golf Sports | 11 | 7 |
-| `healthcare` | 🏥 Healthcare | 12 | 7 |
-| `hospitality` | 🏨 Hospitality | 11 | 7 |
+| `gaming` | 🎮 Gaming | 11 | 9 |
+| `genai-llm-ops` | 🤖 GenAI & LLM Ops | 11 | 8 |
+| `gis-cartography` | 🗺 GIS & Cartography | 11 | 8 |
+| `golf-sports` | ⛳ Golf Sports | 11 | 8 |
+| `healthcare` | 🏥 Healthcare | 12 | 6 |
+| `hospitality` | 🏨 Hospitality | 11 | 8 |
 | `manufacturing` | 🏭 Manufacturing | 11 | 7 |
-| `oil-gas` | 🛢️ Oil & Gas | 11 | 7 |
-| `personal-knowledge` | 📝 Personal Knowledge | 11 | 7 |
+| `oil-gas` | 🛢️ Oil & Gas | 10 | 6 |
+| `personal-knowledge` | 📝 Personal Knowledge | 10 | 8 |
 | `product-management` | 📋 Product Management | 12 | 7 |
-| `real-estate` | 🏠 Real Estate | 11 | 7 |
-| `retail-ecommerce` | 🛒 Retail & E-Commerce | 11 | 7 |
-| `scientific-research` | 🔬 Scientific Research | 11 | 7 |
+| `real-estate` | 🏠 Real Estate | 10 | 8 |
+| `retail-ecommerce` | 🛒 Retail & E-Commerce | 11 | 6 |
+| `scientific-research` | 🔬 Scientific Research | 11 | 6 |
 | `software-engineering` | 💻 Software Engineering | 11 | 7 |
-| `trip-planning` | 🌍 Trip Planning | 11 | 7 |
-| `vacation-industry` | 🏖 Vacation Industry | 11 | 7 |
-| `wildlife-management` | 🐻 Wildlife Management | 11 | 7 |
+| `trip-planning` | 🌍 Trip Planning | 10 | 7 |
+| `vacation-industry` | 🏖 Vacation Industry | 10 | 6 |
+| `wildlife-management` | 🐻 Wildlife Management | 11 | 6 |
 
 ## Domain Details
 

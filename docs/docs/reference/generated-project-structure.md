@@ -7,6 +7,16 @@ title: Generated Project Structure
 
 When you run `create-context-graph`, it produces a complete full-stack application. This page documents every file and directory in the generated output.
 
+```mermaid
+graph LR
+    Browser["Browser"] --> NextJS["Next.js + Chakra UI"]
+    NextJS -->|"SSE /chat/stream"| FastAPI["FastAPI Backend"]
+    FastAPI --> Agent["AI Agent"]
+    Agent -->|Cypher| Neo4j[("Neo4j")]
+    FastAPI -->|Memory API| Memory["neo4j-agent-memory"]
+    Memory --> Neo4j
+```
+
 ## Directory Tree
 
 ```

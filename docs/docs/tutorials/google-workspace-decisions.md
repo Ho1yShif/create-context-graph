@@ -588,3 +588,7 @@ lsof -ti:3000 | xargs kill
 - **Customize agent tools** -- Edit the generated `agent.py` to add domain-specific Cypher queries
 - **Set up periodic sync** -- Run `make import-and-seed` on a schedule to keep the graph fresh
 - **Explore the [How Decision Traces Work](/docs/explanation/how-decision-traces-work) explainer** for the conceptual model behind decision extraction
+
+:::info Suggested next tutorial
+Ready for more? Continue with **[Import Your AI Chat History](./import-chat-history)** to learn how to import Claude AI or ChatGPT conversations into a context graph.
+:::
