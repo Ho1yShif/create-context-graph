@@ -1,0 +1,194 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  validate-tag-format:
+    name: Validate tag format
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+
+    steps:
+      - name: Extract and validate tag
+        id: tag
+        run: |
+          RAW_TAG=${GITHUB_REF#refs/tags/}
+
+          if [[ ! "$RAW_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid tag format: $RAW_TAG"
+            echo "Expected: vMAJOR.MINOR.PATCH (e.g., v1.2.3)"
+            exit 1
+          fi
+
+          VERSION=${RAW_TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "✅ Tag valid: $RAW_TAG"
+
+  validate-tag-on-main:
+    name: Validate tag is on main
+    runs-on: ubuntu-latest
+    needs: validate-tag-format
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure tag commit is on main
+        run: |
+          git fetch origin main
+
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "✅ Tag is based on main"
+          else
+            echo "❌ Tag is NOT based on main"
+            exit 1
+          fi
+
+  validate-version-consistency:
+    name: Validate version consistency
+    runs-on: ubuntu-latest
+    needs: validate-tag-format
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: tag
+        run: |
+          VERSION=${{ needs.validate-tag-format.outputs.version }}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get version from pyproject.toml
+        id: py
+        run: |
+          python -c "import tomllib; data = tomllib.load(open('pyproject.toml', 'rb')); print(f\"version={data['project']['version']}\")" >> "$GITHUB_OUTPUT"
+
+      - name: Get version from package.json
+        id: node
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Compare versions
+        run: |
+          echo "Tag:    ${{ steps.tag.outputs.version }}"
+          echo "Python: ${{ steps.py.outputs.version }}"
+          echo "Node:   ${{ steps.node.outputs.version }}"
+
+          if [ "${{ steps.tag.outputs.version }}" != "${{ steps.py.outputs.version }}" ]; then
+            echo "❌ pyproject.toml version mismatch"
+            exit 1
+          fi
+
+          if [ "${{ steps.tag.outputs.version }}" != "${{ steps.node.outputs.version }}" ]; then
+            echo "❌ package.json version mismatch"
+            exit 1
+          fi
+
+          echo "✅ Versions match"
+
+  build:
+    name: Build artifacts
+    runs-on: ubuntu-latest
+    needs:
+      - validate-tag-on-main
+      - validate-version-consistency
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --- Python build ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install build tool
+        run: pip install build
+
+      - name: Build Python package
+        run: python -m build
+
+      # --- Node build ---
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node deps
+        run: npm ci
+
+      - name: Build Node package
+        run: npm run build --if-present
+
+      # --- Share artifacts ---
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: build
+
+    environment:
+      name: pypi
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - publish-pypi   # 👈 ensures PyPI succeeds first
+
+    environment:
+      name: npm
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        
