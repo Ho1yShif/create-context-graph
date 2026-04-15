@@ -28,36 +28,65 @@ async def apply_schema():
                     print(f"  Warning: {e}")
 
 
+def _batch(items: list, size: int = 500) -> list[list]:
+    """Split a list into batches."""
+    return [items[i:i + size] for i in range(0, len(items), size)]
+
+
+def _safe_props(item: dict) -> dict:
+    """Coerce property values to Neo4j-safe types."""
+    safe = {}
+    for k, v in item.items():
+        if isinstance(v, bool):
+            safe[k] = v
+        elif isinstance(v, (int, float, str)):
+            safe[k] = v
+        elif v is None:
+            safe[k] = ""
+        else:
+            safe[k] = str(v)
+    return safe
+
+
 async def load_fixture_data(data: dict):
     """Load entities and relationships from fixture data."""
-    # Create entities
     entities = data.get("entities", {})
     for label, items in entities.items():
-        for item in items:
-            enriched = {**item, "domain": settings.domain_id}
-            set_clause = ", ".join(f"n.{k} = ${k}" for k in enriched.keys())
-            cypher = f"MERGE (n:{label} {{name: $name, domain: $domain}}) ON CREATE SET {set_clause} ON MATCH SET {set_clause}"
+        if not items:
+            continue
+        enriched = [{**_safe_props(item), "domain": settings.domain_id} for item in items]
+        all_keys = set()
+        for item in enriched:
+            all_keys.update(item.keys())
+        set_clause = ", ".join(f"n.{k} = item.{k}" for k in all_keys)
+        cypher = f"UNWIND $batch AS item MERGE (n:{label} {{name: item.name, domain: item.domain}}) ON CREATE SET {set_clause} ON MATCH SET {set_clause}"
+        for batch in _batch(enriched):
             try:
-                await execute_cypher(cypher, enriched)
+                await execute_cypher(cypher, {"batch": batch})
             except Exception as e:
                 print(f"  Warning creating {label}: {e}")
         print(f"  Created {len(items)} {label} nodes")
 
-    # Create relationships
+    # Create relationships in batches grouped by type+labels
     relationships = data.get("relationships", [])
+    rel_groups: dict[tuple, list] = {}
     for rel in relationships:
+        key = (rel["type"], rel["source_label"], rel["target_label"])
+        rel_groups.setdefault(key, []).append(rel)
+
+    for (rel_type, src_label, tgt_label), rels in rel_groups.items():
         cypher = f"""
-        MATCH (a:{rel['source_label']} {{name: $source_name}})
-        MATCH (b:{rel['target_label']} {{name: $target_name}})
-        MERGE (a)-[r:{rel['type']}]->(b)
+        UNWIND $batch AS rel
+        MATCH (a:{src_label} {{name: rel.source_name}})
+        MATCH (b:{tgt_label} {{name: rel.target_name}})
+        MERGE (a)-[r:{rel_type}]->(b)
         """
-        try:
-            await execute_cypher(cypher, {
-                "source_name": rel["source_name"],
-                "target_name": rel["target_name"],
-            })
-        except Exception as e:
-            print(f"  Warning creating relationship: {e}")
+        batch_data = [{"source_name": r["source_name"], "target_name": r["target_name"]} for r in rels]
+        for batch in _batch(batch_data):
+            try:
+                await execute_cypher(cypher, {"batch": batch})
+            except Exception as e:
+                print(f"  Warning creating {rel_type} relationships: {e}")
     print(f"  Created {len(relationships)} relationships")
 
 
@@ -68,24 +97,29 @@ async def load_documents(data: dict):
         print("  No documents to load")
         return
 
-    for doc in documents:
-        cypher = """
-        MERGE (d:Document {title: $title})
-        SET d.content = $content,
-            d.template_id = $template_id,
-            d.template_name = $template_name,
-            d.domain = $domain
-        """
+    doc_batch = [
+        {
+            "title": doc.get("title", ""),
+            "content": doc.get("content", ""),
+            "template_id": doc.get("template_id", ""),
+            "template_name": doc.get("template_name", ""),
+            "domain": settings.domain_id,
+        }
+        for doc in documents
+    ]
+    cypher = """
+    UNWIND $batch AS doc
+    MERGE (d:Document {title: doc.title})
+    SET d.content = doc.content,
+        d.template_id = doc.template_id,
+        d.template_name = doc.template_name,
+        d.domain = doc.domain
+    """
+    for batch in _batch(doc_batch, 100):
         try:
-            await execute_cypher(cypher, {
-                "title": doc.get("title", ""),
-                "content": doc.get("content", ""),
-                "template_id": doc.get("template_id", ""),
-                "template_name": doc.get("template_name", ""),
-                "domain": settings.domain_id,
-            })
+            await execute_cypher(cypher, {"batch": batch})
         except Exception as e:
-            print(f"  Warning creating document: {e}")
+            print(f"  Warning creating documents: {e}")
 
     print(f"  Created {len(documents)} Document nodes")
 

@@ -144,20 +144,35 @@ def main():
 
     if ingest:
         print("\nIngesting into Neo4j...")
-        # Use the app's existing Neo4j client
         from app.context_graph_client import get_driver
 
         driver = get_driver()
-        # Basic ingestion - create nodes and relationships
         with driver.session() as session:
             for label, items in all_entities.items():
+                if not items:
+                    continue
+                all_keys = set()
                 for item in items:
-                    props = ", ".join(f"{k}: ${k}" for k in item.keys())
-                    session.run(
-                        f"MERGE (n:{label} {{name: $name}}) SET n += {{{props}}}",
-                        **item,
-                    )
-            print(f"  ✓ Ingested {sum(len(v) for v in all_entities.values())} entities")
+                    all_keys.update(item.keys())
+                safe_items = []
+                for item in items:
+                    safe = {}
+                    for k in all_keys:
+                        v = item.get(k)
+                        if isinstance(v, bool):
+                            safe[k] = v
+                        elif isinstance(v, (int, float, str)):
+                            safe[k] = v
+                        elif v is None:
+                            safe[k] = ""
+                        else:
+                            safe[k] = str(v)
+                    safe_items.append(safe)
+                set_clause = ", ".join(f"n.{k} = item.{k}" for k in all_keys)
+                cypher = f"UNWIND $batch AS item MERGE (n:{label} {{name: item.name}}) ON CREATE SET {set_clause} ON MATCH SET {set_clause}"
+                for i in range(0, len(safe_items), 500):
+                    session.run(cypher, batch=safe_items[i:i + 500])
+            print(f"  + Ingested {sum(len(v) for v in all_entities.values())} entities")
 
 
 if __name__ == "__main__":
