@@ -89,6 +89,18 @@ class TestGeneratedTestCollection:
             f"pip install failed:\nstdout: {result.stdout}\nstderr: {result.stderr}"
         )
 
+        # Install pytest into the isolated venv (needed to run generated tests)
+        result = subprocess.run(
+            ["uv", "pip", "install", "pytest"],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        assert result.returncode == 0, (
+            f"pytest install failed:\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+
         # Collect tests without running them
         result = subprocess.run(
             [str(venv_dir / "bin" / "python"), "-m", "pytest", "--collect-only", "tests/"],
@@ -154,6 +166,18 @@ class TestGeneratedTestExecution:
         assert result.returncode == 0, (
             f"pip install failed for {framework}:\n"
             f"stdout: {result.stdout}\nstderr: {result.stderr}"
+        )
+
+        # Install pytest into the isolated venv (needed to run generated tests)
+        result = subprocess.run(
+            ["uv", "pip", "install", "pytest"],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        assert result.returncode == 0, (
+            f"pytest install failed:\nstdout: {result.stdout}\nstderr: {result.stderr}"
         )
 
         # Run the generated tests
