@@ -1,6 +1,14 @@
 # Changelog
 
+## v0.9.4 — GitHub Actions release workflow bugfixes (2026-04-17)
+
+### Bug Fixes
+- **Upgrade npm cli for trusted publishing** - project currently uses npm 20 but we need the latest npm cli in order to perform the trusted publishing OIDC workflow.
+
 ## v0.9.3 — GitHub Actions release workflow bugfixes (2026-04-17)
+
+### Bug Fixes
+- **Target npm-wrapper directory for node pkg** - previously workflow was looing for package.json in top-level directory, but it lives in npm-wrapper.
 
 ## v0.9.2 — Batch Seeding Performance (2026-04-15)
 
