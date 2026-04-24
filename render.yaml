@@ -46,14 +46,13 @@ services:
       - key: CORS_ORIGINS
         value: https://ccg-demo-frontend.onrender.com
 
-  # Next.js frontend — native Node runtime
+  # Next.js frontend — static site (pure SPA, no SSR)
   - type: web
     name: ccg-demo-frontend
-    runtime: node
+    runtime: static
     rootDir: demo/frontend
-    plan: free
     buildCommand: npm ci && npm run build
-    startCommand: npm start
+    staticPublishPath: ./out
     envVars:
       - key: NODE_VERSION
         value: 22.0.0
