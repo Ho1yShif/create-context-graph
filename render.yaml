@@ -17,6 +17,12 @@ services:
         sync: false  # Set to: neo4j/YOURPASSWORD
       - key: NEO4J_PLUGINS
         value: '["apoc", "graph-data-science"]'
+      - key: NEO4J_server_memory_heap_initial__size
+        value: 128m
+      - key: NEO4J_server_memory_heap_max__size
+        value: 256m
+      - key: NEO4J_server_memory_pagecache_size
+        value: 100m
 
   # FastAPI backend — native Python runtime
   - type: web
