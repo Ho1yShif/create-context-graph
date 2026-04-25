@@ -7,7 +7,7 @@
 
 Interactive CLI scaffolding tool that generates fully-functional, domain-specific context graph applications. Pick your industry domain, pick your agent framework, and get a complete full-stack app in under 5 minutes.
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FHo1yShif%2Fcreate-context-graph%2Ftree%2Fmain)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2Frender-examples%2Fcreate-context-graph)
 
 <p align="center">
   <img src="docs/static/img/app-three-panel.png" alt="Generated app: chat interface, graph visualization, and document browser" width="800" />
