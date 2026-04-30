@@ -53,7 +53,7 @@ projects:
             runtime: static
             rootDir: demo/frontend
             buildCommand: npm ci && npm run build
-            staticPublishPath: ./out
+            staticPublishPath: out
             envVars:
               - key: NODE_VERSION
                 value: 22.0.0
