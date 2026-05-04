@@ -9,6 +9,8 @@ Interactive CLI scaffolding tool that generates fully-functional, domain-specifi
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2Frender-examples%2Fcreate-context-graph)
 
+> **After deploying to Render:** The Neo4j private service is assigned a slug with a random suffix (e.g. `ccg-demo-neo4j-o06s`). Render's internal DNS resolves private services by their full slug, not just their name. Update `NEO4J_URI` in the backend and seed cron job environment variables — and in `render.yaml` — to use the full slug: `bolt://ccg-demo-neo4j-<suffix>:7687`. Find the slug on the service's dashboard page or via `list_services()` in the Render MCP. Once updated, trigger the seed cron job manually from the Dashboard after Neo4j shows as Live.
+
 <p align="center">
   <img src="docs/static/img/app-three-panel.png" alt="Generated app: chat interface, graph visualization, and document browser" width="800" />
 </p>
