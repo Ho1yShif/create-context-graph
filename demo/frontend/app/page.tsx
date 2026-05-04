@@ -132,33 +132,39 @@ export default function Home() {
             {DOMAIN.tagline}
           </Text>
         </Box>
-        <HStack gap={2}>
-          <Box
-            w={3}
-            h={3}
-            borderRadius="full"
-            bg={
-              backendStatus === "ok"
-                ? "green.400"
+        <HStack gap={4}>
+          <HStack gap={2}>
+            <Box
+              w={3}
+              h={3}
+              borderRadius="full"
+              bg={
+                backendStatus === "ok"
+                  ? "green.400"
+                  : backendStatus === "degraded"
+                    ? "yellow.400"
+                    : "red.400"
+              }
+              title={
+                backendStatus === "ok"
+                  ? "Backend connected"
+                  : backendStatus === "degraded"
+                    ? "Backend connected (Neo4j unavailable)"
+                    : "Backend offline"
+              }
+            />
+            <Text fontSize="xs" color="gray.500">
+              {backendStatus === "ok"
+                ? "Connected"
                 : backendStatus === "degraded"
-                  ? "yellow.400"
-                  : "red.400"
-            }
-            title={
-              backendStatus === "ok"
-                ? "Backend connected"
-                : backendStatus === "degraded"
-                  ? "Backend connected (Neo4j unavailable)"
-                  : "Backend offline"
-            }
-          />
-          <Text fontSize="xs" color="gray.500">
-            {backendStatus === "ok"
-              ? "Connected"
-              : backendStatus === "degraded"
-                ? "Degraded"
-                : "Offline"}
-          </Text>
+                  ? "Degraded"
+                  : "Offline"}
+            </Text>
+          </HStack>
+          <HStack gap={8} display={{ base: "none", lg: "flex" }} align="center">
+            <img src="/img/neo4j-logo.png" alt="Neo4j" style={{ height: "30px"}} />
+            <img src="/img/render-logo.png" alt="Render" style={{ height: "25px"}} />
+          </HStack>
         </HStack>
       </Flex>
 
